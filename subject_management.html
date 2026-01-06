@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alama Hub - Teacher Allocation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #075824;
+            --secondary-green: #377437;
+            --accent-green: #9BAE30;
+            --muted-green: #5D8B70;
+            --accent-blue: #333687;
+            --background-light: #F4F4F4;
+            --text-light: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-image: linear-gradient(rgba(244, 244, 244, 0.9), rgba(244, 244, 244, 0.9)), 
+                              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23075824" opacity="0.03"/><path d="M20,20 L80,80 M80,20 L20,80" stroke="%23337437" stroke-width="1" opacity="0.05"/></svg>');
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(7, 88, 36, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: var(--primary-green);
+            color: var(--text-light);
+            text-align: center;
+            padding: 25px 20px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .header h2 {
+            font-size: 1.2rem;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        .badge-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .school-badge {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 5px;
+        }
+
+        .badge-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-green);
+            color: white;
+            font-size: 24px;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .page-title {
+            color: var(--primary-green);
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .page-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        /* Form Layout */
+        .form-section {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .section-title {
+            color: var(--primary-green);
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--accent-green);
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-green);
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted-green);
+            z-index: 2;
+        }
+
+        .input-with-icon input,
+        .input-with-icon select {
+            width: 100%;
+            padding: 14px 14px 14px 45px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+
+        .input-with-icon input:focus,
+        .input-with-icon select:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 2px rgba(155, 174, 48, 0.2);
+        }
+
+        /* Subject Search */
+        .subject-search-container {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        #subject-search {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #subject-search:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 2px rgba(155, 174, 48, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted-green);
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            display: none;
+        }
+
+        .clear-search:hover {
+            color: #666;
+        }
+
+        .subject-list-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: white;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .subject-list-container.active {
+            display: block;
+        }
+
+        .subject-option {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.2s ease;
+        }
+
+        .subject-option:hover {
+            background-color: rgba(7, 88, 36, 0.05);
+        }
+
+        .subject-option.selected {
+            background-color: rgba(155, 174, 48, 0.1);
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        .subject-option .subject-code {
+            font-size: 0.85rem;
+            color: var(--muted-green);
+            margin-left: 5px;
+        }
+
+        /* Stream Management */
+        .streams-section {
+            margin-top: 25px;
+        }
+
+        .stream-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stream-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            background-color: white;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        .stream-item input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        .stream-item input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        .add-stream-btn {
+            background-color: var(--muted-green);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .add-stream-btn:hover {
+            background-color: var(--secondary-green);
+        }
+
+        /* Button Section */
+        .button-section {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-green);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(7, 88, 36, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary-green);
+            border: 2px solid var(--primary-green);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(7, 88, 36, 0.05);
+            transform: translateY(-3px);
+        }
+
+        /* Assigned Teachers Section */
+        .assigned-teachers {
+            margin-top: 40px;
+        }
+
+        .assignments-search-container {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .assignments-search {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .assignments-search:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 2px rgba(155, 174, 48, 0.2);
+        }
+
+        .assignments-search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted-green);
+        }
+
+        .clear-assignments-search {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            display: none;
+        }
+
+        .clear-assignments-search:hover {
+            color: #666;
+        }
+
+        .assignments-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: var(--muted-green);
+            font-size: 0.95rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .assignments-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .assignments-table th {
+            background-color: var(--primary-green);
+            color: white;
+            text-align: left;
+            padding: 15px;
+            font-weight: 600;
+        }
+
+        .assignments-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .assignments-table tr:hover {
+            background-color: rgba(7, 88, 36, 0.03);
+        }
+
+        .stream-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stream-tag {
+            background-color: rgba(155, 174, 48, 0.1);
+            color: var(--accent-green);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .edit-btn {
+            background-color: rgba(51, 54, 135, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .remove-btn {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            margin-left: 5px;
+        }
+
+        .edit-btn:hover {
+            background-color: rgba(51, 54, 135, 0.2);
+        }
+
+        .remove-btn:hover {
+            background-color: rgba(220, 53, 69, 0.2);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Status Message */
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status-success {
+            background-color: rgba(155, 174, 48, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(155, 174, 48, 0.3);
+        }
+
+        .status-error {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: var(--muted-green);
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 850px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header h2 {
+                font-size: 1rem;
+            }
+            
+            .badge-container {
+                width: 50px;
+                height: 50px;
+                top: 15px;
+                left: 15px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .stream-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .assignments-stats {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .header h1 {
+                font-size: 1.8rem;
+                margin-top: 10px;
+            }
+            
+            .badge-container {
+                position: relative;
+                top: 0;
+                left: 0;
+                margin: 0 auto 15px;
+            }
+            
+            .header {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px 15px;
+            }
+            
+            .section-title {
+                font-size: 1.1rem;
+            }
+            
+            .action-btn {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Subject search highlight */
+        .highlight {
+            background-color: rgba(155, 174, 48, 0.2);
+            font-weight: 600;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        
+        /* Table row highlight for search */
+        .search-highlight {
+            background-color: rgba(155, 174, 48, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="badge-container">
+                <img src="images/badge.png" alt="Alliance Girls High School Badge" class="school-badge" onerror="this.style.display='none'; document.querySelector('.badge-fallback').style.display='flex';">
+                <div class="badge-fallback" style="display: none;">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+            </div>
+            <h1>Alama Hub</h1>
+            <h2>Teacher Allocation System</h2>
+        </div>
+        
+        <div class="form-container">
+            <h1 class="page-title">Allocate Teacher to Subject & Form</h1>
+            <p class="page-subtitle">Assign teachers to subjects, forms/classes, and manage streams</p>
+            
+            <!-- Status Message -->
+            <div id="status-message" class="status-message"></div>
+            
+            <!-- Teacher Details Section -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <i class="fas fa-user-tie"></i> Teacher Information
+                </h2>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="teacher-name">Teacher Full Name</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="teacher-name" placeholder="Enter teacher's full name" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tsc-number">TSC Number</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-id-card"></i>
+                            <input type="text" id="tsc-number" placeholder="Enter TSC number" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Teaching Allocation Section -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <i class="fas fa-chalkboard-teacher"></i> Teaching Allocation
+                </h2>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="form-grade">Form/Grade</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                            <select id="form-grade" required>
+                                <option value="">Select Form/Grade</option>
+                                <option value="form_3">Form 3</option>
+                                <option value="form_4">Form 4</option>
+                                <option value="grade_10">Grade 10</option>
+                                <option value="grade_11">Grade 11</option>
+                                <option value="grade_12">Grade 12</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Subject to Teach</label>
+                        <div class="subject-search-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="subject-search" placeholder="Search for a subject...">
+                            <button type="button" class="clear-search" id="clear-search">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="subject-list-container" id="subject-list">
+                            <!-- Subject options will be populated here -->
+                        </div>
+                        
+                        <input type="hidden" id="selected-subject" value="">
+                        <input type="hidden" id="selected-subject-display" value="">
+                    </div>
+                </div>
+                
+                <!-- Stream Management -->
+                <div class="streams-section">
+                    <h3 style="color: var(--primary-green); margin-bottom: 15px; font-size: 1.1rem;">
+                        <i class="fas fa-stream"></i> Streams for Selected Form/Grade
+                    </h3>
+                    
+                    <div id="stream-container" class="stream-container">
+                        <!-- Stream items will be added here dynamically -->
+                        <div class="stream-item">
+                            <input type="text" class="stream-input" placeholder="Enter stream name (e.g., North, South)">
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="add-stream-btn" class="add-stream-btn">
+                        <i class="fas fa-plus"></i> Add Another Stream
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Button Section -->
+            <div class="button-section">
+                <button type="button" id="assign-btn" class="btn btn-primary">
+                    <i class="fas fa-user-check"></i> Assign Teacher
+                </button>
+                <button type="button" id="clear-btn" class="btn btn-secondary">
+                    <i class="fas fa-eraser"></i> Clear Form
+                </button>
+            </div>
+            
+            <!-- Assigned Teachers Section -->
+            <div class="assigned-teachers">
+                <h2 class="section-title">
+                    <i class="fas fa-list"></i> Currently Assigned Teachers
+                </h2>
+                
+                <!-- Search Bar for Assigned Teachers -->
+                <div class="assignments-search-container">
+                    <i class="fas fa-search assignments-search-icon"></i>
+                    <input type="text" id="assignments-search" class="assignments-search" placeholder="Search assigned teachers by name, TSC, subject, or form...">
+                    <button type="button" class="clear-assignments-search" id="clear-assignments-search">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <!-- Assignments Statistics -->
+                <div class="assignments-stats">
+                    <div id="assignments-count">Total Assignments: 0</div>
+                    <div id="search-results-count"></div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="assignments-table" id="assignments-table">
+                        <thead>
+                            <tr>
+                                <th>Teacher Name</th>
+                                <th>TSC No.</th>
+                                <th>Subject</th>
+                                <th>Form/Grade</th>
+                                <th>Streams</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assignments-body">
+                            <!-- Assigned teachers will be added here dynamically -->
+                            <tr>
+                                <td colspan="6" class="no-results" id="no-results-message">
+                                    No teachers assigned yet. Use the form above to assign teachers.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>© 2023 Alliance Girls High School - Alama Hub. All rights reserved.</p>
+        <p><a href="#">Teacher Dashboard</a> | <a href="#">Manage Subjects</a> | <a href="#">Help Center</a></p>
+    </div>
+
+    <script>
+        // All subjects data
+        const allSubjects = [
+            { code: "ENG", name: "English Language" },
+            { code: "KIS", name: "Kiswahili" },
+            { code: "KSL", name: "Kenya Sign Language (KSL)" },
+            { code: "CMAT", name: "Core Mathematics" },
+            { code: "EMAT", name: "Essential Mathematics" },
+            { code: "CSL", name: "Community Service Learning (CSL)" },
+            { code: "BIO", name: "Biology" },
+            { code: "CHEM", name: "Chemistry" },
+            { code: "PHY", name: "Physics" },
+            { code: "AMAT", name: "Advanced Mathematics" },
+            { code: "AGR", name: "Agriculture" },
+            { code: "COMP", name: "Computer Studies" },
+            { code: "HS", name: "Home Science" },
+            { code: "BS", name: "Business Studies" },
+            { code: "AVT", name: "Aviation Technology" },
+            { code: "BC", name: "Building Construction" },
+            { code: "PM", name: "Power Mechanics" },
+            { code: "ELEC", name: "Electricity" },
+            { code: "MET", name: "Metalwork" },
+            { code: "WOOD", name: "Woodwork" },
+            { code: "MFT", name: "Marine & Fisheries Technology" },
+            { code: "HIS", name: "History and Citizenship" },
+            { code: "GEO", name: "Geography" },
+            { code: "CRE", name: "Christian Religious Education (CRE)" },
+            { code: "IRE", name: "Islamic Religious Education (IRE)" },
+            { code: "HRE", name: "Hindu Religious Education (HRE)" },
+            { code: "LIT", name: "Literature in English" },
+            { code: "FK", name: "Fasihi ya Kiswahili" },
+            { code: "IL", name: "Indigenous Languages" },
+            { code: "ARB", name: "Arabic" },
+            { code: "FRE", name: "French" },
+            { code: "GER", name: "German" },
+            { code: "MAN", name: "Mandarin Chinese" },
+            { code: "FA", name: "Fine Arts" },
+            { code: "TF", name: "Theatre and Film" },
+            { code: "MUS", name: "Music" },
+            { code: "DAN", name: "Dance" },
+            { code: "SR", name: "Sports and Recreation" }
+        ];
+
+        // Data storage for assigned teachers
+        let assignedTeachers = [];
+        let filteredAssignments = [];
+        let currentSearchTerm = '';
+        
+        // DOM Elements
+        const teacherNameInput = document.getElementById('teacher-name');
+        const tscNumberInput = document.getElementById('tsc-number');
+        const formGradeSelect = document.getElementById('form-grade');
+        const subjectSearch = document.getElementById('subject-search');
+        const clearSearchBtn = document.getElementById('clear-search');
+        const subjectList = document.getElementById('subject-list');
+        const selectedSubjectInput = document.getElementById('selected-subject');
+        const selectedSubjectDisplayInput = document.getElementById('selected-subject-display');
+        const streamContainer = document.getElementById('stream-container');
+        const addStreamBtn = document.getElementById('add-stream-btn');
+        const assignBtn = document.getElementById('assign-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const assignmentsBody = document.getElementById('assignments-body');
+        const statusMessage = document.getElementById('status-message');
+        const assignmentsSearch = document.getElementById('assignments-search');
+        const clearAssignmentsSearchBtn = document.getElementById('clear-assignments-search');
+        const assignmentsCount = document.getElementById('assignments-count');
+        const searchResultsCount = document.getElementById('search-results-count');
+        const noResultsMessage = document.getElementById('no-results-message');
+        
+        // Initialize the application
+        function initApp() {
+            // Load any existing assignments from localStorage
+            loadAssignments();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Render initial assignments table
+            renderAssignmentsTable();
+            
+            // Populate subject list
+            populateSubjectList();
+            
+            // Update assignments count
+            updateAssignmentsCount();
+        }
+        
+        // Populate subject list
+        function populateSubjectList(filter = '') {
+            subjectList.innerHTML = '';
+            
+            // Filter subjects based on search term (fuzzy search)
+            const filteredSubjects = allSubjects.filter(subject => {
+                if (!filter) return true;
+                
+                const searchLower = filter.toLowerCase();
+                const subjectNameLower = subject.name.toLowerCase();
+                const subjectCodeLower = subject.code.toLowerCase();
+                
+                // Simple fuzzy matching
+                return subjectNameLower.includes(searchLower) || 
+                       subjectCodeLower.includes(searchLower) ||
+                       subjectNameLower.replace(/\s+/g, '').includes(searchLower.replace(/\s+/g, ''));
+            });
+            
+            // Display filtered subjects
+            filteredSubjects.forEach(subject => {
+                const option = document.createElement('div');
+                option.className = 'subject-option';
+                option.setAttribute('data-code', subject.code);
+                option.setAttribute('data-name', subject.name);
+                
+                // Highlight matching text if there's a filter
+                let displayName = subject.name;
+                if (filter) {
+                    displayName = highlightMatches(subject.name, filter);
+                }
+                
+                option.innerHTML = `
+                    ${displayName}
+                    <span class="subject-code">(${subject.code})</span>
+                `;
+                
+                option.addEventListener('click', () => {
+                    selectSubject(subject.code, subject.name);
+                });
+                
+                subjectList.appendChild(option);
+            });
+            
+            // Show/hide subject list
+            if (filteredSubjects.length > 0) {
+                subjectList.classList.add('active');
+            } else {
+                subjectList.classList.remove('active');
+            }
+        }
+        
+        // Highlight matching text in search results
+        function highlightMatches(text, searchTerm) {
+            if (!searchTerm) return text;
+            
+            const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+        
+        // Select a subject
+        function selectSubject(code, name) {
+            selectedSubjectInput.value = code;
+            selectedSubjectDisplayInput.value = name;
+            subjectSearch.value = name;
+            subjectList.classList.remove('active');
+            clearSearchBtn.style.display = 'block';
+            
+            // Highlight selected option
+            document.querySelectorAll('.subject-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.getAttribute('data-code') === code) {
+                    option.classList.add('selected');
+                }
+            });
+        }
+        
+        // Search assigned teachers
+        function searchAssignments(searchTerm) {
+            currentSearchTerm = searchTerm.toLowerCase().trim();
+            
+            if (!currentSearchTerm) {
+                filteredAssignments = [...assignedTeachers];
+                renderAssignmentsTable();
+                updateSearchResultsCount();
+                return;
+            }
+            
+            // Filter assignments based on search term
+            filteredAssignments = assignedTeachers.filter(assignment => {
+                const teacherName = assignment.teacherName.toLowerCase();
+                const tscNumber = assignment.tscNumber.toLowerCase();
+                const subjectDisplay = assignment.subjectDisplay.toLowerCase();
+                const subjectCode = assignment.subjectCode.toLowerCase();
+                const formGrade = assignment.formGradeDisplay.toLowerCase();
+                const streams = assignment.streams.join(' ').toLowerCase();
+                
+                // Search in all relevant fields
+                return teacherName.includes(currentSearchTerm) ||
+                       tscNumber.includes(currentSearchTerm) ||
+                       subjectDisplay.includes(currentSearchTerm) ||
+                       subjectCode.includes(currentSearchTerm) ||
+                       formGrade.includes(currentSearchTerm) ||
+                       streams.includes(currentSearchTerm);
+            });
+            
+            renderAssignmentsTable();
+            updateSearchResultsCount();
+        }
+        
+        // Update assignments count
+        function updateAssignmentsCount() {
+            const total = assignedTeachers.length;
+            assignmentsCount.textContent = `Total Assignments: ${total}`;
+        }
+        
+        // Update search results count
+        function updateSearchResultsCount() {
+            if (!currentSearchTerm) {
+                searchResultsCount.textContent = '';
+                return;
+            }
+            
+            const total = assignedTeachers.length;
+            const filtered = filteredAssignments.length;
+            
+            if (filtered === total) {
+                searchResultsCount.textContent = '';
+            } else {
+                searchResultsCount.textContent = `Showing ${filtered} of ${total} assignments`;
+            }
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Subject search
+            subjectSearch.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.trim();
+                populateSubjectList(searchTerm);
+                
+                if (searchTerm) {
+                    clearSearchBtn.style.display = 'block';
+                } else {
+                    clearSearchBtn.style.display = 'none';
+                    selectedSubjectInput.value = '';
+                    selectedSubjectDisplayInput.value = '';
+                }
+            });
+            
+            // Clear search button
+            clearSearchBtn.addEventListener('click', () => {
+                subjectSearch.value = '';
+                selectedSubjectInput.value = '';
+                selectedSubjectDisplayInput.value = '';
+                clearSearchBtn.style.display = 'none';
+                subjectList.classList.remove('active');
+                
+                // Clear selection highlights
+                document.querySelectorAll('.subject-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+            });
+            
+            // Close subject list when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.subject-search-container')) {
+                    subjectList.classList.remove('active');
+                }
+            });
+            
+            // Assignments search
+            assignmentsSearch.addEventListener('input', (e) => {
+                const searchTerm = e.target.value;
+                searchAssignments(searchTerm);
+                
+                if (searchTerm) {
+                    clearAssignmentsSearchBtn.style.display = 'block';
+                } else {
+                    clearAssignmentsSearchBtn.style.display = 'none';
+                }
+            });
+            
+            // Clear assignments search button
+            clearAssignmentsSearchBtn.addEventListener('click', () => {
+                assignmentsSearch.value = '';
+                searchAssignments('');
+                clearAssignmentsSearchBtn.style.display = 'none';
+            });
+            
+            // Add stream button
+            addStreamBtn.addEventListener('click', addStreamField);
+            
+            // Assign teacher button
+            assignBtn.addEventListener('click', assignTeacher);
+            
+            // Clear form button
+            clearBtn.addEventListener('click', clearForm);
+            
+            // Allow Enter key to add streams
+            streamContainer.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.target.classList.contains('stream-input')) {
+                    e.preventDefault();
+                    addStreamField();
+                    // Focus the new input field
+                    const newInputs = streamContainer.querySelectorAll('.stream-input');
+                    if (newInputs.length > 0) {
+                        newInputs[newInputs.length - 1].focus();
+                    }
+                }
+            });
+        }
+        
+        // Add a new stream input field
+        function addStreamField() {
+            const streamItem = document.createElement('div');
+            streamItem.className = 'stream-item';
+            streamItem.innerHTML = `
+                <input type="text" class="stream-input" placeholder="Enter stream name (e.g., North, South)">
+                <button type="button" class="remove-stream-btn" style="background: none; border: none; color: #dc3545; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            streamContainer.appendChild(streamItem);
+            
+            // Add event listener to remove button
+            const removeBtn = streamItem.querySelector('.remove-stream-btn');
+            removeBtn.addEventListener('click', () => {
+                if (streamContainer.children.length > 1) {
+                    streamItem.remove();
+                } else {
+                    // If it's the last stream, just clear the input
+                    streamItem.querySelector('.stream-input').value = '';
+                }
+            });
+        }
+        
+        // Get all stream values
+        function getStreamValues() {
+            const streamInputs = streamContainer.querySelectorAll('.stream-input');
+            const streams = [];
+            
+            streamInputs.forEach(input => {
+                const value = input.value.trim();
+                if (value) {
+                    streams.push(value);
+                }
+            });
+            
+            return streams;
+        }
+        
+        // Assign teacher to subject and form
+        function assignTeacher() {
+            // Get form values
+            const teacherName = teacherNameInput.value.trim();
+            const tscNumber = tscNumberInput.value.trim();
+            const subjectCode = selectedSubjectInput.value;
+            const subjectDisplay = selectedSubjectDisplayInput.value;
+            const formGrade = formGradeSelect.value;
+            const streams = getStreamValues();
+            
+            // Validation
+            if (!teacherName || !tscNumber || !subjectCode || !formGrade) {
+                showStatus('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            if (streams.length === 0) {
+                showStatus('Please add at least one stream', 'error');
+                return;
+            }
+            
+            // Format display values
+            const formGradeDisplay = formGrade.split('_').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+            
+            // Create new assignment
+            const newAssignment = {
+                id: Date.now(), // Unique ID
+                teacherName: teacherName,
+                tscNumber: tscNumber,
+                subjectCode: subjectCode,
+                subjectDisplay: subjectDisplay,
+                formGrade: formGrade,
+                formGradeDisplay: formGradeDisplay,
+                streams: streams,
+                dateAssigned: new Date().toISOString().split('T')[0]
+            };
+            
+            // Add to assigned teachers array
+            assignedTeachers.push(newAssignment);
+            
+            // Save to localStorage
+            saveAssignments();
+            
+            // Update the table
+            renderAssignmentsTable();
+            
+            // Update search if active
+            if (currentSearchTerm) {
+                searchAssignments(currentSearchTerm);
+            }
+            
+            // Show success message
+            showStatus(`Teacher ${teacherName} has been assigned to ${subjectDisplay} for ${formGradeDisplay}`, 'success');
+            
+            // Clear the form (optional)
+            clearForm();
+            
+            // Update counts
+            updateAssignmentsCount();
+        }
+        
+        // Clear the form
+        function clearForm() {
+            teacherNameInput.value = '';
+            tscNumberInput.value = '';
+            formGradeSelect.value = '';
+            subjectSearch.value = '';
+            selectedSubjectInput.value = '';
+            selectedSubjectDisplayInput.value = '';
+            clearSearchBtn.style.display = 'none';
+            subjectList.classList.remove('active');
+            
+            // Clear streams but keep one empty field
+            streamContainer.innerHTML = `
+                <div class="stream-item">
+                    <input type="text" class="stream-input" placeholder="Enter stream name (e.g., North, South)">
+                </div>
+            `;
+            
+            // Clear selection highlights
+            document.querySelectorAll('.subject-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Focus on teacher name
+            teacherNameInput.focus();
+        }
+        
+        // Render assignments table
+        function renderAssignmentsTable() {
+            const assignmentsToRender = currentSearchTerm ? filteredAssignments : assignedTeachers;
+            
+            if (assignmentsToRender.length === 0) {
+                let message = 'No teachers assigned yet. Use the form above to assign teachers.';
+                if (currentSearchTerm && assignedTeachers.length > 0) {
+                    message = `No assignments found for "${currentSearchTerm}". Try a different search term.`;
+                }
+                
+                noResultsMessage.textContent = message;
+                noResultsMessage.style.display = 'table-cell';
+                assignmentsBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="no-results">
+                            ${message}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            noResultsMessage.style.display = 'none';
+            assignmentsBody.innerHTML = '';
+            
+            assignmentsToRender.forEach((assignment, index) => {
+                const row = document.createElement('tr');
+                
+                // Check if this row matches the search
+                const shouldHighlight = currentSearchTerm && (
+                    assignment.teacherName.toLowerCase().includes(currentSearchTerm) ||
+                    assignment.tscNumber.toLowerCase().includes(currentSearchTerm) ||
+                    assignment.subjectDisplay.toLowerCase().includes(currentSearchTerm) ||
+                    assignment.subjectCode.toLowerCase().includes(currentSearchTerm) ||
+                    assignment.formGradeDisplay.toLowerCase().includes(currentSearchTerm)
+                );
+                
+                if (shouldHighlight) {
+                    row.classList.add('search-highlight');
+                }
+                
+                // Create streams HTML
+                let streamsHTML = '<div class="stream-list">';
+                assignment.streams.forEach(stream => {
+                    // Highlight streams if they match search
+                    const streamLower = stream.toLowerCase();
+                    const displayStream = currentSearchTerm && streamLower.includes(currentSearchTerm) 
+                        ? `<span class="highlight">${stream}</span>`
+                        : stream;
+                    
+                    streamsHTML += `<span class="stream-tag">${displayStream}</span>`;
+                });
+                streamsHTML += '</div>';
+                
+                // Highlight text in table cells if searching
+                const highlightText = (text) => {
+                    if (!currentSearchTerm || !text.toLowerCase().includes(currentSearchTerm)) {
+                        return text;
+                    }
+                    
+                    const regex = new RegExp(`(${currentSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                    return text.replace(regex, '<span class="highlight">$1</span>');
+                };
+                
+                row.innerHTML = `
+                    <td>${highlightText(assignment.teacherName)}</td>
+                    <td>${highlightText(assignment.tscNumber)}</td>
+                    <td>${highlightText(assignment.subjectDisplay)} (${assignment.subjectCode})</td>
+                    <td>${highlightText(assignment.formGradeDisplay)}</td>
+                    <td>${streamsHTML}</td>
+                    <td>
+                        <button class="action-btn edit-btn" data-index="${assignedTeachers.indexOf(assignment)}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="action-btn remove-btn" data-index="${assignedTeachers.indexOf(assignment)}">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </td>
+                `;
+                
+                assignmentsBody.appendChild(row);
+            });
+            
+            // Add event listeners to action buttons
+            addActionButtonListeners();
+        }
+        
+        // Add event listeners to action buttons
+        function addActionButtonListeners() {
+            // Edit buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.closest('button').getAttribute('data-index'));
+                    editAssignment(index);
+                });
+            });
+            
+            // Remove buttons
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.closest('button').getAttribute('data-index'));
+                    removeAssignment(index);
+                });
+            });
+        }
+        
+        // Edit assignment
+        function editAssignment(index) {
+            const assignment = assignedTeachers[index];
+            
+            // Populate form with assignment data
+            teacherNameInput.value = assignment.teacherName;
+            tscNumberInput.value = assignment.tscNumber;
+            formGradeSelect.value = assignment.formGrade;
+            subjectSearch.value = assignment.subjectDisplay;
+            selectedSubjectInput.value = assignment.subjectCode;
+            selectedSubjectDisplayInput.value = assignment.subjectDisplay;
+            clearSearchBtn.style.display = 'block';
+            
+            // Clear and populate streams
+            streamContainer.innerHTML = '';
+            assignment.streams.forEach(stream => {
+                const streamItem = document.createElement('div');
+                streamItem.className = 'stream-item';
+                streamItem.innerHTML = `
+                    <input type="text" class="stream-input" value="${stream}">
+                    <button type="button" class="remove-stream-btn" style="background: none; border: none; color: #dc3545; cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                streamContainer.appendChild(streamItem);
+                
+                // Add remove functionality
+                const removeBtn = streamItem.querySelector('.remove-stream-btn');
+                removeBtn.addEventListener('click', () => {
+                    if (streamContainer.children.length > 1) {
+                        streamItem.remove();
+                    } else {
+                        streamItem.querySelector('.stream-input').value = '';
+                    }
+                });
+            });
+            
+            // Highlight selected subject in list
+            document.querySelectorAll('.subject-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.getAttribute('data-code') === assignment.subjectCode) {
+                    option.classList.add('selected');
+                }
+            });
+            
+            // Remove the assignment from the list (will be re-added when saved)
+            assignedTeachers.splice(index, 1);
+            
+            // Update table
+            renderAssignmentsTable();
+            
+            // Update search if active
+            if (currentSearchTerm) {
+                searchAssignments(currentSearchTerm);
+            }
+            
+            // Show edit message
+            showStatus(`Editing assignment for ${assignment.teacherName}. Make changes and click "Assign Teacher".`, 'success');
+            
+            // Focus on form
+            teacherNameInput.focus();
+            
+            // Update counts
+            updateAssignmentsCount();
+        }
+        
+        // Remove assignment
+        function removeAssignment(index) {
+            const assignment = assignedTeachers[index];
+            
+            if (confirm(`Are you sure you want to remove ${assignment.teacherName} from teaching ${assignment.subjectDisplay} for ${assignment.formGradeDisplay}?`)) {
+                assignedTeachers.splice(index, 1);
+                saveAssignments();
+                renderAssignmentsTable();
+                
+                // Update search if active
+                if (currentSearchTerm) {
+                    searchAssignments(currentSearchTerm);
+                }
+                
+                showStatus(`Assignment removed successfully.`, 'success');
+                
+                // Update counts
+                updateAssignmentsCount();
+            }
+        }
+        
+        // Show status message
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message status-${type}`;
+            statusMessage.style.display = 'block';
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Save assignments to localStorage
+        function saveAssignments() {
+            localStorage.setItem('alamaHubAssignments', JSON.stringify(assignedTeachers));
+        }
+        
+        // Load assignments from localStorage
+        function loadAssignments() {
+            const saved = localStorage.getItem('alamaHubAssignments');
+            if (saved) {
+                assignedTeachers = JSON.parse(saved);
+                filteredAssignments = [...assignedTeachers];
+            }
+        }
+        
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
