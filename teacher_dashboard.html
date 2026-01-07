@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alama Hub - Navigation Pane</title>
+    <title>Alama Hub - Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary-green: #075824;
@@ -32,7 +33,110 @@
             overflow-x: hidden;
         }
 
-        /* Header for the sidebar */
+        /* Top Header with User Profile */
+        .top-header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: var(--sidebar-width);
+            background-color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 999;
+            transition: left 0.3s ease;
+        }
+
+        .page-title h1 {
+            color: var(--primary-green);
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .page-title p {
+            color: var(--muted-green);
+            font-size: 0.9rem;
+        }
+
+        .user-profile-top {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 8px 15px;
+            background-color: rgba(7, 88, 36, 0.05);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .user-profile-top:hover {
+            background-color: rgba(7, 88, 36, 0.1);
+        }
+
+        .user-avatar-top {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .user-info-top h4 {
+            color: var(--primary-green);
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+        }
+
+        .user-info-top p {
+            color: var(--muted-green);
+            font-size: 0.8rem;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            padding: 15px;
+            min-width: 200px;
+            display: none;
+            z-index: 1001;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            color: #555;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(7, 88, 36, 0.05);
+            color: var(--primary-green);
+        }
+
+        .dropdown-item i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        /* Sidebar Header */
         .sidebar-header {
             background-color: var(--primary-green);
             color: var(--text-light);
@@ -159,72 +263,42 @@
             margin-left: auto;
         }
 
-        /* User profile at bottom */
-        .user-profile {
-            padding: 20px 25px;
-            border-top: 1px solid #eee;
-            margin-top: auto;
-            background-color: rgba(7, 88, 36, 0.03);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .user-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-green), var(--accent-green));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .user-info h4 {
-            color: var(--primary-green);
-            font-size: 1rem;
-            margin-bottom: 3px;
-        }
-
-        .user-info p {
-            color: var(--muted-green);
-            font-size: 0.85rem;
-        }
-
-        /* Main content area - simplified */
+        /* Main content area */
         .main-content {
             flex: 1;
-            padding: 40px;
+            padding: 100px 40px 40px;
             margin-left: var(--sidebar-width);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             text-align: center;
             color: #666;
+            transition: margin-left 0.3s ease;
+            width: calc(100% - var(--sidebar-width));
         }
 
         .main-content h1 {
             color: var(--primary-green);
             font-size: 2.5rem;
             margin-bottom: 15px;
+            text-align: center;
+            width: 100%;
         }
 
         .main-content p {
-            max-width: 600px;
+            max-width: 800px;
             line-height: 1.6;
             font-size: 1.1rem;
             margin-bottom: 30px;
+            text-align: center;
         }
 
         .placeholder-icon {
             font-size: 5rem;
             color: var(--muted-green);
             opacity: 0.3;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            text-align: center;
         }
 
         /* Hamburger menu for mobile */
@@ -246,6 +320,117 @@
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
 
+        /* Dashboard Cards - Centered Layout */
+        .dashboard-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            width: 100%;
+            margin: 40px 0;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            height: 100%;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            height: 80px;
+            width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(7, 88, 36, 0.1), rgba(155, 174, 48, 0.1));
+        }
+
+        .card-title {
+            color: var(--primary-green);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .card-text {
+            color: #666;
+            line-height: 1.6;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--muted-green);
+            font-size: 0.9rem;
+            margin-top: 60px;
+            width: 100%;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer p {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            line-height: 1.5;
+            margin: 0 auto 15px;
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: var(--primary-green);
+            text-decoration: underline;
+        }
+
         /* Responsive Design */
         @media (max-width: 1024px) {
             .sidebar {
@@ -258,11 +443,21 @@
 
             .main-content {
                 margin-left: 0;
-                padding: 30px 20px;
+                padding: 100px 20px 40px;
+                width: 100%;
+            }
+
+            .top-header {
+                left: 0;
             }
 
             .hamburger {
                 display: flex;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
             }
         }
 
@@ -275,22 +470,56 @@
             .main-content h1 {
                 font-size: 2rem;
             }
+
+            .top-header {
+                padding: 15px 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .user-profile-top {
+                align-self: flex-end;
+                margin-top: 10px;
+            }
+
+            .user-info-top h4 {
+                font-size: 0.9rem;
+            }
+
+            .user-info-top p {
+                font-size: 0.75rem;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+            
+            .card-icon {
+                font-size: 2.5rem;
+                height: 70px;
+                width: 70px;
+            }
+            
+            .dashboard-card {
+                padding: 25px;
+            }
         }
 
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: var(--muted-green);
-            font-size: 0.9rem;
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-        }
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 120px 15px 30px;
+            }
 
-        .footer a {
-            color: var(--accent-blue);
-            text-decoration: none;
+            .user-info-top {
+                display: none;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
@@ -298,6 +527,41 @@
     <!-- Hamburger Menu for Mobile -->
     <div class="hamburger" id="hamburger">
         <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Top Header with User Profile -->
+    <div class="top-header" id="topHeader">
+        <div class="page-title">
+            <h1>Welcome to Alama Hub</h1>
+            <p>Teacher Dashboard - Alliance Girls High School</p>
+        </div>
+        
+        <div class="user-profile-top" id="userProfileTop">
+            <div class="user-avatar-top" id="userAvatar">JD</div>
+            <div class="user-info-top">
+                <h4 id="userName">Loading...</h4>
+                <p id="userRole">Teacher</p>
+                <p id="userTSC">TSC: Loading...</p>
+            </div>
+            <i class="fas fa-chevron-down" id="dropdownArrow"></i>
+        </div>
+        
+        <!-- User Dropdown Menu -->
+        <div class="user-dropdown" id="userDropdown">
+            <a href="#" class="dropdown-item">
+                <i class="fas fa-user"></i> My Profile
+            </a>
+            <a href="#" class="dropdown-item">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="#" class="dropdown-item">
+                <i class="fas fa-question-circle"></i> Help & Support
+            </a>
+            <div style="height: 1px; background-color: #eee; margin: 10px 0;"></div>
+            <a href="#" class="dropdown-item" id="logoutLink">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
     </div>
 
     <!-- Left Navigation Pane -->
@@ -396,126 +660,420 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link logout-sidebar">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </li>
         </ul>
-
-        <!-- User Profile -->
-        <div class="user-profile">
-            <div class="user-avatar">JD</div>
-            <div class="user-info">
-                <h4>Jane Doe</h4>
-                <p>Mathematics Teacher</p>
-                <p>TSC: 567890</p>
-            </div>
-        </div>
     </div>
 
-    <!-- Main Content Area (Placeholder) -->
+    <!-- Main Content Area -->
     <div class="main-content">
         <div class="placeholder-icon">
             <i class="fas fa-chalkboard-teacher"></i>
         </div>
-        <h1>Welcome to Alama Hub</h1>
-        <p>Select an option from the left navigation pane to begin.</p>
-        <p>Use the menu to access your subjects, enter student marks, manage exam sessions, and upload data to the examination centre.</p>
+        <h1>Welcome to Alama Hub, <span id="welcomeName">Teacher</span>!</h1>
+        <p>Select an option from the left navigation pane to begin managing your academic tasks.</p>
         
-        <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; width: 100%; max-width: 800px;">
-            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-                <i class="fas fa-edit" style="font-size: 2rem; color: var(--accent-green); margin-bottom: 15px;"></i>
-                <h3 style="color: var(--primary-green); margin-bottom: 10px;">Enter Marks</h3>
-                <p>Excel-like interface for entering student examination marks</p>
+        <div class="dashboard-container">
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <div class="card-icon" style="color: var(--accent-green);">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h3 class="card-title">Enter Marks</h3>
+                    <p class="card-text">Excel-like interface for entering student examination marks with validation and auto-save features.</p>
+                </div>
+                
+                <div class="dashboard-card">
+                    <div class="card-icon" style="color: var(--accent-blue);">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <h3 class="card-title">Upload to Exam Centre</h3>
+                    <p class="card-text">Securely submit marks to central examination office for processing and record keeping.</p>
+                </div>
+                
+                <div class="dashboard-card">
+                    <div class="card-icon" style="color: var(--muted-green);">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3 class="card-title">Generate Reports</h3>
+                    <p class="card-text">Create comprehensive performance reports and analytics for students and classes.</p>
+                </div>
+                
+                <div class="dashboard-card">
+                    <div class="card-icon" style="color: var(--primary-green);">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="card-title">Exam Sessions</h3>
+                    <p class="card-text">Manage upcoming examination sessions, deadlines, and submission timelines.</p>
+                </div>
             </div>
-            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-                <i class="fas fa-upload" style="font-size: 2rem; color: var(--accent-blue); margin-bottom: 15px;"></i>
-                <h3 style="color: var(--primary-green); margin-bottom: 10px;">Upload to Exam Centre</h3>
-                <p>Submit marks to central examination office for processing</p>
-            </div>
-            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-                <i class="fas fa-chart-bar" style="font-size: 2rem; color: var(--muted-green); margin-bottom: 15px;"></i>
-                <h3 style="color: var(--primary-green); margin-bottom: 10px;">Generate Reports</h3>
-                <p>Create performance reports and analytics</p>
+            
+            <div class="footer">
+                <p>© 2026 Alliance Girls High School - Alama Hub. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Help Center</a>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Mobile hamburger menu toggle
-        const hamburger = document.getElementById('hamburger');
-        const sidebar = document.getElementById('sidebar');
-        const navLinks = document.querySelectorAll('.nav-link');
+        // Initialize dashboard application
+        (function() {
+            // Prevent multiple initializations
+            if (window.dashboardInitialized) return;
+            window.dashboardInitialized = true;
+            
+            console.log('Initializing Teacher Dashboard...');
+            
+            // Initialize Supabase client
+            let supabase;
+            try {
+                const supabaseUrl = 'https://eloqizcahwxavsbalxii.supabase.co';
+                const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsb3FpemNhaHd4YXZzYmFseGlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MTQ4OTUsImV4cCI6MjA4MzI5MDg5NX0.SGogIbdShzCLv2TovpdS1BDf6GJx4mu0iz9s25BGRRQ';
+                
+                supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+                console.log('Supabase client initialized');
+            } catch (error) {
+                console.error('Failed to initialize Supabase:', error);
+                alert('Failed to initialize application. Please refresh the page.');
+                return;
+            }
 
-        // Toggle sidebar on mobile
-        hamburger.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-        });
+            // DOM Elements
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const userProfileTop = document.getElementById('userProfileTop');
+            const userDropdown = document.getElementById('userDropdown');
+            const dropdownArrow = document.getElementById('dropdownArrow');
+            const logoutLink = document.getElementById('logoutLink');
+            const logoutSidebarLinks = document.querySelectorAll('.logout-sidebar');
+            const userNameElement = document.getElementById('userName');
+            const userAvatarElement = document.getElementById('userAvatar');
+            const userRoleElement = document.getElementById('userRole');
+            const userTSCElement = document.getElementById('userTSC');
+            const welcomeNameElement = document.getElementById('welcomeName');
 
-        // Handle navigation clicks
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                // Update active state
-                navLinks.forEach(nav => nav.classList.remove('active'));
-                link.classList.add('active');
-                
-                // Get the page name from the link text
-                const pageName = link.textContent.trim();
-                
-                // Update main content based on selection
-                const mainContent = document.querySelector('.main-content');
-                const iconClass = link.querySelector('i').className;
-                
-                // Update the main content to reflect selection
-                mainContent.innerHTML = `
-                    <div class="placeholder-icon">
-                        <i class="${iconClass}"></i>
-                    </div>
-                    <h1>${pageName}</h1>
-                    <p>This is the ${pageName} section. Content would load here based on your selection.</p>
-                    <p>In the full application, this area would display the relevant data and tools for ${pageName.toLowerCase()}.</p>
+            // Function to get user data from Supabase
+            async function loadUserData() {
+                try {
+                    console.log('Loading user data from Supabase...');
                     
-                    <div style="margin-top: 40px; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); max-width: 600px;">
-                        <h3 style="color: var(--primary-green); margin-bottom: 15px;">Feature Preview</h3>
-                        <p style="text-align: left; line-height: 1.6;">When you select a navigation item, the main content area will display:</p>
-                        <ul style="text-align: left; margin: 15px 0; padding-left: 20px;">
-                            <li>Relevant data tables and forms</li>
-                            <li>Interactive tools for managing information</li>
-                            <li>Visualizations and reports</li>
-                            <li>Action buttons for specific tasks</li>
-                        </ul>
-                        <p style="text-align: left;">Use the navigation pane to explore different sections of the Alama Hub.</p>
-                    </div>
-                `;
+                    // Check if user is logged in
+                    const { data: { user }, error: userError } = await supabase.auth.getUser();
+                    
+                    if (userError) {
+                        console.error('Auth error:', userError);
+                        redirectToLogin();
+                        return;
+                    }
+                    
+                    if (!user) {
+                        console.error('No user found - redirecting to login');
+                        redirectToLogin();
+                        return;
+                    }
+                    
+                    console.log('User authenticated:', user.id);
+                    console.log('User metadata:', user.user_metadata);
+                    
+                    // Get user data from teachers table
+                    const { data: teacherData, error: teacherError } = await supabase
+                        .from('teachers')
+                        .select('full_name, tsc_number')
+                        .eq('id', user.id)
+                        .single();
+                    
+                    if (teacherError) {
+                        console.error('Error fetching teacher data:', teacherError);
+                        // Use auth user metadata as fallback
+                        const authUserData = user.user_metadata || {};
+                        console.log('Using auth metadata:', authUserData);
+                        updateUserDisplay(
+                            authUserData.full_name || 'Teacher',
+                            authUserData.tsc_number || 'N/A'
+                        );
+                    } else {
+                        // Use data from teachers table
+                        console.log('Teacher data from database:', teacherData);
+                        updateUserDisplay(
+                            teacherData.full_name || 'Teacher',
+                            teacherData.tsc_number || 'N/A'
+                        );
+                    }
+                    
+                } catch (error) {
+                    console.error('Error loading user data:', error);
+                    // Try to get from localStorage as fallback
+                    const savedName = localStorage.getItem('teacherName') || 'Teacher';
+                    const savedTSC = localStorage.getItem('teacherTSC') || 'N/A';
+                    console.log('Using localStorage as fallback:', savedName, savedTSC);
+                    updateUserDisplay(savedName, savedTSC);
+                }
+            }
+
+            // Function to update user display
+            function updateUserDisplay(fullName, tscNumber) {
+                console.log('Updating UI with:', {fullName, tscNumber});
                 
-                // Close sidebar on mobile after selection
-                if (window.innerWidth <= 1024) {
+                // Get initials for avatar
+                const initials = getInitials(fullName);
+                
+                // Get first name for welcome message
+                const firstName = fullName.split(' ')[0] || fullName;
+                
+                // Update all display elements
+                if (userNameElement) userNameElement.textContent = fullName;
+                if (userAvatarElement) userAvatarElement.textContent = initials;
+                if (userTSCElement) userTSCElement.textContent = `TSC: ${tscNumber}`;
+                if (welcomeNameElement) welcomeNameElement.textContent = firstName;
+                
+                // Update page title
+                const pageTitle = document.querySelector('.page-title h1');
+                if (pageTitle) {
+                    pageTitle.textContent = `Welcome to Alama Hub`;
+                }
+                
+                // Save to localStorage for persistence
+                localStorage.setItem('teacherName', fullName);
+                localStorage.setItem('teacherTSC', tscNumber);
+                
+                console.log('User display updated successfully');
+            }
+
+            // Function to get initials from full name
+            function getInitials(fullName) {
+                if (!fullName || fullName === 'Teacher') return 'T';
+                
+                return fullName
+                    .split(' ')
+                    .map(name => name[0])
+                    .join('')
+                    .toUpperCase()
+                    .substring(0, 2);
+            }
+
+            // Redirect to login page
+            function redirectToLogin() {
+                console.log('Redirecting to login page...');
+                window.location.href = 'index.html';
+            }
+
+            // Toggle sidebar on mobile
+            if (hamburger) {
+                hamburger.addEventListener('click', () => {
+                    sidebar.classList.toggle('open');
+                });
+            }
+
+            // Toggle user dropdown
+            if (userProfileTop) {
+                userProfileTop.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                    dropdownArrow.classList.toggle('fa-chevron-down');
+                    dropdownArrow.classList.toggle('fa-chevron-up');
+                });
+            }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (userProfileTop && userDropdown && 
+                    !userProfileTop.contains(e.target) && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('show');
+                    dropdownArrow.classList.remove('fa-chevron-up');
+                    dropdownArrow.classList.add('fa-chevron-down');
+                }
+                
+                // Close sidebar when clicking outside on mobile
+                if (window.innerWidth <= 1024 && 
+                    sidebar && sidebar.classList.contains('open') && 
+                    !sidebar.contains(e.target) && 
+                    e.target !== hamburger) {
                     sidebar.classList.remove('open');
                 }
             });
-        });
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 1024 && 
-                sidebar.classList.contains('open') && 
-                !sidebar.contains(e.target) && 
-                e.target !== hamburger) {
-                sidebar.classList.remove('open');
+            // Handle navigation clicks
+            if (navLinks.length > 0) {
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        if (link.classList.contains('logout-sidebar')) {
+                            e.preventDefault();
+                            handleLogout();
+                            return;
+                        }
+                        
+                        e.preventDefault();
+                        
+                        // Update active state
+                        navLinks.forEach(nav => nav.classList.remove('active'));
+                        link.classList.add('active');
+                        
+                        // Get the page name from the link text
+                        const pageName = link.textContent.trim();
+                        
+                        // Update main content based on selection
+                        const mainContent = document.querySelector('.main-content');
+                        const iconClass = link.querySelector('i').className;
+                        
+                        // Update page title
+                        const pageTitleElem = document.querySelector('.page-title h1');
+                        if (pageTitleElem) pageTitleElem.textContent = pageName;
+                        
+                        // Update main content
+                        if (mainContent) {
+                            mainContent.innerHTML = `
+                                <div class="placeholder-icon">
+                                    <i class="${iconClass}"></i>
+                                </div>
+                                <h1>${pageName}</h1>
+                                <p>This is the ${pageName} section. Content would load here based on your selection.</p>
+                                
+                                <div class="dashboard-container">
+                                    <div class="dashboard-cards">
+                                        <div class="dashboard-card">
+                                            <div class="card-icon" style="color: var(--primary-green);">
+                                                <i class="${iconClass}"></i>
+                                            </div>
+                                            <h3 class="card-title">${pageName} Overview</h3>
+                                            <p class="card-text">In the full application, this section would display relevant tools and data for ${pageName.toLowerCase()}.</p>
+                                        </div>
+                                        
+                                        <div class="dashboard-card">
+                                            <div class="card-icon" style="color: var(--accent-green);">
+                                                <i class="fas fa-tasks"></i>
+                                            </div>
+                                            <h3 class="card-title">Quick Actions</h3>
+                                            <p class="card-text">Common tasks and actions related to ${pageName.toLowerCase()} would appear here.</p>
+                                        </div>
+                                        
+                                        <div class="dashboard-card">
+                                            <div class="card-icon" style="color: var(--accent-blue);">
+                                                <i class="fas fa-chart-line"></i>
+                                            </div>
+                                            <h3 class="card-title">Statistics</h3>
+                                            <p class="card-text">Relevant statistics and analytics for ${pageName.toLowerCase()} management.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="footer">
+                                        <p>© 2023 Alliance Girls High School - Alama Hub. All rights reserved.</p>
+                                        <div class="footer-links">
+                                            <a href="#">Privacy Policy</a>
+                                            <a href="#">Terms of Service</a>
+                                            <a href="#">Help Center</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        
+                        // Close sidebar on mobile after selection
+                        if (window.innerWidth <= 1024) {
+                            sidebar.classList.remove('open');
+                        }
+                    });
+                });
             }
-        });
 
-        // Handle logout
-        const logoutLink = document.querySelector('.nav-link:last-child');
-        logoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (confirm('Are you sure you want to logout?')) {
-                alert('Logging out... Redirecting to login page.');
-                // In real app: window.location.href = 'index.html';
+            // Handle logout
+            async function handleLogout() {
+                if (confirm('Are you sure you want to logout?')) {
+                    try {
+                        const { error } = await supabase.auth.signOut();
+                        if (error) throw error;
+                        
+                        // Clear localStorage
+                        localStorage.removeItem('teacherName');
+                        localStorage.removeItem('teacherTSC');
+                        
+                        console.log('Logout successful, redirecting to login...');
+                        
+                        // Redirect to login page
+                        window.location.href = 'index.html';
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                        alert('Error during logout. Please try again.');
+                    }
+                }
             }
-        });
+
+            // Attach logout handlers
+            if (logoutLink) {
+                logoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleLogout();
+                });
+            }
+
+            if (logoutSidebarLinks.length > 0) {
+                logoutSidebarLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        handleLogout();
+                    });
+                });
+            }
+
+            // Adjust top header on sidebar toggle for mobile
+            function adjustHeaderForMobile() {
+                const topHeader = document.getElementById('topHeader');
+                if (topHeader) {
+                    if (window.innerWidth <= 1024) {
+                        if (sidebar.classList.contains('open')) {
+                            topHeader.style.left = '320px';
+                        } else {
+                            topHeader.style.left = '0';
+                        }
+                    } else {
+                        topHeader.style.left = '280px';
+                    }
+                }
+            }
+
+            // Initialize dashboard
+            function initializeDashboard() {
+                console.log('Starting dashboard initialization...');
+                
+                // Load user data
+                loadUserData();
+                
+                // Set up responsive adjustments
+                adjustHeaderForMobile();
+                window.addEventListener('resize', adjustHeaderForMobile);
+                
+                // Adjust header when sidebar toggles
+                if (hamburger) {
+                    hamburger.addEventListener('click', adjustHeaderForMobile);
+                }
+                
+                // Close sidebar when clicking on mobile
+                document.addEventListener('click', (e) => {
+                    if (window.innerWidth <= 1024 && 
+                        sidebar && sidebar.classList.contains('open') && 
+                        !sidebar.contains(e.target) && 
+                        e.target !== hamburger) {
+                        sidebar.classList.remove('open');
+                        adjustHeaderForMobile();
+                    }
+                });
+                
+                console.log('Dashboard initialization complete');
+            }
+
+            // Start initialization when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initializeDashboard);
+            } else {
+                initializeDashboard();
+            }
+        })();
     </script>
 </body>
 </html>
