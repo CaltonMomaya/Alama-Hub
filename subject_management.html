@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alama Hub - Teacher Allocation</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <style>
         :root {
             --primary-green: #075824;
@@ -14,6 +15,8 @@
             --accent-blue: #333687;
             --background-light: #F4F4F4;
             --text-light: #FFFFFF;
+            --warning-orange: #ff9800;
+            --error-red: #dc3545;
         }
 
         * {
@@ -38,7 +41,7 @@
 
         .container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1200px;
             background-color: white;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(7, 88, 36, 0.15);
@@ -147,6 +150,7 @@
 
         .form-group {
             margin-bottom: 20px;
+            position: relative;
         }
 
         .form-group label {
@@ -187,13 +191,13 @@
             box-shadow: 0 0 0 2px rgba(155, 174, 48, 0.2);
         }
 
-        /* Subject Search */
-        .subject-search-container {
+        /* Teacher Search */
+        .teacher-search-container {
             position: relative;
             margin-bottom: 10px;
         }
 
-        #subject-search {
+        #teacher-search {
             width: 100%;
             padding: 12px 15px 12px 45px;
             border: 1px solid #ddd;
@@ -202,7 +206,7 @@
             transition: all 0.3s ease;
         }
 
-        #subject-search:focus {
+        #teacher-search:focus {
             outline: none;
             border-color: var(--accent-green);
             box-shadow: 0 0 0 2px rgba(155, 174, 48, 0.2);
@@ -232,6 +236,96 @@
             color: #666;
         }
 
+        .teacher-list-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: white;
+            margin-top: 10px;
+            display: none;
+            position: absolute;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .teacher-list-container.active {
+            display: block;
+        }
+
+        .teacher-option {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.2s ease;
+        }
+
+        .teacher-option:hover {
+            background-color: rgba(7, 88, 36, 0.05);
+        }
+
+        .teacher-option.selected {
+            background-color: rgba(155, 174, 48, 0.1);
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        .teacher-option .tsc-number {
+            font-size: 0.85rem;
+            color: var(--muted-green);
+            margin-left: 5px;
+        }
+
+        .teacher-details {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: rgba(155, 174, 48, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(155, 174, 48, 0.2);
+            display: none;
+        }
+
+        .teacher-details.active {
+            display: block;
+        }
+
+        .teacher-detail-row {
+            display: flex;
+            margin-bottom: 8px;
+        }
+
+        .teacher-detail-label {
+            font-weight: 600;
+            min-width: 120px;
+            color: var(--primary-green);
+        }
+
+        .teacher-detail-value {
+            color: #555;
+        }
+
+        /* Subject Search */
+        .subject-search-container {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        #subject-search {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #subject-search:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 2px rgba(155, 174, 48, 0.2);
+        }
+
         .subject-list-container {
             max-height: 300px;
             overflow-y: auto;
@@ -240,6 +334,10 @@
             background-color: white;
             margin-top: 10px;
             display: none;
+            position: absolute;
+            width: 100%;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .subject-list-container.active {
@@ -356,6 +454,13 @@
             background-color: var(--secondary-green);
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(7, 88, 36, 0.2);
+        }
+
+        .btn-primary:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .btn-secondary {
@@ -530,6 +635,33 @@
             border: 1px solid rgba(220, 53, 69, 0.3);
         }
 
+        .status-warning {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--warning-orange);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+
+        .status-info {
+            background-color: rgba(51, 54, 135, 0.1);
+            color: var(--accent-blue);
+            border: 1px solid rgba(51, 54, 135, 0.3);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(155, 174, 48, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent-green);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Footer */
         .footer {
             margin-top: 30px;
@@ -623,7 +755,7 @@
             }
         }
 
-        /* Subject search highlight */
+        /* Search highlight */
         .highlight {
             background-color: rgba(155, 174, 48, 0.2);
             font-weight: 600;
@@ -634,6 +766,38 @@
         /* Table row highlight for search */
         .search-highlight {
             background-color: rgba(155, 174, 48, 0.1);
+        }
+
+        /* Database status indicator */
+        .db-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 1000;
+        }
+
+        .db-status.connected {
+            background-color: rgba(155, 174, 48, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(155, 174, 48, 0.3);
+        }
+
+        .db-status.disconnected {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .db-status.loading {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--warning-orange);
+            border: 1px solid rgba(255, 152, 0, 0.3);
         }
     </style>
 </head>
@@ -657,28 +821,48 @@
             <!-- Status Message -->
             <div id="status-message" class="status-message"></div>
             
-            <!-- Teacher Details Section -->
+            <!-- Teacher Selection Section -->
             <div class="form-section">
                 <h2 class="section-title">
-                    <i class="fas fa-user-tie"></i> Teacher Information
+                    <i class="fas fa-user-tie"></i> Select Teacher from Database
                 </h2>
                 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="teacher-name">Teacher Full Name</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-user"></i>
-                            <input type="text" id="teacher-name" placeholder="Enter teacher's full name" required>
+                <div class="form-group">
+                    <label for="teacher-search">Search Teacher by Name or TSC Number</label>
+                    <div class="teacher-search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="teacher-search" placeholder="Start typing teacher name or TSC number...">
+                        <button type="button" class="clear-search" id="clear-teacher-search">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="teacher-list-container" id="teacher-list">
+                        <!-- Teacher options will be populated here -->
+                    </div>
+                    
+                    <div class="teacher-details" id="teacher-details">
+                        <div class="teacher-detail-row">
+                            <span class="teacher-detail-label">Full Name:</span>
+                            <span class="teacher-detail-value" id="teacher-full-name"></span>
+                        </div>
+                        <div class="teacher-detail-row">
+                            <span class="teacher-detail-label">TSC Number:</span>
+                            <span class="teacher-detail-value" id="teacher-tsc-number"></span>
+                        </div>
+                        <div class="teacher-detail-row">
+                            <span class="teacher-detail-label">Email:</span>
+                            <span class="teacher-detail-value" id="teacher-email"></span>
+                        </div>
+                        <div class="teacher-detail-row">
+                            <span class="teacher-detail-label">Phone:</span>
+                            <span class="teacher-detail-value" id="teacher-phone"></span>
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="tsc-number">TSC Number</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-id-card"></i>
-                            <input type="text" id="tsc-number" placeholder="Enter TSC number" required>
-                        </div>
-                    </div>
+                    <input type="hidden" id="selected-teacher-id" value="">
+                    <input type="hidden" id="selected-teacher-name" value="">
+                    <input type="hidden" id="selected-teacher-tsc" value="">
                 </div>
             </div>
             
@@ -709,7 +893,7 @@
                         <div class="subject-search-container">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" id="subject-search" placeholder="Search for a subject...">
-                            <button type="button" class="clear-search" id="clear-search">
+                            <button type="button" class="clear-search" id="clear-subject-search">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -744,7 +928,7 @@
             
             <!-- Button Section -->
             <div class="button-section">
-                <button type="button" id="assign-btn" class="btn btn-primary">
+                <button type="button" id="assign-btn" class="btn btn-primary" disabled>
                     <i class="fas fa-user-check"></i> Assign Teacher
                 </button>
                 <button type="button" id="clear-btn" class="btn btn-secondary">
@@ -771,6 +955,9 @@
                 <div class="assignments-stats">
                     <div id="assignments-count">Total Assignments: 0</div>
                     <div id="search-results-count"></div>
+                    <button type="button" id="refresh-assignments" class="action-btn edit-btn" style="font-size: 0.8rem;">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
                 </div>
                 
                 <div class="table-container">
@@ -789,7 +976,7 @@
                             <!-- Assigned teachers will be added here dynamically -->
                             <tr>
                                 <td colspan="6" class="no-results" id="no-results-message">
-                                    No teachers assigned yet. Use the form above to assign teachers.
+                                    Loading assignments...
                                 </td>
                             </tr>
                         </tbody>
@@ -804,7 +991,17 @@
         <p><a href="#">Teacher Dashboard</a> | <a href="#">Manage Subjects</a> | <a href="#">Help Center</a></p>
     </div>
 
+    <!-- Database Connection Status -->
+    <div id="db-status" class="db-status loading">
+        <span class="spinner"></span>
+        <span>Connecting to database...</span>
+    </div>
+
     <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://eloqizcahwxavsbalxii.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsb3FpemNhaHd4YXZzYmFseGlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MTQ4OTUsImV4cCI6MjA4MzI5MDg5NX0.SGogIbdShzCLv2TovpdS1BDf6GJx4mu0iz9s25BGRRQ';
+
         // All subjects data
         const allSubjects = [
             { code: "ENG", name: "English Language" },
@@ -847,17 +1044,31 @@
             { code: "SR", name: "Sports and Recreation" }
         ];
 
-        // Data storage for assigned teachers
+        // Global variables
+        let supabase = null;
         let assignedTeachers = [];
         let filteredAssignments = [];
         let currentSearchTerm = '';
+        let allTeachers = [];
         
         // DOM Elements
+        const teacherSearch = document.getElementById('teacher-search');
+        const clearTeacherSearchBtn = document.getElementById('clear-teacher-search');
+        const teacherList = document.getElementById('teacher-list');
+        const teacherDetails = document.getElementById('teacher-details');
+        const teacherFullNameSpan = document.getElementById('teacher-full-name');
+        const teacherTscNumberSpan = document.getElementById('teacher-tsc-number');
+        const teacherEmailSpan = document.getElementById('teacher-email');
+        const teacherPhoneSpan = document.getElementById('teacher-phone');
+        const selectedTeacherIdInput = document.getElementById('selected-teacher-id');
+        const selectedTeacherNameInput = document.getElementById('selected-teacher-name');
+        const selectedTeacherTscInput = document.getElementById('selected-teacher-tsc');
+        
         const teacherNameInput = document.getElementById('teacher-name');
         const tscNumberInput = document.getElementById('tsc-number');
         const formGradeSelect = document.getElementById('form-grade');
         const subjectSearch = document.getElementById('subject-search');
-        const clearSearchBtn = document.getElementById('clear-search');
+        const clearSubjectSearchBtn = document.getElementById('clear-subject-search');
         const subjectList = document.getElementById('subject-list');
         const selectedSubjectInput = document.getElementById('selected-subject');
         const selectedSubjectDisplayInput = document.getElementById('selected-subject-display');
@@ -872,30 +1083,288 @@
         const assignmentsCount = document.getElementById('assignments-count');
         const searchResultsCount = document.getElementById('search-results-count');
         const noResultsMessage = document.getElementById('no-results-message');
-        
+        const refreshAssignmentsBtn = document.getElementById('refresh-assignments');
+        const dbStatus = document.getElementById('db-status');
+
         // Initialize the application
-        function initApp() {
-            // Load any existing assignments from localStorage
-            loadAssignments();
+        async function initApp() {
+            try {
+                // Initialize Supabase
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                
+                // Test database connection
+                await testDatabaseConnection();
+                
+                // Load teachers from database
+                await loadTeachersFromDatabase();
+                
+                // Load assignments from database
+                await loadAssignmentsFromDatabase();
+                
+                // Set up event listeners
+                setupEventListeners();
+                
+                // Populate subject list
+                populateSubjectList();
+                
+                // Update database status
+                updateDatabaseStatus(true, 'Connected to database');
+                
+            } catch (error) {
+                console.error('Error initializing application:', error);
+                updateDatabaseStatus(false, 'Database connection failed');
+                showStatus('Failed to connect to database. Some features may not work.', 'error');
+                
+                // Still set up event listeners for offline mode
+                setupEventListeners();
+                populateSubjectList();
+            }
+        }
+        
+        // Test database connection
+        async function testDatabaseConnection() {
+            try {
+                // Try to fetch teachers table to test connection
+                const { data, error } = await supabase
+                    .from('teachers')
+                    .select('count')
+                    .limit(1);
+                
+                if (error) {
+                    throw error;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Database connection test failed:', error);
+                throw error;
+            }
+        }
+        
+        // Load teachers from database
+        async function loadTeachersFromDatabase() {
+            try {
+                showLoadingStatus('Loading teachers from database...');
+                
+                const { data, error } = await supabase
+                    .from('teachers')
+                    .select('*')
+                    .order('full_name', { ascending: true });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                allTeachers = data || [];
+                
+                if (allTeachers.length === 0) {
+                    showStatus('No teachers found in database. Please add teachers first.', 'warning');
+                } else {
+                    showStatus(`Loaded ${allTeachers.length} teachers from database`, 'success');
+                }
+                
+            } catch (error) {
+                console.error('Error loading teachers:', error);
+                showStatus('Failed to load teachers from database', 'error');
+                allTeachers = [];
+            }
+        }
+        
+        // Load assignments from database
+        async function loadAssignmentsFromDatabase() {
+            try {
+                showLoadingStatus('Loading assignments from database...');
+                
+                const { data, error } = await supabase
+                    .from('teacher_assignments')
+                    .select(`
+                        *,
+                        teacher:teacher_id (full_name, tsc_number)
+                    `)
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                assignedTeachers = data || [];
+                filteredAssignments = [...assignedTeachers];
+                
+                // Update the table
+                renderAssignmentsTable();
+                
+                // Update counts
+                updateAssignmentsCount();
+                
+                showStatus(`Loaded ${assignedTeachers.length} assignments from database`, 'success');
+                
+            } catch (error) {
+                console.error('Error loading assignments:', error);
+                showStatus('Failed to load assignments from database', 'error');
+                assignedTeachers = [];
+                filteredAssignments = [];
+                
+                // Show error in table
+                noResultsMessage.textContent = 'Failed to load assignments. Please check database connection.';
+                noResultsMessage.style.display = 'table-cell';
+            }
+        }
+        
+        // Save assignment to database
+        async function saveAssignmentToDatabase(assignment) {
+            try {
+                const { data, error } = await supabase
+                    .from('teacher_assignments')
+                    .insert([
+                        {
+                            teacher_id: assignment.teacherId,
+                            subject_code: assignment.subjectCode,
+                            subject_display: assignment.subjectDisplay,
+                            form_grade: assignment.formGrade,
+                            form_grade_display: assignment.formGradeDisplay,
+                            streams: assignment.streams,
+                            created_at: new Date().toISOString()
+                        }
+                    ])
+                    .select(`
+                        *,
+                        teacher:teacher_id (full_name, tsc_number)
+                    `);
+                
+                if (error) {
+                    throw error;
+                }
+                
+                return data ? data[0] : null;
+                
+            } catch (error) {
+                console.error('Error saving assignment:', error);
+                throw error;
+            }
+        }
+        
+        // Delete assignment from database
+        async function deleteAssignmentFromDatabase(assignmentId) {
+            try {
+                const { error } = await supabase
+                    .from('teacher_assignments')
+                    .delete()
+                    .eq('id', assignmentId);
+                
+                if (error) {
+                    throw error;
+                }
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Error deleting assignment:', error);
+                throw error;
+            }
+        }
+        
+        // Populate teacher search list
+        function populateTeacherList(filter = '') {
+            teacherList.innerHTML = '';
             
-            // Set up event listeners
-            setupEventListeners();
+            if (allTeachers.length === 0) {
+                const option = document.createElement('div');
+                option.className = 'teacher-option';
+                option.textContent = 'No teachers found in database';
+                teacherList.appendChild(option);
+                teacherList.classList.add('active');
+                return;
+            }
             
-            // Render initial assignments table
-            renderAssignmentsTable();
+            // Filter teachers based on search term
+            const filteredTeachers = allTeachers.filter(teacher => {
+                if (!filter) return true;
+                
+                const searchLower = filter.toLowerCase();
+                const teacherNameLower = teacher.full_name ? teacher.full_name.toLowerCase() : '';
+                const tscNumberLower = teacher.tsc_number ? teacher.tsc_number.toLowerCase() : '';
+                const emailLower = teacher.email ? teacher.email.toLowerCase() : '';
+                
+                return teacherNameLower.includes(searchLower) || 
+                       tscNumberLower.includes(searchLower) ||
+                       emailLower.includes(searchLower);
+            });
             
-            // Populate subject list
-            populateSubjectList();
+            // Display filtered teachers
+            filteredTeachers.forEach(teacher => {
+                const option = document.createElement('div');
+                option.className = 'teacher-option';
+                option.setAttribute('data-id', teacher.id);
+                option.setAttribute('data-name', teacher.full_name);
+                option.setAttribute('data-tsc', teacher.tsc_number);
+                option.setAttribute('data-email', teacher.email || '');
+                option.setAttribute('data-phone', teacher.phone || '');
+                
+                // Highlight matching text if there's a filter
+                let displayName = teacher.full_name || 'Unknown Name';
+                if (filter) {
+                    displayName = highlightMatches(displayName, filter);
+                }
+                
+                option.innerHTML = `
+                    ${displayName}
+                    <span class="tsc-number">(${teacher.tsc_number || 'No TSC'})</span>
+                `;
+                
+                option.addEventListener('click', () => {
+                    selectTeacher(
+                        teacher.id,
+                        teacher.full_name,
+                        teacher.tsc_number,
+                        teacher.email,
+                        teacher.phone
+                    );
+                });
+                
+                teacherList.appendChild(option);
+            });
             
-            // Update assignments count
-            updateAssignmentsCount();
+            // Show/hide teacher list
+            if (filteredTeachers.length > 0) {
+                teacherList.classList.add('active');
+            } else {
+                teacherList.classList.remove('active');
+            }
+        }
+        
+        // Select a teacher
+        function selectTeacher(id, name, tsc, email, phone) {
+            selectedTeacherIdInput.value = id;
+            selectedTeacherNameInput.value = name;
+            selectedTeacherTscInput.value = tsc;
+            teacherSearch.value = name;
+            teacherList.classList.remove('active');
+            clearTeacherSearchBtn.style.display = 'block';
+            
+            // Show teacher details
+            teacherFullNameSpan.textContent = name || 'Not available';
+            teacherTscNumberSpan.textContent = tsc || 'Not available';
+            teacherEmailSpan.textContent = email || 'Not available';
+            teacherPhoneSpan.textContent = phone || 'Not available';
+            teacherDetails.classList.add('active');
+            
+            // Highlight selected option
+            document.querySelectorAll('.teacher-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.getAttribute('data-id') === id.toString()) {
+                    option.classList.add('selected');
+                }
+            });
+            
+            // Enable assign button if other fields are filled
+            checkFormCompletion();
         }
         
         // Populate subject list
         function populateSubjectList(filter = '') {
             subjectList.innerHTML = '';
             
-            // Filter subjects based on search term (fuzzy search)
+            // Filter subjects based on search term
             const filteredSubjects = allSubjects.filter(subject => {
                 if (!filter) return true;
                 
@@ -903,7 +1372,6 @@
                 const subjectNameLower = subject.name.toLowerCase();
                 const subjectCodeLower = subject.code.toLowerCase();
                 
-                // Simple fuzzy matching
                 return subjectNameLower.includes(searchLower) || 
                        subjectCodeLower.includes(searchLower) ||
                        subjectNameLower.replace(/\s+/g, '').includes(searchLower.replace(/\s+/g, ''));
@@ -942,21 +1410,13 @@
             }
         }
         
-        // Highlight matching text in search results
-        function highlightMatches(text, searchTerm) {
-            if (!searchTerm) return text;
-            
-            const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-            return text.replace(regex, '<span class="highlight">$1</span>');
-        }
-        
         // Select a subject
         function selectSubject(code, name) {
             selectedSubjectInput.value = code;
             selectedSubjectDisplayInput.value = name;
             subjectSearch.value = name;
             subjectList.classList.remove('active');
-            clearSearchBtn.style.display = 'block';
+            clearSubjectSearchBtn.style.display = 'block';
             
             // Highlight selected option
             document.querySelectorAll('.subject-option').forEach(option => {
@@ -965,6 +1425,28 @@
                     option.classList.add('selected');
                 }
             });
+            
+            // Enable assign button if other fields are filled
+            checkFormCompletion();
+        }
+        
+        // Highlight matching text in search results
+        function highlightMatches(text, searchTerm) {
+            if (!searchTerm || !text) return text;
+            
+            const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+        
+        // Check if form is complete and enable/disable assign button
+        function checkFormCompletion() {
+            const isTeacherSelected = selectedTeacherIdInput.value !== '';
+            const isSubjectSelected = selectedSubjectInput.value !== '';
+            const isFormSelected = formGradeSelect.value !== '';
+            const streams = getStreamValues();
+            const hasStreams = streams.length > 0;
+            
+            assignBtn.disabled = !(isTeacherSelected && isSubjectSelected && isFormSelected && hasStreams);
         }
         
         // Search assigned teachers
@@ -980,12 +1462,12 @@
             
             // Filter assignments based on search term
             filteredAssignments = assignedTeachers.filter(assignment => {
-                const teacherName = assignment.teacherName.toLowerCase();
-                const tscNumber = assignment.tscNumber.toLowerCase();
-                const subjectDisplay = assignment.subjectDisplay.toLowerCase();
-                const subjectCode = assignment.subjectCode.toLowerCase();
-                const formGrade = assignment.formGradeDisplay.toLowerCase();
-                const streams = assignment.streams.join(' ').toLowerCase();
+                const teacherName = assignment.teacher?.full_name?.toLowerCase() || '';
+                const tscNumber = assignment.teacher?.tsc_number?.toLowerCase() || '';
+                const subjectDisplay = assignment.subject_display?.toLowerCase() || '';
+                const subjectCode = assignment.subject_code?.toLowerCase() || '';
+                const formGrade = assignment.form_grade_display?.toLowerCase() || '';
+                const streams = (assignment.streams || []).join(' ').toLowerCase();
                 
                 // Search in all relevant fields
                 return teacherName.includes(currentSearchTerm) ||
@@ -1023,38 +1505,91 @@
             }
         }
         
+        // Update database status indicator
+        function updateDatabaseStatus(isConnected, message) {
+            if (isConnected) {
+                dbStatus.className = 'db-status connected';
+                dbStatus.innerHTML = `<i class="fas fa-check-circle"></i><span>${message}</span>`;
+            } else {
+                dbStatus.className = 'db-status disconnected';
+                dbStatus.innerHTML = `<i class="fas fa-times-circle"></i><span>${message}</span>`;
+            }
+        }
+        
+        // Show loading status
+        function showLoadingStatus(message) {
+            dbStatus.className = 'db-status loading';
+            dbStatus.innerHTML = `<span class="spinner"></span><span>${message}</span>`;
+        }
+        
         // Set up event listeners
         function setupEventListeners() {
+            // Teacher search
+            teacherSearch.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.trim();
+                populateTeacherList(searchTerm);
+                
+                if (searchTerm) {
+                    clearTeacherSearchBtn.style.display = 'block';
+                } else {
+                    clearTeacherSearchBtn.style.display = 'none';
+                    teacherDetails.classList.remove('active');
+                }
+            });
+            
+            // Clear teacher search button
+            clearTeacherSearchBtn.addEventListener('click', () => {
+                teacherSearch.value = '';
+                selectedTeacherIdInput.value = '';
+                selectedTeacherNameInput.value = '';
+                selectedTeacherTscInput.value = '';
+                clearTeacherSearchBtn.style.display = 'none';
+                teacherList.classList.remove('active');
+                teacherDetails.classList.remove('active');
+                
+                // Clear selection highlights
+                document.querySelectorAll('.teacher-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                checkFormCompletion();
+            });
+            
             // Subject search
             subjectSearch.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.trim();
                 populateSubjectList(searchTerm);
                 
                 if (searchTerm) {
-                    clearSearchBtn.style.display = 'block';
+                    clearSubjectSearchBtn.style.display = 'block';
                 } else {
-                    clearSearchBtn.style.display = 'none';
-                    selectedSubjectInput.value = '';
-                    selectedSubjectDisplayInput.value = '';
+                    clearSubjectSearchBtn.style.display = 'none';
                 }
+                
+                checkFormCompletion();
             });
             
-            // Clear search button
-            clearSearchBtn.addEventListener('click', () => {
+            // Clear subject search button
+            clearSubjectSearchBtn.addEventListener('click', () => {
                 subjectSearch.value = '';
                 selectedSubjectInput.value = '';
                 selectedSubjectDisplayInput.value = '';
-                clearSearchBtn.style.display = 'none';
+                clearSubjectSearchBtn.style.display = 'none';
                 subjectList.classList.remove('active');
                 
                 // Clear selection highlights
                 document.querySelectorAll('.subject-option').forEach(option => {
                     option.classList.remove('selected');
                 });
+                
+                checkFormCompletion();
             });
             
-            // Close subject list when clicking outside
+            // Close dropdowns when clicking outside
             document.addEventListener('click', (e) => {
+                if (!e.target.closest('.teacher-search-container')) {
+                    teacherList.classList.remove('active');
+                }
                 if (!e.target.closest('.subject-search-container')) {
                     subjectList.classList.remove('active');
                 }
@@ -1079,6 +1614,9 @@
                 clearAssignmentsSearchBtn.style.display = 'none';
             });
             
+            // Form grade change
+            formGradeSelect.addEventListener('change', checkFormCompletion);
+            
             // Add stream button
             addStreamBtn.addEventListener('click', addStreamField);
             
@@ -1087,6 +1625,11 @@
             
             // Clear form button
             clearBtn.addEventListener('click', clearForm);
+            
+            // Refresh assignments button
+            refreshAssignmentsBtn.addEventListener('click', async () => {
+                await loadAssignmentsFromDatabase();
+            });
             
             // Allow Enter key to add streams
             streamContainer.addEventListener('keydown', (e) => {
@@ -1098,6 +1641,13 @@
                     if (newInputs.length > 0) {
                         newInputs[newInputs.length - 1].focus();
                     }
+                }
+            });
+            
+            // Stream input changes
+            streamContainer.addEventListener('input', (e) => {
+                if (e.target.classList.contains('stream-input')) {
+                    checkFormCompletion();
                 }
             });
         }
@@ -1124,7 +1674,14 @@
                     // If it's the last stream, just clear the input
                     streamItem.querySelector('.stream-input').value = '';
                 }
+                checkFormCompletion();
             });
+            
+            // Add input listener for form validation
+            const input = streamItem.querySelector('.stream-input');
+            input.addEventListener('input', checkFormCompletion);
+            
+            checkFormCompletion();
         }
         
         // Get all stream values
@@ -1143,17 +1700,23 @@
         }
         
         // Assign teacher to subject and form
-        function assignTeacher() {
+        async function assignTeacher() {
             // Get form values
-            const teacherName = teacherNameInput.value.trim();
-            const tscNumber = tscNumberInput.value.trim();
+            const teacherId = selectedTeacherIdInput.value;
+            const teacherName = selectedTeacherNameInput.value;
+            const tscNumber = selectedTeacherTscInput.value;
             const subjectCode = selectedSubjectInput.value;
             const subjectDisplay = selectedSubjectDisplayInput.value;
             const formGrade = formGradeSelect.value;
             const streams = getStreamValues();
             
             // Validation
-            if (!teacherName || !tscNumber || !subjectCode || !formGrade) {
+            if (!teacherId) {
+                showStatus('Please select a teacher from the database', 'error');
+                return;
+            }
+            
+            if (!subjectCode || !formGrade) {
                 showStatus('Please fill in all required fields', 'error');
                 return;
             }
@@ -1168,53 +1731,65 @@
                 word.charAt(0).toUpperCase() + word.slice(1)
             ).join(' ');
             
-            // Create new assignment
+            // Create new assignment object
             const newAssignment = {
-                id: Date.now(), // Unique ID
-                teacherName: teacherName,
-                tscNumber: tscNumber,
+                teacherId: teacherId,
                 subjectCode: subjectCode,
                 subjectDisplay: subjectDisplay,
                 formGrade: formGrade,
                 formGradeDisplay: formGradeDisplay,
-                streams: streams,
-                dateAssigned: new Date().toISOString().split('T')[0]
+                streams: streams
             };
             
-            // Add to assigned teachers array
-            assignedTeachers.push(newAssignment);
-            
-            // Save to localStorage
-            saveAssignments();
-            
-            // Update the table
-            renderAssignmentsTable();
-            
-            // Update search if active
-            if (currentSearchTerm) {
-                searchAssignments(currentSearchTerm);
+            try {
+                // Save to database
+                const savedAssignment = await saveAssignmentToDatabase(newAssignment);
+                
+                if (savedAssignment) {
+                    // Add to local array
+                    assignedTeachers.unshift(savedAssignment);
+                    
+                    // Update the table
+                    renderAssignmentsTable();
+                    
+                    // Update search if active
+                    if (currentSearchTerm) {
+                        searchAssignments(currentSearchTerm);
+                    }
+                    
+                    // Show success message
+                    showStatus(`Teacher ${teacherName} has been assigned to ${subjectDisplay} for ${formGradeDisplay}`, 'success');
+                    
+                    // Clear the form
+                    clearForm();
+                    
+                    // Update counts
+                    updateAssignmentsCount();
+                }
+                
+            } catch (error) {
+                console.error('Error assigning teacher:', error);
+                showStatus(`Failed to assign teacher: ${error.message}`, 'error');
             }
-            
-            // Show success message
-            showStatus(`Teacher ${teacherName} has been assigned to ${subjectDisplay} for ${formGradeDisplay}`, 'success');
-            
-            // Clear the form (optional)
-            clearForm();
-            
-            // Update counts
-            updateAssignmentsCount();
         }
         
         // Clear the form
         function clearForm() {
-            teacherNameInput.value = '';
-            tscNumberInput.value = '';
-            formGradeSelect.value = '';
+            teacherSearch.value = '';
+            selectedTeacherIdInput.value = '';
+            selectedTeacherNameInput.value = '';
+            selectedTeacherTscInput.value = '';
+            clearTeacherSearchBtn.style.display = 'none';
+            teacherList.classList.remove('active');
+            teacherDetails.classList.remove('active');
+            
             subjectSearch.value = '';
             selectedSubjectInput.value = '';
             selectedSubjectDisplayInput.value = '';
-            clearSearchBtn.style.display = 'none';
+            clearSubjectSearchBtn.style.display = 'none';
             subjectList.classList.remove('active');
+            
+            formGradeSelect.value = '';
             
             // Clear streams but keep one empty field
             streamContainer.innerHTML = `
@@ -1224,12 +1799,19 @@
             `;
             
             // Clear selection highlights
+            document.querySelectorAll('.teacher-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
             document.querySelectorAll('.subject-option').forEach(option => {
                 option.classList.remove('selected');
             });
             
-            // Focus on teacher name
-            teacherNameInput.focus();
+            // Disable assign button
+            assignBtn.disabled = true;
+            
+            // Focus on teacher search
+            teacherSearch.focus();
         }
         
         // Render assignments table
@@ -1262,11 +1844,11 @@
                 
                 // Check if this row matches the search
                 const shouldHighlight = currentSearchTerm && (
-                    assignment.teacherName.toLowerCase().includes(currentSearchTerm) ||
-                    assignment.tscNumber.toLowerCase().includes(currentSearchTerm) ||
-                    assignment.subjectDisplay.toLowerCase().includes(currentSearchTerm) ||
-                    assignment.subjectCode.toLowerCase().includes(currentSearchTerm) ||
-                    assignment.formGradeDisplay.toLowerCase().includes(currentSearchTerm)
+                    (assignment.teacher?.full_name?.toLowerCase() || '').includes(currentSearchTerm) ||
+                    (assignment.teacher?.tsc_number?.toLowerCase() || '').includes(currentSearchTerm) ||
+                    (assignment.subject_display?.toLowerCase() || '').includes(currentSearchTerm) ||
+                    (assignment.subject_code?.toLowerCase() || '').includes(currentSearchTerm) ||
+                    (assignment.form_grade_display?.toLowerCase() || '').includes(currentSearchTerm)
                 );
                 
                 if (shouldHighlight) {
@@ -1275,7 +1857,8 @@
                 
                 // Create streams HTML
                 let streamsHTML = '<div class="stream-list">';
-                assignment.streams.forEach(stream => {
+                const streams = assignment.streams || [];
+                streams.forEach(stream => {
                     // Highlight streams if they match search
                     const streamLower = stream.toLowerCase();
                     const displayStream = currentSearchTerm && streamLower.includes(currentSearchTerm) 
@@ -1288,8 +1871,8 @@
                 
                 // Highlight text in table cells if searching
                 const highlightText = (text) => {
-                    if (!currentSearchTerm || !text.toLowerCase().includes(currentSearchTerm)) {
-                        return text;
+                    if (!currentSearchTerm || !text || !text.toLowerCase().includes(currentSearchTerm)) {
+                        return text || 'N/A';
                     }
                     
                     const regex = new RegExp(`(${currentSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
@@ -1297,16 +1880,13 @@
                 };
                 
                 row.innerHTML = `
-                    <td>${highlightText(assignment.teacherName)}</td>
-                    <td>${highlightText(assignment.tscNumber)}</td>
-                    <td>${highlightText(assignment.subjectDisplay)} (${assignment.subjectCode})</td>
-                    <td>${highlightText(assignment.formGradeDisplay)}</td>
+                    <td>${highlightText(assignment.teacher?.full_name)}</td>
+                    <td>${highlightText(assignment.teacher?.tsc_number)}</td>
+                    <td>${highlightText(assignment.subject_display)} (${assignment.subject_code})</td>
+                    <td>${highlightText(assignment.form_grade_display)}</td>
                     <td>${streamsHTML}</td>
                     <td>
-                        <button class="action-btn edit-btn" data-index="${assignedTeachers.indexOf(assignment)}">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="action-btn remove-btn" data-index="${assignedTeachers.indexOf(assignment)}">
+                        <button class="action-btn remove-btn" data-id="${assignment.id}">
                             <i class="fas fa-trash"></i> Remove
                         </button>
                     </td>
@@ -1321,107 +1901,52 @@
         
         // Add event listeners to action buttons
         function addActionButtonListeners() {
-            // Edit buttons
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const index = parseInt(e.target.closest('button').getAttribute('data-index'));
-                    editAssignment(index);
-                });
-            });
-            
             // Remove buttons
             document.querySelectorAll('.remove-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const index = parseInt(e.target.closest('button').getAttribute('data-index'));
-                    removeAssignment(index);
+                btn.addEventListener('click', async (e) => {
+                    const assignmentId = parseInt(e.target.closest('button').getAttribute('data-id'));
+                    await removeAssignment(assignmentId);
                 });
             });
-        }
-        
-        // Edit assignment
-        function editAssignment(index) {
-            const assignment = assignedTeachers[index];
-            
-            // Populate form with assignment data
-            teacherNameInput.value = assignment.teacherName;
-            tscNumberInput.value = assignment.tscNumber;
-            formGradeSelect.value = assignment.formGrade;
-            subjectSearch.value = assignment.subjectDisplay;
-            selectedSubjectInput.value = assignment.subjectCode;
-            selectedSubjectDisplayInput.value = assignment.subjectDisplay;
-            clearSearchBtn.style.display = 'block';
-            
-            // Clear and populate streams
-            streamContainer.innerHTML = '';
-            assignment.streams.forEach(stream => {
-                const streamItem = document.createElement('div');
-                streamItem.className = 'stream-item';
-                streamItem.innerHTML = `
-                    <input type="text" class="stream-input" value="${stream}">
-                    <button type="button" class="remove-stream-btn" style="background: none; border: none; color: #dc3545; cursor: pointer;">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                streamContainer.appendChild(streamItem);
-                
-                // Add remove functionality
-                const removeBtn = streamItem.querySelector('.remove-stream-btn');
-                removeBtn.addEventListener('click', () => {
-                    if (streamContainer.children.length > 1) {
-                        streamItem.remove();
-                    } else {
-                        streamItem.querySelector('.stream-input').value = '';
-                    }
-                });
-            });
-            
-            // Highlight selected subject in list
-            document.querySelectorAll('.subject-option').forEach(option => {
-                option.classList.remove('selected');
-                if (option.getAttribute('data-code') === assignment.subjectCode) {
-                    option.classList.add('selected');
-                }
-            });
-            
-            // Remove the assignment from the list (will be re-added when saved)
-            assignedTeachers.splice(index, 1);
-            
-            // Update table
-            renderAssignmentsTable();
-            
-            // Update search if active
-            if (currentSearchTerm) {
-                searchAssignments(currentSearchTerm);
-            }
-            
-            // Show edit message
-            showStatus(`Editing assignment for ${assignment.teacherName}. Make changes and click "Assign Teacher".`, 'success');
-            
-            // Focus on form
-            teacherNameInput.focus();
-            
-            // Update counts
-            updateAssignmentsCount();
         }
         
         // Remove assignment
-        function removeAssignment(index) {
-            const assignment = assignedTeachers[index];
+        async function removeAssignment(assignmentId) {
+            const assignment = assignedTeachers.find(a => a.id === assignmentId);
             
-            if (confirm(`Are you sure you want to remove ${assignment.teacherName} from teaching ${assignment.subjectDisplay} for ${assignment.formGradeDisplay}?`)) {
-                assignedTeachers.splice(index, 1);
-                saveAssignments();
-                renderAssignmentsTable();
-                
-                // Update search if active
-                if (currentSearchTerm) {
-                    searchAssignments(currentSearchTerm);
+            if (!assignment) return;
+            
+            const teacherName = assignment.teacher?.full_name || 'Unknown Teacher';
+            const subjectDisplay = assignment.subject_display || 'Unknown Subject';
+            
+            if (confirm(`Are you sure you want to remove ${teacherName} from teaching ${subjectDisplay}?`)) {
+                try {
+                    // Delete from database
+                    await deleteAssignmentFromDatabase(assignmentId);
+                    
+                    // Remove from local array
+                    const index = assignedTeachers.findIndex(a => a.id === assignmentId);
+                    if (index !== -1) {
+                        assignedTeachers.splice(index, 1);
+                    }
+                    
+                    // Update search if active
+                    if (currentSearchTerm) {
+                        searchAssignments(currentSearchTerm);
+                    } else {
+                        filteredAssignments = [...assignedTeachers];
+                        renderAssignmentsTable();
+                    }
+                    
+                    showStatus(`Assignment removed successfully.`, 'success');
+                    
+                    // Update counts
+                    updateAssignmentsCount();
+                    
+                } catch (error) {
+                    console.error('Error removing assignment:', error);
+                    showStatus(`Failed to remove assignment: ${error.message}`, 'error');
                 }
-                
-                showStatus(`Assignment removed successfully.`, 'success');
-                
-                // Update counts
-                updateAssignmentsCount();
             }
         }
         
@@ -1435,20 +1960,6 @@
             setTimeout(() => {
                 statusMessage.style.display = 'none';
             }, 5000);
-        }
-        
-        // Save assignments to localStorage
-        function saveAssignments() {
-            localStorage.setItem('alamaHubAssignments', JSON.stringify(assignedTeachers));
-        }
-        
-        // Load assignments from localStorage
-        function loadAssignments() {
-            const saved = localStorage.getItem('alamaHubAssignments');
-            if (saved) {
-                assignedTeachers = JSON.parse(saved);
-                filteredAssignments = [...assignedTeachers];
-            }
         }
         
         // Initialize the application when DOM is loaded

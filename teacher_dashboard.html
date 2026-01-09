@@ -16,6 +16,8 @@
             --background-light: #F4F4F4;
             --text-light: #FFFFFF;
             --sidebar-width: 280px;
+            --card-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            --hover-shadow: 0 15px 30px rgba(0,0,0,0.12);
         }
 
         * {
@@ -76,8 +78,8 @@
         }
 
         .user-avatar-top {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary-green), var(--accent-green));
             display: flex;
@@ -85,7 +87,38 @@
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 1.2rem;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+
+        .user-avatar-top img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+
+        .profile-upload-overlay:hover {
+            opacity: 1;
         }
 
         .user-info-top h4 {
@@ -270,9 +303,6 @@
             margin-left: var(--sidebar-width);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            text-align: center;
-            color: #666;
             transition: margin-left 0.3s ease;
             width: calc(100% - var(--sidebar-width));
         }
@@ -293,97 +323,669 @@
             text-align: center;
         }
 
-        .placeholder-icon {
-            font-size: 5rem;
-            color: var(--muted-green);
-            opacity: 0.3;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        /* Hamburger menu for mobile */
-        .hamburger {
-            display: none;
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1100;
-            background-color: var(--primary-green);
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Dashboard Cards - Centered Layout */
-        .dashboard-container {
+        /* Data display sections */
+        .data-section {
             width: 100%;
             max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            margin: 0 auto 40px;
         }
 
-        .dashboard-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            width: 100%;
-            margin: 40px 0;
-        }
-
-        .dashboard-card {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            height: 100%;
-        }
-
-        .dashboard-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
-        }
-
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            height: 80px;
-            width: 80px;
+        .section-title {
             display: flex;
             align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(7, 88, 36, 0.1), rgba(155, 174, 48, 0.1));
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(7, 88, 36, 0.1);
         }
 
-        .card-title {
+        .section-title h2 {
             color: var(--primary-green);
-            margin-bottom: 15px;
-            font-size: 1.4rem;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title h2 i {
+            color: var(--accent-green);
+        }
+
+        .section-info {
+            color: var(--muted-green);
+            font-size: 1rem;
+        }
+
+        /* Data Cards Layout - NO LEFT STRIPS */
+        .data-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .data-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: none;
+        }
+
+        .data-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .card-header i {
+            font-size: 1.8rem;
+        }
+
+        .card-header h3 {
+            font-size: 1.3rem;
             font-weight: 600;
         }
 
-        .card-text {
-            color: #666;
-            line-height: 1.6;
-            font-size: 1rem;
+        .card-body {
+            padding: 25px;
+            flex-grow: 1;
+        }
+
+        .card-footer {
+            padding: 15px 25px;
+            background-color: rgba(7, 88, 36, 0.03);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Subject and Form Info */
+        .subject-info, .form-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--muted-green);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin: 30px 0;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--muted-green);
+            opacity: 0.3;
             margin-bottom: 20px;
         }
 
-        /* Footer */
+        .empty-state h3 {
+            color: var(--primary-green);
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            max-width: 500px;
+            margin: 0 auto;
+            color: #666;
+        }
+
+        /* Action Buttons */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-green);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(7, 88, 36, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #2a2c6e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(51, 54, 135, 0.2);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-green);
+            border: 2px solid var(--primary-green);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(7, 88, 36, 0.05);
+        }
+
+        /* Profile Modal */
+        .profile-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .profile-preview {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 30px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 5px solid rgba(7, 88, 36, 0.1);
+            position: relative;
+        }
+
+        .profile-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-preview .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+
+        .profile-preview:hover .overlay {
+            opacity: 1;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(155, 174, 48, 0.1);
+        }
+
+        .file-upload {
+            padding: 15px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: var(--accent-green);
+            background-color: rgba(155, 174, 48, 0.05);
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            background-color: rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        /* Stream Selection Modal - UPDATED TO 3/4 WIDTH */
+        .stream-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stream-modal.show {
+            display: flex;
+        }
+
+        .stream-modal-content {
+            background-color: white;
+            width: 75%; /* Changed from 90% to 75% */
+            max-width: 1200px; /* Increased max-width */
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: modalFadeIn 0.3s ease;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stream-modal-header {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .stream-modal-header h3 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stream-modal-body {
+            padding: 30px;
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: calc(90vh - 70px); /* Account for header */
+        }
+
+        .stream-selection {
+            margin-bottom: 30px;
+        }
+
+        .stream-selection h4 {
+            color: var(--primary-green);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stream-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stream-btn {
+            padding: 15px 20px;
+            background-color: rgba(7, 88, 36, 0.1);
+            border: 1px solid rgba(7, 88, 36, 0.2);
+            border-radius: 8px;
+            color: var(--primary-green);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stream-btn:hover {
+            background-color: rgba(7, 88, 36, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .stream-btn.active {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        .stream-btn .stream-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .stream-btn .stream-info {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Excel-like Table - UPDATED FOR LARGER DISPLAY */
+        .excel-table-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            max-height: 60vh; /* Increased height */
+            overflow-y: auto;
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px; /* Increased minimum width */
+        }
+
+        .excel-table th {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 15px 20px; /* Increased padding */
+            text-align: left;
+            font-weight: 600;
+            border-right: 1px solid rgba(255,255,255,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: 1rem; /* Larger font */
+        }
+
+        .excel-table th:last-child {
+            border-right: none;
+        }
+
+        .excel-table td {
+            padding: 12px 20px; /* Increased padding */
+            border: 1px solid #e0e0e0;
+            transition: background-color 0.2s ease;
+            background-color: white;
+            font-size: 1rem; /* Larger font for better readability */
+        }
+
+        .excel-table tr:nth-child(even) td {
+            background-color: #f9f9f9;
+        }
+
+        .excel-table tr:hover td {
+            background-color: rgba(7, 88, 36, 0.05);
+        }
+
+        .editable-cell {
+            width: 100%;
+            padding: 10px 12px; /* Increased padding */
+            border: 1px solid transparent;
+            background: transparent;
+            font-family: inherit;
+            font-size: 1rem; /* Larger font */
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+            height: 40px; /* Fixed height for consistency */
+        }
+
+        .editable-cell:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(155, 174, 48, 0.2); /* Larger focus ring */
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 8px 12px; /* Increased padding */
+            border: none;
+            border-radius: 6px; /* Slightly larger radius */
+            background: none;
+            cursor: pointer;
+            font-size: 1rem; /* Larger icons */
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px; /* Larger width */
+            height: 40px; /* Larger height */
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .action-btn.save {
+            color: var(--primary-green);
+            background-color: rgba(7, 88, 36, 0.1);
+        }
+
+        .action-btn.save:hover {
+            background-color: rgba(7, 88, 36, 0.2);
+        }
+
+        .action-btn.delete {
+            color: #e74c3c;
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+
+        .action-btn.delete:hover {
+            background-color: rgba(231, 76, 60, 0.2);
+        }
+
+        .action-btn.update {
+            color: var(--accent-blue);
+            background-color: rgba(51, 54, 135, 0.1);
+        }
+
+        .action-btn.update:hover {
+            background-color: rgba(51, 54, 135, 0.2);
+        }
+
+        .add-row-btn {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .add-row-btn:hover {
+            background-color: #8ba028;
+            transform: translateY(-2px);
+        }
+
+        .table-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .table-info {
+            color: var(--muted-green);
+            font-size: 0.95rem;
+            background-color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            flex-grow: 1;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(7, 88, 36, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-green);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* View Toggle */
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .view-btn {
+            padding: 8px 20px;
+            border: 1px solid var(--primary-green);
+            background: white;
+            color: var(--primary-green);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn.active {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .view-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Footer - CENTERED */
         .footer {
             text-align: center;
             padding: 30px 20px;
@@ -406,8 +1008,6 @@
             text-align: center;
             line-height: 1.5;
             margin: 0 auto 15px;
-            text-align: justify;
-            text-justify: inter-word;
         }
 
         .footer-links {
@@ -431,7 +1031,32 @@
             text-decoration: underline;
         }
 
+        /* Hamburger menu for mobile */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background-color: var(--primary-green);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
         /* Responsive Design */
+        @media (max-width: 1200px) {
+            .stream-modal-content {
+                width: 85%;
+            }
+        }
+
         @media (max-width: 1024px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -455,9 +1080,16 @@
                 display: flex;
             }
             
-            .dashboard-cards {
+            .data-cards {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
+            }
+            
+            .stream-modal-content {
+                width: 95%;
+            }
+            
+            .stream-buttons {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
@@ -491,19 +1123,39 @@
                 font-size: 0.75rem;
             }
             
-            .dashboard-cards {
+            .data-cards {
                 grid-template-columns: 1fr;
-                max-width: 500px;
             }
             
-            .card-icon {
-                font-size: 2.5rem;
-                height: 70px;
-                width: 70px;
+            .section-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
             }
             
-            .dashboard-card {
-                padding: 25px;
+            .excel-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .stream-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-actions {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .action-buttons {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .excel-table th,
+            .excel-table td {
+                padding: 10px 15px;
             }
         }
 
@@ -520,6 +1172,27 @@
                 flex-direction: column;
                 gap: 10px;
             }
+            
+            .modal-content {
+                width: 95%;
+            }
+            
+            .profile-preview {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .excel-table th,
+            .excel-table td {
+                padding: 8px 10px;
+                font-size: 0.9rem;
+            }
+            
+            .action-btn {
+                width: 30px;
+                height: 30px;
+                padding: 4px;
+            }
         }
     </style>
 </head>
@@ -532,12 +1205,17 @@
     <!-- Top Header with User Profile -->
     <div class="top-header" id="topHeader">
         <div class="page-title">
-            <h1>Welcome to Alama Hub</h1>
-            <p>Teacher Dashboard - Alliance Girls High School</p>
+            <h1 id="pageTitle">Welcome to Alama Hub</h1>
+            <p id="pageSubtitle">Teacher Dashboard - Alliance Girls High School</p>
         </div>
         
         <div class="user-profile-top" id="userProfileTop">
-            <div class="user-avatar-top" id="userAvatar">JD</div>
+            <div class="user-avatar-top" id="userAvatar">
+                <img id="profileImage" alt="Profile Picture" onerror="this.style.display='none'">
+                <div class="profile-upload-overlay" id="profileUploadTrigger">
+                    <i class="fas fa-camera"></i>
+                </div>
+            </div>
             <div class="user-info-top">
                 <h4 id="userName">Loading...</h4>
                 <p id="userRole">Teacher</p>
@@ -548,8 +1226,8 @@
         
         <!-- User Dropdown Menu -->
         <div class="user-dropdown" id="userDropdown">
-            <a href="#" class="dropdown-item">
-                <i class="fas fa-user"></i> My Profile
+            <a href="#" class="dropdown-item" id="editProfileLink">
+                <i class="fas fa-user-edit"></i> Edit Profile
             </a>
             <a href="#" class="dropdown-item">
                 <i class="fas fa-cog"></i> Settings
@@ -561,6 +1239,139 @@
             <a href="#" class="dropdown-item" id="logoutLink">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
+        </div>
+    </div>
+
+    <!-- Profile Picture Modal -->
+    <div class="profile-modal" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-circle"></i> Update Profile Picture</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-preview" id="profilePreview">
+                    <img id="profilePreviewImg" alt="Profile Preview">
+                    <div class="overlay">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Upload New Photo</label>
+                    <div class="file-upload" id="fileUploadArea">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: var(--muted-green); margin-bottom: 10px;"></i>
+                        <p>Click to upload or drag and drop</p>
+                        <p style="font-size: 0.8rem; color: #777;">JPG, PNG or GIF (Max. 5MB)</p>
+                        <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Profile Information</label>
+                    <input type="text" id="editFullName" placeholder="Full Name">
+                </div>
+                
+                <div class="form-group">
+                    <input type="text" id="editTSC" placeholder="TSC Number">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelProfileUpdate">Cancel</button>
+                <button class="btn btn-primary" id="saveProfileUpdate">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stream Selection and Student Registration Modal -->
+    <div class="stream-modal" id="streamModal">
+        <div class="stream-modal-content">
+            <div class="stream-modal-header">
+                <h3><i class="fas fa-user-plus"></i> Student Registration - Select Stream</h3>
+                <button class="modal-close" id="streamModalClose">&times;</button>
+            </div>
+            <div class="stream-modal-body">
+                <div class="view-toggle" id="viewToggle">
+                    <button class="view-btn active" data-view="streams">Streams</button>
+                    <button class="view-btn" data-view="students">Student List</button>
+                </div>
+                
+                <div id="streamSelectionSection">
+                    <div class="stream-selection">
+                        <h4><i class="fas fa-graduation-cap"></i> All Streams Associated with You</h4>
+                        <p style="color: var(--muted-green); margin-bottom: 15px;">
+                            Select a stream to register students. Streams are loaded from your teacher assignments.
+                        </p>
+                        <div class="stream-buttons" id="streamButtons">
+                            <!-- Stream buttons will be dynamically generated here -->
+                        </div>
+                        <div id="streamInfo" style="margin-top: 20px; padding: 15px; background-color: rgba(7, 88, 36, 0.05); border-radius: 8px; display: none;">
+                            <p style="color: var(--muted-green); margin: 0;">
+                                <strong>Teacher:</strong> <span id="selectedStreamTeacher">Loading...</span> | 
+                                <strong>TSC:</strong> <span id="selectedStreamTSC">Loading...</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="studentRegistrationSection" style="display: none;">
+                    <div class="table-actions">
+                        <div class="table-info">
+                            <strong>Stream:</strong> <span id="currentStreamName">Not Selected</span> | 
+                            <strong>Form:</strong> <span id="currentFormName">Loading...</span> | 
+                            <strong>Teacher:</strong> <span id="currentTeacherName">Loading...</span> | 
+                            <strong>TSC:</strong> <span id="currentTeacherTSC">Loading...</span> |
+                            <strong>Students:</strong> <span id="currentStudentCount">0</span>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="add-row-btn" id="addStudentRow">
+                                <i class="fas fa-plus"></i> Add Student
+                            </button>
+                            <button class="btn btn-secondary" id="updateListBtn">
+                                <i class="fas fa-sync-alt"></i> Update List
+                            </button>
+                            <button class="btn btn-outline" onclick="switchView('streams')">
+                                <i class="fas fa-arrow-left"></i> Back to Streams
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="excel-table-container">
+                        <table class="excel-table" id="studentsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>Admission No.</th>
+                                    <th>Full Name</th>
+                                    <th>Date of Birth</th>
+                                    <th>Gender</th>
+                                    <th>Parent/Guardian</th>
+                                    <th>Phone Number</th>
+                                    <th style="width: 120px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody">
+                                <!-- Student rows will be dynamically generated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" id="saveAllStudents">
+                            <i class="fas fa-save"></i> Save All Students
+                        </button>
+                        <button class="btn btn-secondary" id="exportStudents">
+                            <i class="fas fa-download"></i> Export to Excel
+                        </button>
+                        <button class="btn btn-outline" id="clearForm">
+                            <i class="fas fa-trash"></i> Clear Form
+                        </button>
+                        <button class="btn btn-outline" id="loadExisting">
+                            <i class="fas fa-database"></i> Load Existing
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -584,78 +1395,79 @@
         <ul class="sidebar-nav">
             <li class="nav-section-title">Academic</li>
             <li class="nav-item">
-                <a href="#" class="nav-link active">
+                <a href="#" class="nav-link active" data-section="dashboard">
                     <i class="fas fa-home"></i> Dashboard
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link" data-section="subjects">
                     <i class="fas fa-book"></i> My Subjects
-                    <span class="nav-badge">3</span>
+                    <span class="nav-badge" id="subjectCount">0</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fas fa-calendar-alt"></i> Exam Sessions
-                    <span class="nav-badge">2</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link" id="registerStudentsLink" data-section="forms">
                     <i class="fas fa-user-plus"></i> Register Students
+                    <span class="nav-badge" id="formCount">0</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-section="exam-marks">
+                    <i class="fas fa-calendar-alt"></i> Exam Sessions
+                    <span class="nav-badge" id="examCount">0</span>
                 </a>
             </li>
             
             <li class="nav-section-title">Marks Management</li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link" data-section="enter-marks">
                     <i class="fas fa-edit"></i> Enter Marks
-                    <span class="nav-badge">45</span>
+                    <span class="nav-badge" id="marksCount">0</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link" data-section="upload">
                     <i class="fas fa-upload"></i> Upload to Exam Centre
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link" data-section="reports">
                     <i class="fas fa-chart-bar"></i> Reports & Analytics
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link" data-section="export">
                     <i class="fas fa-file-export"></i> Export Data
                 </a>
             </li>
             
             <li class="nav-section-title">Communication</li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link" data-section="messages">
                     <i class="fas fa-comments"></i> Messages
-                    <span class="nav-badge">5</span>
+                    <span class="nav-badge" id="messageCount">0</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link" data-section="notifications">
                     <i class="fas fa-bell"></i> Notifications
-                    <span class="nav-badge">3</span>
+                    <span class="nav-badge" id="notificationCount">0</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link" data-section="events">
                     <i class="fas fa-calendar-check"></i> Events & Deadlines
                 </a>
             </li>
             
             <li class="nav-section-title">Account</li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link" data-section="settings">
                     <i class="fas fa-cog"></i> Settings
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link" data-section="help">
                     <i class="fas fa-question-circle"></i> Help & Support
                 </a>
             </li>
@@ -668,57 +1480,8 @@
     </div>
 
     <!-- Main Content Area -->
-    <div class="main-content">
-        <div class="placeholder-icon">
-            <i class="fas fa-chalkboard-teacher"></i>
-        </div>
-        <h1>Welcome to Alama Hub, <span id="welcomeName">Teacher</span>!</h1>
-        <p>Select an option from the left navigation pane to begin managing your academic tasks.</p>
-        
-        <div class="dashboard-container">
-            <div class="dashboard-cards">
-                <div class="dashboard-card">
-                    <div class="card-icon" style="color: var(--accent-green);">
-                        <i class="fas fa-edit"></i>
-                    </div>
-                    <h3 class="card-title">Enter Marks</h3>
-                    <p class="card-text">Excel-like interface for entering student examination marks with validation and auto-save features.</p>
-                </div>
-                
-                <div class="dashboard-card">
-                    <div class="card-icon" style="color: var(--accent-blue);">
-                        <i class="fas fa-upload"></i>
-                    </div>
-                    <h3 class="card-title">Upload to Exam Centre</h3>
-                    <p class="card-text">Securely submit marks to central examination office for processing and record keeping.</p>
-                </div>
-                
-                <div class="dashboard-card">
-                    <div class="card-icon" style="color: var(--muted-green);">
-                        <i class="fas fa-chart-bar"></i>
-                    </div>
-                    <h3 class="card-title">Generate Reports</h3>
-                    <p class="card-text">Create comprehensive performance reports and analytics for students and classes.</p>
-                </div>
-                
-                <div class="dashboard-card">
-                    <div class="card-icon" style="color: var(--primary-green);">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <h3 class="card-title">Exam Sessions</h3>
-                    <p class="card-text">Manage upcoming examination sessions, deadlines, and submission timelines.</p>
-                </div>
-            </div>
-            
-            <div class="footer">
-                <p>© 2026 Alliance Girls High School - Alama Hub. All rights reserved.</p>
-                <div class="footer-links">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                    <a href="#">Help Center</a>
-                </div>
-            </div>
-        </div>
+    <div class="main-content" id="mainContent">
+        <!-- Content will be dynamically loaded here -->
     </div>
 
     <script>
@@ -732,6 +1495,10 @@
             
             // Initialize Supabase client
             let supabase;
+            let currentUser = null;
+            let teacherId = null;
+            let currentTeacherTSC = null;
+            
             try {
                 const supabaseUrl = 'https://eloqizcahwxavsbalxii.supabase.co';
                 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsb3FpemNhaHd4YXZzYmFseGlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MTQ4OTUsImV4cCI6MjA4MzI5MDg5NX0.SGogIbdShzCLv2TovpdS1BDf6GJx4mu0iz9s25BGRRQ';
@@ -757,7 +1524,57 @@
             const userAvatarElement = document.getElementById('userAvatar');
             const userRoleElement = document.getElementById('userRole');
             const userTSCElement = document.getElementById('userTSC');
-            const welcomeNameElement = document.getElementById('welcomeName');
+            const pageTitleElement = document.getElementById('pageTitle');
+            const pageSubtitleElement = document.getElementById('pageSubtitle');
+            const profileImageElement = document.getElementById('profileImage');
+            const profileUploadTrigger = document.getElementById('profileUploadTrigger');
+            const editProfileLink = document.getElementById('editProfileLink');
+            const profileModal = document.getElementById('profileModal');
+            const modalClose = document.getElementById('modalClose');
+            const cancelProfileUpdate = document.getElementById('cancelProfileUpdate');
+            const saveProfileUpdate = document.getElementById('saveProfileUpdate');
+            const profilePreviewImg = document.getElementById('profilePreviewImg');
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const profileImageInput = document.getElementById('profileImageInput');
+            const editFullName = document.getElementById('editFullName');
+            const editTSC = document.getElementById('editTSC');
+            const mainContent = document.getElementById('mainContent');
+            
+            // Stream modal elements
+            const streamModal = document.getElementById('streamModal');
+            const streamModalClose = document.getElementById('streamModalClose');
+            const streamButtons = document.getElementById('streamButtons');
+            const streamSelectionSection = document.getElementById('streamSelectionSection');
+            const studentRegistrationSection = document.getElementById('studentRegistrationSection');
+            const currentStreamName = document.getElementById('currentStreamName');
+            const currentFormName = document.getElementById('currentFormName');
+            const currentTeacherName = document.getElementById('currentTeacherName');
+            const currentTeacherTSCElem = document.getElementById('currentTeacherTSC');
+            const currentStudentCount = document.getElementById('currentStudentCount');
+            const selectedStreamTeacher = document.getElementById('selectedStreamTeacher');
+            const selectedStreamTSC = document.getElementById('selectedStreamTSC');
+            const addStudentRow = document.getElementById('addStudentRow');
+            const studentsTableBody = document.getElementById('studentsTableBody');
+            const saveAllStudents = document.getElementById('saveAllStudents');
+            const exportStudents = document.getElementById('exportStudents');
+            const clearForm = document.getElementById('clearForm');
+            const loadExisting = document.getElementById('loadExisting');
+            const updateListBtn = document.getElementById('updateListBtn');
+            const viewToggle = document.getElementById('viewToggle');
+            const registerStudentsLink = document.getElementById('registerStudentsLink');
+
+            // State variables
+            let currentProfileImage = null;
+            let selectedImageFile = null;
+            let teacherAssignments = [];
+            let teacherStreams = []; // Array of objects with stream, form, subjects
+            let teacherForms = []; // Array of unique teaching forms from form_grade
+            let teacherSubjects = []; // Array of unique subjects from subject_code
+            let currentSelectedStream = null;
+            let currentSelectedForm = null;
+            let studentRows = [];
+            let studentCounter = 1;
+            let isUpdateMode = false;
 
             // Function to get user data from Supabase
             async function loadUserData() {
@@ -779,69 +1596,328 @@
                         return;
                     }
                     
+                    currentUser = user;
+                    teacherId = user.id;
+                    
                     console.log('User authenticated:', user.id);
                     console.log('User metadata:', user.user_metadata);
                     
                     // Get user data from teachers table
                     const { data: teacherData, error: teacherError } = await supabase
                         .from('teachers')
-                        .select('full_name, tsc_number')
+                        .select('*')
                         .eq('id', user.id)
                         .single();
                     
                     if (teacherError) {
                         console.error('Error fetching teacher data:', teacherError);
-                        // Use auth user metadata as fallback
-                        const authUserData = user.user_metadata || {};
-                        console.log('Using auth metadata:', authUserData);
-                        updateUserDisplay(
-                            authUserData.full_name || 'Teacher',
-                            authUserData.tsc_number || 'N/A'
-                        );
+                        // Try to get teacher by email
+                        const { data: teacherByEmail, error: emailError } = await supabase
+                            .from('teachers')
+                            .select('*')
+                            .eq('email', user.email)
+                            .single();
+                        
+                        if (emailError) {
+                            console.error('Error fetching teacher by email:', emailError);
+                            // Use auth user metadata as fallback
+                            const authUserData = user.user_metadata || {};
+                            console.log('Using auth metadata:', authUserData);
+                            updateUserDisplay(
+                                authUserData.full_name || 'Teacher',
+                                authUserData.tsc_number || 'N/A',
+                                authUserData.profile_image_url || null
+                            );
+                            currentTeacherTSC = authUserData.tsc_number || 'N/A';
+                        } else {
+                            // Use data from teachers table found by email
+                            console.log('Teacher data found by email:', teacherByEmail);
+                            teacherId = teacherByEmail.id;
+                            updateUserDisplay(
+                                teacherByEmail.full_name || 'Teacher',
+                                teacherByEmail.tsc_number || 'N/A',
+                                teacherByEmail.profile_image_url || null
+                            );
+                            currentTeacherTSC = teacherByEmail.tsc_number || 'N/A';
+                        }
                     } else {
                         // Use data from teachers table
                         console.log('Teacher data from database:', teacherData);
                         updateUserDisplay(
                             teacherData.full_name || 'Teacher',
-                            teacherData.tsc_number || 'N/A'
+                            teacherData.tsc_number || 'N/A',
+                            teacherData.profile_image_url || null
                         );
+                        currentTeacherTSC = teacherData.tsc_number || 'N/A';
                     }
+                    
+                    // Update stream modal teacher info
+                    if (currentTeacherName) currentTeacherName.textContent = userNameElement.textContent;
+                    if (currentTeacherTSCElem) currentTeacherTSCElem.textContent = currentTeacherTSC;
+                    if (selectedStreamTeacher) selectedStreamTeacher.textContent = userNameElement.textContent;
+                    if (selectedStreamTSC) selectedStreamTSC.textContent = currentTeacherTSC;
+                    
+                    // Load teacher assignments, streams, forms, and subjects
+                    await loadTeacherAssignments();
+                    
+                    // Load dashboard content
+                    loadDashboardContent();
                     
                 } catch (error) {
                     console.error('Error loading user data:', error);
                     // Try to get from localStorage as fallback
                     const savedName = localStorage.getItem('teacherName') || 'Teacher';
                     const savedTSC = localStorage.getItem('teacherTSC') || 'N/A';
+                    const savedImage = localStorage.getItem('teacherProfileImage') || null;
                     console.log('Using localStorage as fallback:', savedName, savedTSC);
-                    updateUserDisplay(savedName, savedTSC);
+                    updateUserDisplay(savedName, savedTSC, savedImage);
+                    currentTeacherTSC = savedTSC;
                 }
             }
 
+            // Function to load teacher assignments from database - COMBINE ALL ASSIGNMENTS
+            async function loadTeacherAssignments() {
+                try {
+                    console.log('Loading teacher assignments from database...');
+                    console.log('Current teacher TSC:', currentTeacherTSC);
+                    
+                    if (!currentTeacherTSC || currentTeacherTSC === 'N/A') {
+                        console.error('No TSC number found for teacher');
+                        teacherAssignments = [];
+                        teacherStreams = [];
+                        teacherForms = [];
+                        teacherSubjects = [];
+                        updateBadgeCounts();
+                        return;
+                    }
+                    
+                    // Get all teacher assignments for this teacher
+                    // First try by TSC number - GET ALL ASSIGNMENTS, NOT JUST ONE
+                    let { data: assignments, error } = await supabase
+                        .from('teacher_assignments')
+                        .select('*')
+                        .eq('tsc_number', currentTeacherTSC);
+                    
+                    if (error) {
+                        console.error('Error loading teacher assignments by TSC:', error);
+                        // Try by teacher_id
+                        const { data: assignmentsById, error: idError } = await supabase
+                            .from('teacher_assignments')
+                            .select('*')
+                            .eq('teacher_id', teacherId);
+                        
+                        if (idError) {
+                            console.error('Error loading teacher assignments by ID:', idError);
+                            // Try by teacher name
+                            const teacherName = userNameElement.textContent;
+                            const { data: allAssignments, error: allError } = await supabase
+                                .from('teacher_assignments')
+                                .select('*');
+                            
+                            if (allError) {
+                                console.error('Error loading all assignments:', allError);
+                                teacherAssignments = [];
+                            } else {
+                                // Filter by teacher name - GET ALL MATCHING ASSIGNMENTS
+                                assignments = allAssignments.filter(assignment => 
+                                    assignment.teacher_name && 
+                                    assignment.teacher_name.includes(teacherName.split(' ')[0])
+                                );
+                            }
+                        } else {
+                            assignments = assignmentsById;
+                        }
+                    }
+                    
+                    if (assignments && assignments.length > 0) {
+                        console.log('Teacher assignments loaded (ALL):', assignments.length, 'assignments');
+                        teacherAssignments = assignments;
+                        
+                        // Extract streams, forms, and subjects - THIS WILL NOW COMBINE ALL
+                        extractAssignmentsData(assignments);
+                    } else {
+                        console.log('No assignments found for teacher');
+                        teacherAssignments = [];
+                        teacherStreams = [];
+                        teacherForms = [];
+                        teacherSubjects = [];
+                    }
+                    
+                    // Update badge counts
+                    updateBadgeCounts();
+                    
+                } catch (error) {
+                    console.error('Error in loadTeacherAssignments:', error);
+                    teacherAssignments = [];
+                    teacherStreams = [];
+                    teacherForms = [];
+                    teacherSubjects = [];
+                    updateBadgeCounts();
+                }
+            }
+
+            // Extract streams, forms, and subjects from assignments - COMBINE ALL, NOT JUST LAST
+            function extractAssignmentsData(assignments) {
+                console.log('Extracting data from assignments:', assignments);
+                
+                const streamsMap = new Map(); // stream -> {stream, form, subjects: []}
+                const formsSet = new Set();
+                const subjectsSet = new Set();
+                
+                assignments.forEach(assignment => {
+                    // Extract form from form_grade - FIXED TO EXTRACT ALL FORMS
+                    let form = '';
+                    if (assignment.form_grade) {
+                        // Check for different form patterns: Grade 12, Form 3, Class 5, etc.
+                        const formMatch = assignment.form_grade.match(/(Grade \d+|Form \d+|Class \d+)/i);
+                        if (formMatch) {
+                            form = formMatch[0];
+                            formsSet.add(form);
+                        } else {
+                            // If no pattern found, use the whole form_grade
+                            form = assignment.form_grade;
+                            formsSet.add(form);
+                        }
+                    }
+                    
+                    // Extract subject from subject_code
+                    let subject = '';
+                    if (assignment.subject_code) {
+                        subject = assignment.subject_code;
+                        subjectsSet.add(subject);
+                    }
+                    
+                    // Extract streams - FIXED TO HANDLE ALL STREAM TYPES
+                    let streams = [];
+                    
+                    if (assignment.streams) {
+                        if (Array.isArray(assignment.streams)) {
+                            streams = assignment.streams;
+                        } else if (typeof assignment.streams === 'string') {
+                            // Handle different formats: comma-separated, single stream, or stream in form_grade
+                            if (assignment.streams.includes(',')) {
+                                streams = assignment.streams.split(',').map(s => s.trim());
+                            } else if (assignment.streams.trim() !== '') {
+                                streams = [assignment.streams.trim()];
+                            }
+                        }
+                    }
+                    
+                    // If no streams found in streams field, try to extract from form_grade
+                    if (streams.length === 0 && assignment.form_grade) {
+                        // Try to extract stream name from form_grade (e.g., "Form 3 East" -> "East")
+                        const formGrade = assignment.form_grade;
+                        // Remove the form part to get stream
+                        const withoutForm = formGrade.replace(/(Grade \d+|Form \d+|Class \d+)/i, '').trim();
+                        if (withoutForm && withoutForm.length > 0) {
+                            streams = [withoutForm];
+                        }
+                    }
+                    
+                    // Process each stream found
+                    streams.forEach(stream => {
+                        if (stream && stream.length > 0 && stream !== 'N/A') {
+                            const streamKey = `${form} - ${stream}`;
+                            
+                            if (!streamsMap.has(streamKey)) {
+                                streamsMap.set(streamKey, {
+                                    stream: stream,
+                                    form: form,
+                                    subjects: new Set()
+                                });
+                            }
+                            
+                            // Add subject to this stream - COMBINE with existing subjects
+                            if (subject) {
+                                streamsMap.get(streamKey).subjects.add(subject);
+                            }
+                        }
+                    });
+                });
+                
+                // Convert Map to Array
+                teacherStreams = Array.from(streamsMap.values()).map(streamData => ({
+                    ...streamData,
+                    subjects: Array.from(streamData.subjects)
+                }));
+                
+                teacherForms = Array.from(formsSet).filter(form => form && form.length > 0);
+                teacherSubjects = Array.from(subjectsSet).filter(subject => subject && subject.length > 0);
+                
+                console.log('Extracted data (COMBINED ALL STREAMS):', {
+                    streams: teacherStreams,
+                    forms: teacherForms,
+                    subjects: teacherSubjects
+                });
+            }
+
+            // Update badge counts
+            function updateBadgeCounts() {
+                // Update subject count badge
+                const subjectCountElement = document.getElementById('subjectCount');
+                if (subjectCountElement) {
+                    subjectCountElement.textContent = teacherSubjects.length;
+                }
+                
+                // Update form count badge (teaching forms count)
+                const formCountElement = document.getElementById('formCount');
+                if (formCountElement) {
+                    formCountElement.textContent = teacherForms.length;
+                }
+                
+                // Update marks count badge (estimated students)
+                const marksCountElement = document.getElementById('marksCount');
+                if (marksCountElement) {
+                    const estimatedStudents = teacherStreams.length * 40;
+                    marksCountElement.textContent = estimatedStudents;
+                }
+                
+                console.log('Badge counts updated:', {
+                    subjects: teacherSubjects.length,
+                    forms: teacherForms.length,
+                    streams: teacherStreams.length,
+                    assignments: teacherAssignments.length
+                });
+            }
+
             // Function to update user display
-            function updateUserDisplay(fullName, tscNumber) {
-                console.log('Updating UI with:', {fullName, tscNumber});
+            function updateUserDisplay(fullName, tscNumber, profileImageUrl) {
+                console.log('Updating UI with:', {fullName, tscNumber, profileImageUrl});
                 
                 // Get initials for avatar
                 const initials = getInitials(fullName);
                 
-                // Get first name for welcome message
-                const firstName = fullName.split(' ')[0] || fullName;
-                
                 // Update all display elements
                 if (userNameElement) userNameElement.textContent = fullName;
-                if (userAvatarElement) userAvatarElement.textContent = initials;
-                if (userTSCElement) userTSCElement.textContent = `TSC: ${tscNumber}`;
-                if (welcomeNameElement) welcomeNameElement.textContent = firstName;
-                
-                // Update page title
-                const pageTitle = document.querySelector('.page-title h1');
-                if (pageTitle) {
-                    pageTitle.textContent = `Welcome to Alama Hub`;
+                if (userAvatarElement && !profileImageUrl) {
+                    userAvatarElement.textContent = initials;
+                    userAvatarElement.style.background = 'linear-gradient(135deg, var(--primary-green), var(--accent-green))';
                 }
+                if (userTSCElement) userTSCElement.textContent = `TSC: ${tscNumber}`;
+                
+                // Update profile image if available
+                if (profileImageUrl) {
+                    currentProfileImage = profileImageUrl;
+                    if (profileImageElement) {
+                        profileImageElement.src = profileImageUrl;
+                        profileImageElement.style.display = 'block';
+                        userAvatarElement.textContent = '';
+                    }
+                    if (profilePreviewImg) {
+                        profilePreviewImg.src = profileImageUrl;
+                    }
+                }
+                
+                // Update edit form
+                if (editFullName) editFullName.value = fullName;
+                if (editTSC) editTSC.value = tscNumber;
                 
                 // Save to localStorage for persistence
                 localStorage.setItem('teacherName', fullName);
                 localStorage.setItem('teacherTSC', tscNumber);
+                if (profileImageUrl) {
+                    localStorage.setItem('teacherProfileImage', profileImageUrl);
+                }
                 
                 console.log('User display updated successfully');
             }
@@ -858,128 +1934,1523 @@
                     .substring(0, 2);
             }
 
-            // Redirect to login page
-            function redirectToLogin() {
-                console.log('Redirecting to login page...');
-                window.location.href = 'index.html';
-            }
-
-            // Toggle sidebar on mobile
-            if (hamburger) {
-                hamburger.addEventListener('click', () => {
-                    sidebar.classList.toggle('open');
-                });
-            }
-
-            // Toggle user dropdown
-            if (userProfileTop) {
-                userProfileTop.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    userDropdown.classList.toggle('show');
-                    dropdownArrow.classList.toggle('fa-chevron-down');
-                    dropdownArrow.classList.toggle('fa-chevron-up');
-                });
-            }
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (userProfileTop && userDropdown && 
-                    !userProfileTop.contains(e.target) && !userDropdown.contains(e.target)) {
-                    userDropdown.classList.remove('show');
-                    dropdownArrow.classList.remove('fa-chevron-up');
-                    dropdownArrow.classList.add('fa-chevron-down');
+            // Function to load dashboard content
+            function loadDashboardContent(section = 'dashboard') {
+                console.log('Loading section:', section);
+                
+                let content = '';
+                let pageTitle = '';
+                let pageSubtitle = '';
+                
+                switch(section) {
+                    case 'dashboard':
+                        pageTitle = 'Teacher Dashboard';
+                        pageSubtitle = 'Welcome to Alama Hub - Alliance Girls High School';
+                        content = generateDashboardContent();
+                        break;
+                    case 'subjects':
+                        pageTitle = 'My Subjects';
+                        pageSubtitle = 'Subjects assigned to you for teaching';
+                        content = generateSubjectsContent();
+                        break;
+                    case 'forms':
+                        pageTitle = 'Register Students';
+                        pageSubtitle = 'Teaching Forms and Streams assigned to you';
+                        content = generateFormsContent();
+                        break;
+                    case 'enter-marks':
+                        pageTitle = 'Enter Marks';
+                        pageSubtitle = 'Enter examination marks for your classes';
+                        content = generateEnterMarksContent();
+                        break;
+                    case 'exam-marks':
+                        pageTitle = 'Exam Sessions';
+                        pageSubtitle = 'Upcoming and past examination sessions';
+                        content = generateExamSessionsContent();
+                        break;
+                    default:
+                        pageTitle = section.charAt(0).toUpperCase() + section.slice(1);
+                        pageSubtitle = `${pageTitle} Management`;
+                        content = generateDefaultContent(section);
                 }
                 
-                // Close sidebar when clicking outside on mobile
-                if (window.innerWidth <= 1024 && 
-                    sidebar && sidebar.classList.contains('open') && 
-                    !sidebar.contains(e.target) && 
-                    e.target !== hamburger) {
-                    sidebar.classList.remove('open');
+                // Update page title
+                if (pageTitleElement) pageTitleElement.textContent = pageTitle;
+                if (pageSubtitleElement) pageSubtitleElement.textContent = pageSubtitle;
+                
+                // Update main content
+                if (mainContent) {
+                    mainContent.innerHTML = content;
+                }
+                
+                // Update active nav link
+                navLinks.forEach(link => {
+                    if (link.getAttribute('data-section') === section) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            // Content generation functions
+            function generateDashboardContent() {
+                const firstName = userNameElement.textContent.split(' ')[0] || 'Teacher';
+                
+                return `
+                    <div class="placeholder-icon" style="margin-bottom: 30px;">
+                        <i class="fas fa-chalkboard-teacher" style="font-size: 5rem; color: var(--muted-green); opacity: 0.3;"></i>
+                    </div>
+                    <h1>Welcome to Alama Hub, ${firstName}!</h1>
+                    <p>Select an option from the left navigation pane to begin managing your academic tasks.</p>
+                    
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-tachometer-alt"></i> Quick Overview</h2>
+                            <div class="section-info">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                        </div>
+                        
+                        <div class="data-cards">
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-book"></i>
+                                    <h3>My Subjects</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="subject-info">
+                                        <div class="info-row">
+                                            <span class="info-label">Total Subjects:</span>
+                                            <span class="info-value">${teacherSubjects.length}</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">Teaching Forms:</span>
+                                            <span class="info-value">${teacherForms.length}</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">Teacher:</span>
+                                            <span class="info-value">${userNameElement.textContent}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <span>View All Subjects</span>
+                                    <button class="btn btn-outline" onclick="loadDashboardContent('subjects')">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-users"></i>
+                                    <h3>My Streams</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-info">
+                                        <div class="info-row">
+                                            <span class="info-label">Total Streams:</span>
+                                            <span class="info-value">${teacherStreams.length}</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">Teaching Forms:</span>
+                                            <span class="info-value">${teacherForms.length}</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">Estimated Students:</span>
+                                            <span class="info-value">${teacherStreams.length * 40}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <span>Register Students</span>
+                                    <button class="btn btn-outline" onclick="openStreamModal()">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h3>Performance</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div style="text-align: center; padding: 20px 0;">
+                                        <div style="font-size: 3rem; color: var(--accent-green); font-weight: bold;">86%</div>
+                                        <p style="color: var(--muted-green); margin-top: 10px;">Average Student Performance</p>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <span>View Reports</span>
+                                    <button class="btn btn-outline" onclick="loadDashboardContent('reports')">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="footer">
+                        <p>© 2026 Alliance Girls High School - Alama Hub. All rights reserved.</p>
+                        <div class="footer-links">
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
+                            <a href="#">Help Center</a>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function generateSubjectsContent() {
+                if (teacherSubjects.length === 0) {
+                    return `
+                        <div class="data-section">
+                            <div class="section-title">
+                                <h2><i class="fas fa-book"></i> My Subjects</h2>
+                                <div class="section-info">No subjects assigned yet</div>
+                            </div>
+                            
+                            <div class="empty-state">
+                                <i class="fas fa-book"></i>
+                                <h3>No Subjects Assigned</h3>
+                                <p>You haven't been assigned to teach any subjects yet. Please contact the administration office.</p>
+                                <p style="margin-top: 15px; color: var(--muted-green);">
+                                    <strong>Teacher:</strong> ${userNameElement.textContent}<br>
+                                    <strong>TSC Number:</strong> ${currentTeacherTSC}
+                                </p>
+                                <button class="btn btn-primary" style="margin-top: 20px;" onclick="loadDashboardContent('dashboard')">
+                                    <i class="fas fa-home"></i> Return to Dashboard
+                                </button>
+                            </div>
+                            
+                            <div class="footer">
+                                <p>© 2026 Alliance Girls High School - Alama Hub. All rights reserved.</p>
+                                <div class="footer-links">
+                                    <a href="#">Privacy Policy</a>
+                                    <a href="#">Terms of Service</a>
+                                    <a href="#">Help Center</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                let subjectsHTML = '';
+                
+                teacherSubjects.forEach((subject, index) => {
+                    // Find assignments for this subject
+                    const subjectAssignments = teacherAssignments.filter(assignment => 
+                        assignment.subject_code === subject
+                    );
+                    
+                    // Get unique forms and streams for this subject
+                    const forms = [...new Set(subjectAssignments.map(a => {
+                        if (a.form_grade) {
+                            const formMatch = a.form_grade.match(/(Grade \d+|Form \d+|Class \d+)/i);
+                            return formMatch ? formMatch[0] : a.form_grade;
+                        }
+                        return '';
+                    }).filter(f => f))].join(', ');
+                    
+                    const streams = [...new Set(subjectAssignments.flatMap(a => {
+                        if (a.streams) {
+                            if (Array.isArray(a.streams)) return a.streams;
+                            if (typeof a.streams === 'string') return a.streams.split(',').map(s => s.trim());
+                        }
+                        return [];
+                    }))].join(', ');
+                    
+                    subjectsHTML += `
+                        <div class="data-card">
+                            <div class="card-header">
+                                <i class="fas fa-book-open"></i>
+                                <h3>${subject}</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="subject-info">
+                                    <div class="info-row">
+                                        <span class="info-label">Subject Code:</span>
+                                        <span class="info-value">${subject}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Teacher:</span>
+                                        <span class="info-value">${userNameElement.textContent}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Teaching Forms:</span>
+                                        <span class="info-value">${forms || 'Not specified'}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Streams:</span>
+                                        <span class="info-value">${streams || 'Not specified'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <span>${subject}</span>
+                                <button class="btn btn-outline" onclick="alert('Subject Details:\\n\\nCode: ${subject}\\nTeacher: ${userNameElement.textContent}\\nForms: ${forms || 'None'}\\nStreams: ${streams || 'None'}')">
+                                    <i class="fas fa-info-circle"></i> Details
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-book"></i> My Subjects</h2>
+                            <div class="section-info">${teacherSubjects.length} subject codes assigned to ${userNameElement.textContent}</div>
+                        </div>
+                        
+                        <div class="data-cards">
+                            ${subjectsHTML}
+                        </div>
+                        
+                        <div style="margin-top: 40px; background: white; padding: 25px; border-radius: 12px; box-shadow: var(--card-shadow);">
+                            <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-info-circle"></i> Subject Information
+                            </h3>
+                            <p style="line-height: 1.6; color: #666; margin-bottom: 15px;">
+                                These are the subject codes you're assigned to teach based on your teacher assignments in the database.
+                            </p>
+                            <div class="info-row" style="margin-top: 15px;">
+                                <span class="info-label">Total Assignments:</span>
+                                <span class="info-value">${teacherAssignments.length}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Teaching Forms:</span>
+                                <span class="info-value">${teacherForms.length}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Total Streams:</span>
+                                <span class="info-value">${teacherStreams.length}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Alama Hub. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function generateFormsContent() {
+                if (teacherForms.length === 0) {
+                    return `
+                        <div class="data-section">
+                            <div class="section-title">
+                                <h2><i class="fas fa-users"></i> My Teaching Forms & Streams</h2>
+                                <div class="section-info">No teaching forms assigned yet</div>
+                            </div>
+                            
+                            <div class="empty-state">
+                                <i class="fas fa-users"></i>
+                                <h3>No Teaching Forms Assigned</h3>
+                                <p>You haven't been assigned to any teaching forms yet. Please contact the administration office.</p>
+                                <p style="margin-top: 15px; color: var(--muted-green);">
+                                    <strong>Teacher:</strong> ${userNameElement.textContent}<br>
+                                    <strong>TSC Number:</strong> ${currentTeacherTSC}
+                                </p>
+                                <button class="btn btn-primary" style="margin-top: 20px;" onclick="loadDashboardContent('dashboard')">
+                                    <i class="fas fa-home"></i> Return to Dashboard
+                                </button>
+                            </div>
+                            
+                            <div class="footer">
+                                <p>© 2026 Alliance Girls High School - Alama Hub. All rights reserved.</p>
+                                <div class="footer-links">
+                                    <a href="#">Privacy Policy</a>
+                                    <a href="#">Terms of Service</a>
+                                    <a href="#">Help Center</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                let formsHTML = '';
+                
+                teacherForms.forEach((form, index) => {
+                    // Get streams for this form
+                    const formStreams = teacherStreams.filter(stream => stream.form === form);
+                    
+                    formsHTML += `
+                        <div class="data-card">
+                            <div class="card-header">
+                                <i class="fas fa-users-class"></i>
+                                <h3>${form}</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-info">
+                                    <div class="info-row">
+                                        <span class="info-label">Teaching Form:</span>
+                                        <span class="info-value">${form}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Streams:</span>
+                                        <span class="info-value">${formStreams.length}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Teacher:</span>
+                                        <span class="info-value">${userNameElement.textContent}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">TSC Number:</span>
+                                        <span class="info-value">${currentTeacherTSC}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <span>${form}</span>
+                                <button class="btn btn-primary" onclick="openStreamModalForForm('${form}')">
+                                    <i class="fas fa-user-plus"></i> Register Students
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-users"></i> My Teaching Forms & Streams</h2>
+                            <div class="section-info">${teacherForms.length} teaching forms assigned to ${userNameElement.textContent}</div>
+                        </div>
+                        
+                        <div class="data-cards">
+                            ${formsHTML}
+                        </div>
+                        
+                        <div style="margin-top: 40px; background: white; padding: 25px; border-radius: 12px; box-shadow: var(--card-shadow);">
+                            <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-info-circle"></i> Student Registration Instructions
+                            </h3>
+                            <p style="line-height: 1.6; color: #666; margin-bottom: 15px;">
+                                Click "Register Students" on any teaching form card above to open the stream selection interface. 
+                                You'll be able to:
+                            </p>
+                            <ul style="color: #666; line-height: 1.6; padding-left: 20px; margin-bottom: 20px;">
+                                <li>Select a specific stream within the teaching form</li>
+                                <li>Add new students in an Excel-like interface</li>
+                                <li>Update existing student records</li>
+                                <li>Save student data to the database</li>
+                                <li>Export student lists for administrative purposes</li>
+                            </ul>
+                            <p style="color: var(--muted-green); font-style: italic;">
+                                Note: Only registered students will appear in the marks entry system.
+                            </p>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Alama Hub. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Open stream modal for specific form
+            function openStreamModalForForm(form) {
+                console.log('Opening stream modal for form:', form);
+                
+                // Reset state
+                currentSelectedForm = form;
+                currentSelectedStream = null;
+                studentRows = [];
+                studentCounter = 1;
+                isUpdateMode = false;
+                
+                // Populate stream buttons
+                streamButtons.innerHTML = '';
+                
+                // Get streams for this form
+                const formStreams = teacherStreams.filter(stream => stream.form === form);
+                
+                if (formStreams.length === 0) {
+                    streamButtons.innerHTML = `
+                        <div style="text-align: center; padding: 30px; color: var(--muted-green);">
+                            <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                            <h4>No Streams Available</h4>
+                            <p>No streams found for ${form}. Please contact administration.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                formStreams.forEach(streamData => {
+                    const streamBtn = document.createElement('button');
+                    streamBtn.className = 'stream-btn';
+                    
+                    const subjectCount = streamData.subjects.length;
+                    const subjectsList = streamData.subjects.join(', ');
+                    
+                    streamBtn.innerHTML = `
+                        <span class="stream-name">${streamData.stream}</span>
+                        <span class="stream-info">${form} | ${subjectCount} subject(s)</span>
+                    `;
+                    streamBtn.title = `Subjects: ${subjectsList || 'None'}`;
+                    
+                    streamBtn.addEventListener('click', () => {
+                        // Remove active class from all buttons
+                        document.querySelectorAll('.stream-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+                        
+                        // Add active class to clicked button
+                        streamBtn.classList.add('active');
+                        
+                        // Set current stream and form
+                        currentSelectedStream = streamData.stream;
+                        currentSelectedForm = form;
+                        currentStreamName.textContent = streamData.stream;
+                        currentFormName.textContent = form;
+                        
+                        // Switch to student registration view
+                        switchView('students');
+                        
+                        // Load existing students for this stream
+                        loadExistingStudents(streamData.stream);
+                    });
+                    
+                    streamButtons.appendChild(streamBtn);
+                });
+                
+                // Show stream info
+                const streamInfo = document.getElementById('streamInfo');
+                if (streamInfo) {
+                    streamInfo.style.display = 'block';
+                }
+                
+                // Show modal
+                streamModal.classList.add('show');
+                
+                // Reset view to streams
+                switchView('streams');
+            }
+
+            // Open stream modal function (general) - LOADS ALL STREAMS
+            function openStreamModal(preSelectedForm = null) {
+                console.log('Opening stream modal...');
+                
+                // Reset state
+                currentSelectedForm = preSelectedForm || null;
+                currentSelectedStream = null;
+                studentRows = [];
+                studentCounter = 1;
+                isUpdateMode = false;
+                
+                // Populate stream buttons
+                streamButtons.innerHTML = '';
+                
+                // Show all streams from all forms
+                let streamsToShow = teacherStreams;
+                
+                if (streamsToShow.length === 0) {
+                    streamButtons.innerHTML = `
+                        <div style="text-align: center; padding: 30px; color: var(--muted-green);">
+                            <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                            <h4>No Streams Available</h4>
+                            <p>No streams found in your teacher assignments. Please contact administration.</p>
+                            <p style="margin-top: 10px; font-size: 0.9rem;">
+                                Current assignments: ${teacherAssignments.length}<br>
+                                Forms: ${teacherForms.join(', ')}
+                            </p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Group streams by form for better organization
+                const streamsByForm = {};
+                streamsToShow.forEach(streamData => {
+                    if (!streamsByForm[streamData.form]) {
+                        streamsByForm[streamData.form] = [];
+                    }
+                    streamsByForm[streamData.form].push(streamData);
+                });
+                
+                // Create buttons for all streams
+                Object.keys(streamsByForm).sort().forEach(form => {
+                    // Add form heading
+                    const formHeading = document.createElement('div');
+                    formHeading.style.gridColumn = '1 / -1';
+                    formHeading.style.marginTop = '20px';
+                    formHeading.style.marginBottom = '10px';
+                    formHeading.style.color = 'var(--primary-green)';
+                    formHeading.style.fontWeight = 'bold';
+                    formHeading.style.fontSize = '1.1rem';
+                    formHeading.style.borderBottom = '2px solid rgba(7, 88, 36, 0.1)';
+                    formHeading.style.paddingBottom = '5px';
+                    formHeading.textContent = `${form} Streams`;
+                    
+                    // Only add heading if not the first one
+                    if (Object.keys(streamsByForm)[0] !== form) {
+                        streamButtons.appendChild(formHeading);
+                    }
+                    
+                    streamsByForm[form].forEach(streamData => {
+                        const streamBtn = document.createElement('button');
+                        streamBtn.className = 'stream-btn';
+                        
+                        const subjectCount = streamData.subjects.length;
+                        const subjectsList = streamData.subjects.join(', ');
+                        
+                        streamBtn.innerHTML = `
+                            <span class="stream-name">${streamData.stream}</span>
+                            <span class="stream-info">${streamData.form} | ${subjectCount} subject(s)</span>
+                        `;
+                        streamBtn.title = `Form: ${streamData.form}\\nSubjects: ${subjectsList || 'None'}`;
+                        
+                        streamBtn.addEventListener('click', () => {
+                            // Remove active class from all buttons
+                            document.querySelectorAll('.stream-btn').forEach(btn => {
+                                btn.classList.remove('active');
+                            });
+                            
+                            // Add active class to clicked button
+                            streamBtn.classList.add('active');
+                            
+                            // Set current stream and form
+                            currentSelectedStream = streamData.stream;
+                            currentSelectedForm = streamData.form;
+                            currentStreamName.textContent = streamData.stream;
+                            currentFormName.textContent = streamData.form;
+                            
+                            // Switch to student registration view
+                            switchView('students');
+                            
+                            // Load existing students for this stream
+                            loadExistingStudents(streamData.stream);
+                        });
+                        
+                        streamButtons.appendChild(streamBtn);
+                    });
+                });
+                
+                // Show stream info
+                const streamInfo = document.getElementById('streamInfo');
+                if (streamInfo) {
+                    streamInfo.style.display = 'block';
+                }
+                
+                // Show modal
+                streamModal.classList.add('show');
+                
+                // Reset view to streams
+                switchView('streams');
+            }
+
+            // Switch between streams view and students view
+            function switchView(view) {
+                const streamBtns = document.querySelectorAll('.view-btn');
+                streamBtns.forEach(btn => {
+                    if (btn.dataset.view === view) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+                
+                if (view === 'streams') {
+                    streamSelectionSection.style.display = 'block';
+                    studentRegistrationSection.style.display = 'none';
+                } else if (view === 'students') {
+                    streamSelectionSection.style.display = 'none';
+                    studentRegistrationSection.style.display = 'block';
+                }
+            }
+
+            // Load existing students from database
+            async function loadExistingStudents(streamName) {
+                try {
+                    console.log(`Loading existing students for stream: ${streamName}`);
+                    
+                    // Clear existing rows
+                    studentsTableBody.innerHTML = '';
+                    studentRows = [];
+                    studentCounter = 1;
+                    
+                    // Show loading state
+                    studentsTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px;">
+                                <div class="loading-spinner">
+                                    <div class="spinner"></div>
+                                </div>
+                                <p>Loading students for ${streamName}...</p>
+                            </td>
+                        </tr>
+                    `;
+                    
+                    // Try to load students from database
+                    const { data: existingStudents, error, count } = await supabase
+                        .from('students')
+                        .select('*', { count: 'exact' })
+                        .eq('stream', streamName)
+                        .eq('teacher_tsc', currentTeacherTSC)
+                        .order('admission_no', { ascending: true });
+                    
+                    if (error) {
+                        console.error('Error loading existing students:', error);
+                        // Check if table exists
+                        if (error.message.includes('does not exist')) {
+                            alert('Students table not found. Please create it using the SQL provided in the requirements.');
+                            // Start with empty table
+                            studentsTableBody.innerHTML = '';
+                            addNewStudentRow();
+                            updateStudentCount();
+                            return;
+                        }
+                        // Show error
+                        studentsTableBody.innerHTML = `
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 40px; color: #e74c3c;">
+                                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 15px;"></i>
+                                    <p>Error loading students: ${error.message}</p>
+                                    <button class="btn btn-outline" onclick="loadExistingStudents('${streamName}')" style="margin-top: 15px;">
+                                        <i class="fas fa-redo"></i> Try Again
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+                    
+                    // Clear loading/error message
+                    studentsTableBody.innerHTML = '';
+                    
+                    if (existingStudents && existingStudents.length > 0) {
+                        console.log(`Found ${existingStudents.length} existing students`);
+                        isUpdateMode = true;
+                        
+                        existingStudents.forEach((student, index) => {
+                            addStudentRowFromData(student, index + 1);
+                        });
+                    } else {
+                        console.log('No existing students found, starting with empty row');
+                        isUpdateMode = false;
+                        // Add one empty row to start with
+                        addNewStudentRow();
+                    }
+                    
+                    // Update student count
+                    updateStudentCount(existingStudents?.length || 0);
+                    
+                } catch (error) {
+                    console.error('Error in loadExistingStudents:', error);
+                    // Show error
+                    studentsTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px; color: #e74c3c;">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 15px;"></i>
+                                <p>Error: ${error.message}</p>
+                                <button class="btn btn-outline" onclick="addNewStudentRow()" style="margin-top: 15px;">
+                                    <i class="fas fa-plus"></i> Add New Student Manually
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    updateStudentCount(0);
+                }
+            }
+
+            // Update student count display
+            function updateStudentCount(count) {
+                if (currentStudentCount) {
+                    currentStudentCount.textContent = count || studentRows.filter(row => row.admissionNo && row.fullName).length;
+                }
+            }
+
+            // Add new student row from data
+            function addStudentRowFromData(studentData, rowNumber) {
+                const rowId = `student-row-${studentCounter++}`;
+                
+                // Format date for input field
+                let dob = '';
+                if (studentData.date_of_birth) {
+                    const date = new Date(studentData.date_of_birth);
+                    dob = date.toISOString().split('T')[0];
+                }
+                
+                const row = {
+                    id: rowId,
+                    number: rowNumber,
+                    admissionNo: studentData.admission_no || '',
+                    fullName: studentData.full_name || '',
+                    dateOfBirth: dob,
+                    gender: studentData.gender || 'Female',
+                    parentGuardian: studentData.parent_guardian || '',
+                    phoneNumber: studentData.phone_number || '',
+                    isNew: false,
+                    dbId: studentData.id
+                };
+                
+                studentRows.push(row);
+                
+                const rowHTML = `
+                    <tr id="${rowId}">
+                        <td>${rowNumber}</td>
+                        <td>
+                            <input type="text" class="editable-cell" value="${row.admissionNo}" 
+                                   placeholder="e.g., AGHS-2026-001" 
+                                   oninput="updateStudentData('${rowId}', 'admissionNo', this.value)"
+                                   onkeydown="handleCellNavigation(event, '${rowId}', 'admissionNo')">
+                        </td>
+                        <td>
+                            <input type="text" class="editable-cell" value="${row.fullName}" 
+                                   placeholder="Enter full name" 
+                                   oninput="updateStudentData('${rowId}', 'fullName', this.value)"
+                                   onkeydown="handleCellNavigation(event, '${rowId}', 'fullName')">
+                        </td>
+                        <td>
+                            <input type="date" class="editable-cell" value="${row.dateOfBirth}" 
+                                   onchange="updateStudentData('${rowId}', 'dateOfBirth', this.value)"
+                                   onkeydown="handleCellNavigation(event, '${rowId}', 'dateOfBirth')">
+                        </td>
+                        <td>
+                            <select class="editable-cell" onchange="updateStudentData('${rowId}', 'gender', this.value)"
+                                    onkeydown="handleCellNavigation(event, '${rowId}', 'gender')">
+                                <option value="Female" ${row.gender === 'Female' ? 'selected' : ''}>Female</option>
+                                <option value="Male" ${row.gender === 'Male' ? 'selected' : ''}>Male</option>
+                                <option value="Other" ${row.gender === 'Other' ? 'selected' : ''}>Other</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" class="editable-cell" value="${row.parentGuardian}" 
+                                   placeholder="Parent/Guardian name" 
+                                   oninput="updateStudentData('${rowId}', 'parentGuardian', this.value)"
+                                   onkeydown="handleCellNavigation(event, '${rowId}', 'parentGuardian')">
+                        </td>
+                        <td>
+                            <input type="text" class="editable-cell" value="${row.phoneNumber}" 
+                                   placeholder="Phone number" 
+                                   oninput="updateStudentData('${rowId}', 'phoneNumber', this.value)"
+                                   onkeydown="handleCellNavigation(event, '${rowId}', 'phoneNumber')">
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="action-btn save" title="Save" onclick="saveStudentRow('${rowId}')">
+                                    <i class="fas fa-save"></i>
+                                </button>
+                                <button class="action-btn update" title="Update" onclick="updateStudentRow('${rowId}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete" title="Delete" onclick="deleteStudentRow('${rowId}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                
+                studentsTableBody.insertAdjacentHTML('beforeend', rowHTML);
+            }
+
+            // Add new empty student row
+            function addNewStudentRow() {
+                const rowId = `student-row-${studentCounter}`;
+                const rowNumber = studentRows.length + 1;
+                
+                const row = {
+                    id: rowId,
+                    number: rowNumber,
+                    admissionNo: '',
+                    fullName: '',
+                    dateOfBirth: '',
+                    gender: 'Female',
+                    parentGuardian: '',
+                    phoneNumber: '',
+                    isNew: true
+                };
+                
+                studentRows.push(row);
+                
+                const rowHTML = `
+                    <tr id="${rowId}">
+                        <td>${rowNumber}</td>
+                        <td>
+                            <input type="text" class="editable-cell" 
+                                   placeholder="e.g., AGHS-2026-001" 
+                                   oninput="updateStudentData('${rowId}', 'admissionNo', this.value)"
+                                   onkeydown="handleCellNavigation(event, '${rowId}', 'admissionNo')">
+                        </td>
+                        <td>
+                            <input type="text" class="editable-cell" 
+                                   placeholder="Enter full name" 
+                                   oninput="updateStudentData('${rowId}', 'fullName', this.value)"
+                                   onkeydown="handleCellNavigation(event, '${rowId}', 'fullName')">
+                        </td>
+                        <td>
+                            <input type="date" class="editable-cell" 
+                                   onchange="updateStudentData('${rowId}', 'dateOfBirth', this.value)"
+                                   onkeydown="handleCellNavigation(event, '${rowId}', 'dateOfBirth')">
+                        </td>
+                        <td>
+                            <select class="editable-cell" onchange="updateStudentData('${rowId}', 'gender', this.value)"
+                                    onkeydown="handleCellNavigation(event, '${rowId}', 'gender')">
+                                <option value="Female" selected>Female</option>
+                                <option value="Male">Male</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" class="editable-cell" 
+                                   placeholder="Parent/Guardian name" 
+                                   oninput="updateStudentData('${rowId}', 'parentGuardian', this.value)"
+                                   onkeydown="handleCellNavigation(event, '${rowId}', 'parentGuardian')">
+                        </td>
+                        <td>
+                            <input type="text" class="editable-cell" 
+                                   placeholder="Phone number" 
+                                   oninput="updateStudentData('${rowId}', 'phoneNumber', this.value)"
+                                   onkeydown="handleCellNavigation(event, '${rowId}', 'phoneNumber')">
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="action-btn save" title="Save" onclick="saveStudentRow('${rowId}')">
+                                    <i class="fas fa-save"></i>
+                                </button>
+                                <button class="action-btn update" title="Update" onclick="updateStudentRow('${rowId}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete" title="Delete" onclick="deleteStudentRow('${rowId}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                
+                studentsTableBody.insertAdjacentHTML('beforeend', rowHTML);
+                studentCounter++;
+                
+                // Update student count
+                updateStudentCount();
+                
+                // Auto-focus the first input field in the new row
+                setTimeout(() => {
+                    const firstInput = document.querySelector(`#${rowId} td:nth-child(2) .editable-cell`);
+                    if (firstInput) firstInput.focus();
+                }, 100);
+            }
+
+            // Handle Excel-like cell navigation
+            function handleCellNavigation(event, rowId, fieldName) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    
+                    // Find the current row
+                    const rowIndex = studentRows.findIndex(row => row.id === rowId);
+                    if (rowIndex === -1) return;
+                    
+                    // Get all cells in the current row
+                    const cells = event.target.closest('tr').querySelectorAll('.editable-cell');
+                    const currentCell = event.target;
+                    let nextCell = null;
+                    
+                    // Find the next cell
+                    for (let i = 0; i < cells.length; i++) {
+                        if (cells[i] === currentCell) {
+                            if (i < cells.length - 1) {
+                                nextCell = cells[i + 1];
+                            } else {
+                                // If last cell in row, move to first cell of next row
+                                const nextRow = currentCell.closest('tr').nextElementSibling;
+                                if (nextRow) {
+                                    nextCell = nextRow.querySelector('.editable-cell');
+                                } else {
+                                    // If last row, add new row and focus on its first cell
+                                    addNewStudentRow();
+                                    const newRowId = studentRows[studentRows.length - 1].id;
+                                    setTimeout(() => {
+                                        const firstInput = document.querySelector(`#${newRowId} td:nth-child(2) .editable-cell`);
+                                        if (firstInput) firstInput.focus();
+                                    }, 50);
+                                    return;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    
+                    if (nextCell) {
+                        nextCell.focus();
+                        if (nextCell.tagName === 'INPUT' || nextCell.tagName === 'SELECT') {
+                            nextCell.focus();
+                            if (nextCell.tagName === 'INPUT') {
+                                nextCell.select();
+                            }
+                        }
+                    }
+                } else if (event.key === 'Tab') {
+                    // Allow default tab behavior for accessibility
+                    return;
+                }
+            }
+
+            // Validate admission number format
+            function validateAdmissionNumber(admissionNo) {
+                // Format: AGHS-2026-001 (uppercase letters, year, 3-4 digit number)
+                const regex = /^[A-Z]+-\d{4}-\d{3,4}$/;
+                return regex.test(admissionNo);
+            }
+
+            // Update student data in memory
+            function updateStudentData(rowId, field, value) {
+                const rowIndex = studentRows.findIndex(row => row.id === rowId);
+                if (rowIndex !== -1) {
+                    studentRows[rowIndex][field] = value;
+                    
+                    // Validate admission number format
+                    if (field === 'admissionNo' && value) {
+                        const rowElement = document.getElementById(rowId);
+                        if (rowElement) {
+                            const input = rowElement.querySelector('td:nth-child(2) .editable-cell');
+                            if (input) {
+                                if (!validateAdmissionNumber(value)) {
+                                    input.style.borderColor = '#e74c3c';
+                                    input.style.boxShadow = '0 0 0 2px rgba(231, 76, 60, 0.2)';
+                                } else {
+                                    input.style.borderColor = '';
+                                    input.style.boxShadow = '';
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Update student count if name or admission number changed
+                    if (field === 'fullName' || field === 'admissionNo') {
+                        updateStudentCount();
+                    }
+                }
+            }
+
+            // Save student row to database
+            async function saveStudentRow(rowId) {
+                try {
+                    const rowIndex = studentRows.findIndex(row => row.id === rowId);
+                    if (rowIndex === -1) return;
+                    
+                    const student = studentRows[rowIndex];
+                    
+                    // Validate required fields
+                    if (!student.admissionNo || !student.fullName) {
+                        alert('Please fill in Admission Number and Full Name');
+                        return;
+                    }
+                    
+                    // Validate admission number format
+                    if (!validateAdmissionNumber(student.admissionNo)) {
+                        alert('Invalid admission number format. Please use format like: AGHS-2026-001');
+                        return;
+                    }
+                    
+                    if (!currentSelectedStream) {
+                        alert('Please select a stream first');
+                        return;
+                    }
+                    
+                    const studentData = {
+                        admission_no: student.admissionNo,
+                        full_name: student.fullName,
+                        date_of_birth: student.dateOfBirth || null,
+                        gender: student.gender,
+                        parent_guardian: student.parentGuardian || '',
+                        phone_number: student.phoneNumber || '',
+                        stream: currentSelectedStream,
+                        teacher_tsc: currentTeacherTSC,
+                        teacher_name: userNameElement.textContent
+                    };
+                    
+                    let result;
+                    
+                    if (student.dbId) {
+                        // Update existing student
+                        const { data, error } = await supabase
+                            .from('students')
+                            .update(studentData)
+                            .eq('id', student.dbId);
+                        
+                        if (error) throw error;
+                        result = 'updated';
+                    } else {
+                        // Insert new student
+                        const { data, error } = await supabase
+                            .from('students')
+                            .insert([studentData])
+                            .select();
+                        
+                        if (error) {
+                            if (error.code === '23505') {
+                                // Unique violation - student already exists
+                                throw new Error('A student with this admission number already exists.');
+                            }
+                            throw error;
+                        }
+                        
+                        // Save the database ID
+                        if (data && data[0]) {
+                            studentRows[rowIndex].dbId = data[0].id;
+                            studentRows[rowIndex].isNew = false;
+                        }
+                        result = 'saved';
+                    }
+                    
+                    // Show success message
+                    const saveBtn = document.querySelector(`#${rowId} .action-btn.save`);
+                    if (saveBtn) {
+                        const originalHTML = saveBtn.innerHTML;
+                        saveBtn.innerHTML = '<i class="fas fa-check"></i>';
+                        saveBtn.style.color = '#2ecc71';
+                        setTimeout(() => {
+                            saveBtn.innerHTML = originalHTML;
+                            saveBtn.style.color = '';
+                        }, 1500);
+                    }
+                    
+                    console.log(`Student ${result} successfully!`);
+                    
+                    // Update student count
+                    updateStudentCount();
+                    
+                } catch (error) {
+                    console.error('Error saving student:', error);
+                    alert(`Error saving student: ${error.message}`);
+                }
+            }
+
+            // Update student row (mark as updated)
+            function updateStudentRow(rowId) {
+                const rowIndex = studentRows.findIndex(row => row.id === rowId);
+                if (rowIndex === -1) return;
+                
+                const rowElement = document.getElementById(rowId);
+                if (rowElement) {
+                    rowElement.style.backgroundColor = 'rgba(255, 255, 200, 0.3)';
+                    setTimeout(() => {
+                        rowElement.style.backgroundColor = '';
+                    }, 1000);
+                }
+                
+                // Focus on the first field
+                const firstInput = rowElement.querySelector('.editable-cell');
+                if (firstInput) firstInput.focus();
+            }
+
+            // Delete student row
+            async function deleteStudentRow(rowId) {
+                if (!confirm('Are you sure you want to delete this student?')) {
+                    return;
+                }
+    
+                try {
+                    const rowIndex = studentRows.findIndex(row => row.id === rowId);
+                    if (rowIndex === -1) return;
+                    
+                    const student = studentRows[rowIndex];
+                    
+                    // If the student exists in the database, delete it
+                    if (student.dbId) {
+                        const { error } = await supabase
+                            .from('students')
+                            .delete()
+                            .eq('id', student.dbId);
+                        
+                        if (error) throw error;
+                    }
+                    
+                    // Remove from memory and DOM
+                    studentRows.splice(rowIndex, 1);
+                    document.getElementById(rowId).remove();
+                    
+                    // Update row numbers
+                    updateRowNumbers();
+                    
+                    // Update student count
+                    updateStudentCount();
+                    
+                    console.log('Student deleted successfully!');
+                    
+                } catch (error) {
+                    console.error('Error deleting student:', error);
+                    alert('Error deleting student. Please try again.');
+                }
+            }
+
+            // Update row numbers in the table
+            function updateRowNumbers() {
+                const rows = studentsTableBody.querySelectorAll('tr');
+                rows.forEach((row, index) => {
+                    // Update the first cell (row number)
+                    const firstCell = row.querySelector('td:first-child');
+                    if (firstCell) {
+                        firstCell.textContent = index + 1;
+                    }
+                    
+                    // Update the row number in memory
+                    const rowId = row.id;
+                    const rowIndex = studentRows.findIndex(r => r.id === rowId);
+                    if (rowIndex !== -1) {
+                        studentRows[rowIndex].number = index + 1;
+                    }
+                });
+            }
+
+            // Save all students to database
+            async function saveAllStudentsToDatabase() {
+                try {
+                    if (!currentSelectedStream) {
+                        alert('Please select a stream first');
+                        return;
+                    }
+                    
+                    // Filter students that have required data
+                    const studentsToSave = studentRows.filter(student => 
+                        student.admissionNo && student.fullName
+                    );
+                    
+                    if (studentsToSave.length === 0) {
+                        alert('No students with complete information to save');
+                        return;
+                    }
+                    
+                    // Validate all admission numbers
+                    const invalidStudents = studentsToSave.filter(student => 
+                        !validateAdmissionNumber(student.admissionNo)
+                    );
+                    
+                    if (invalidStudents.length > 0) {
+                        alert(`${invalidStudents.length} student(s) have invalid admission numbers. Please use format like: AGHS-2026-001`);
+                        return;
+                    }
+                    
+                    // Show loading state
+                    saveAllStudents.disabled = true;
+                    saveAllStudents.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                    
+                    const studentsData = studentsToSave.map(student => ({
+                        admission_no: student.admissionNo,
+                        full_name: student.fullName,
+                        date_of_birth: student.dateOfBirth || null,
+                        gender: student.gender,
+                        parent_guardian: student.parentGuardian || '',
+                        phone_number: student.phoneNumber || '',
+                        stream: currentSelectedStream,
+                        teacher_tsc: currentTeacherTSC,
+                        teacher_name: userNameElement.textContent
+                    }));
+                    
+                    // Save to database using upsert (update or insert)
+                    const { data, error } = await supabase
+                        .from('students')
+                        .upsert(studentsData, { 
+                            onConflict: 'admission_no',
+                            ignoreDuplicates: false 
+                        })
+                        .select();
+                    
+                    if (error) {
+                        if (error.code === '23505') {
+                            throw new Error('Duplicate admission numbers found. Each student must have a unique admission number.');
+                        }
+                        throw error;
+                    }
+                    
+                    // Update database IDs for saved students
+                    if (data) {
+                        data.forEach(savedStudent => {
+                            const rowIndex = studentRows.findIndex(row => 
+                                row.admissionNo === savedStudent.admission_no
+                            );
+                            if (rowIndex !== -1) {
+                                studentRows[rowIndex].dbId = savedStudent.id;
+                                studentRows[rowIndex].isNew = false;
+                            }
+                        });
+                    }
+                    
+                    alert(`${studentsToSave.length} students saved successfully!`);
+                    isUpdateMode = true;
+                    
+                    // Update student count
+                    updateStudentCount(studentsToSave.length);
+                    
+                } catch (error) {
+                    console.error('Error saving all students:', error);
+                    alert(`Error saving students: ${error.message}`);
+                } finally {
+                    // Restore button state
+                    saveAllStudents.disabled = false;
+                    saveAllStudents.innerHTML = '<i class="fas fa-save"></i> Save All Students';
+                }
+            }
+
+            // Export students to Excel (CSV format)
+            function exportStudentsToExcel() {
+                if (studentRows.length === 0) {
+                    alert('No students to export');
+                    return;
+                }
+                
+                // Filter students with data
+                const studentsToExport = studentRows.filter(student => 
+                    student.admissionNo && student.fullName
+                );
+                
+                if (studentsToExport.length === 0) {
+                    alert('No students with complete information to export');
+                    return;
+                }
+                
+                // Create CSV content
+                const headers = ['Admission No.', 'Full Name', 'Date of Birth', 'Gender', 'Parent/Guardian', 'Phone Number', 'Stream', 'Form', 'Teacher', 'TSC Number'];
+                const csvRows = [headers.join(',')];
+                
+                studentsToExport.forEach(student => {
+                    const row = [
+                        `"${student.admissionNo}"`,
+                        `"${student.fullName}"`,
+                        `"${student.dateOfBirth || ''}"`,
+                        `"${student.gender}"`,
+                        `"${student.parentGuardian || ''}"`,
+                        `"${student.phoneNumber || ''}"`,
+                        `"${currentSelectedStream}"`,
+                        `"${currentSelectedForm || 'Not specified'}"`,
+                        `"${userNameElement.textContent}"`,
+                        `"${currentTeacherTSC}"`
+                    ];
+                    csvRows.push(row.join(','));
+                });
+                
+                const csvContent = csvRows.join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                
+                if (navigator.msSaveBlob) {
+                    // For IE
+                    navigator.msSaveBlob(blob, `students_${currentSelectedStream}_${new Date().toISOString().split('T')[0]}.csv`);
+                } else {
+                    // For other browsers
+                    link.href = URL.createObjectURL(blob);
+                    const filename = `students_${currentSelectedStream.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+                    link.download = filename;
+                    link.click();
+                }
+            }
+
+            // Clear form
+            function clearStudentForm() {
+                if (studentRows.length === 0) return;
+                
+                if (!confirm('Are you sure you want to clear all student data? This cannot be undone.')) {
+                    return;
+                }
+                
+                studentsTableBody.innerHTML = '';
+                studentRows = [];
+                studentCounter = 1;
+                
+                // Add one empty row
+                addNewStudentRow();
+                
+                alert('Form cleared successfully!');
+            }
+
+            // Update list (reload from database)
+            async function updateStudentList() {
+                if (!currentSelectedStream) {
+                    alert('Please select a stream first');
+                    return;
+                }
+                
+                await loadExistingStudents(currentSelectedStream);
+                alert('Student list updated from database!');
+            }
+
+            // Global functions for onclick handlers
+            window.openStreamModal = openStreamModal;
+            window.openStreamModalForForm = openStreamModalForForm;
+            window.switchView = switchView;
+            window.updateStudentData = updateStudentData;
+            window.saveStudentRow = saveStudentRow;
+            window.updateStudentRow = updateStudentRow;
+            window.deleteStudentRow = deleteStudentRow;
+            window.handleCellNavigation = handleCellNavigation;
+            window.addNewStudentRow = addNewStudentRow;
+
+            // Event Listeners for Stream Modal
+            if (streamModalClose) {
+                streamModalClose.addEventListener('click', () => {
+                    streamModal.classList.remove('show');
+                });
+            }
+
+            // View toggle buttons
+            if (viewToggle) {
+                viewToggle.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('view-btn')) {
+                        const view = e.target.dataset.view;
+                        switchView(view);
+                    }
+                });
+            }
+
+            // Add new student row button
+            if (addStudentRow) {
+                addStudentRow.addEventListener('click', () => {
+                    addNewStudentRow();
+                });
+            }
+
+            // Save all students button
+            if (saveAllStudents) {
+                saveAllStudents.addEventListener('click', saveAllStudentsToDatabase);
+            }
+
+            // Export students button
+            if (exportStudents) {
+                exportStudents.addEventListener('click', exportStudentsToExcel);
+            }
+
+            // Clear form button
+            if (clearForm) {
+                clearForm.addEventListener('click', clearStudentForm);
+            }
+
+            // Load existing button
+            if (loadExisting) {
+                loadExisting.addEventListener('click', async () => {
+                    if (!currentSelectedStream) {
+                        alert('Please select a stream first');
+                        return;
+                    }
+                    await loadExistingStudents(currentSelectedStream);
+                });
+            }
+
+            // Update list button
+            if (updateListBtn) {
+                updateListBtn.addEventListener('click', updateStudentList);
+            }
+
+            // Register students link in sidebar
+            if (registerStudentsLink) {
+                registerStudentsLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openStreamModal();
+                    loadDashboardContent('forms');
+                });
+            }
+
+            // Close stream modal when clicking outside
+            document.addEventListener('click', (e) => {
+                if (streamModal && streamModal.classList.contains('show') && 
+                    !streamModal.contains(e.target) && !e.target.closest('.nav-link[data-section="forms"]')) {
+                    streamModal.classList.remove('show');
                 }
             });
 
-            // Handle navigation clicks
-            if (navLinks.length > 0) {
-                navLinks.forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        if (link.classList.contains('logout-sidebar')) {
+            // Initialize dashboard
+            function initializeDashboard() {
+                console.log('Starting dashboard initialization...');
+                
+                // Load user data
+                loadUserData();
+                
+                // Set up event listeners for navigation, profile, etc.
+                setupEventListeners();
+                
+                console.log('Dashboard initialization complete');
+            }
+
+            // Setup event listeners
+            function setupEventListeners() {
+                // Hamburger menu
+                if (hamburger) {
+                    hamburger.addEventListener('click', () => {
+                        sidebar.classList.toggle('open');
+                    });
+                }
+
+                // User dropdown
+                if (userProfileTop) {
+                    userProfileTop.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        userDropdown.classList.toggle('show');
+                        dropdownArrow.classList.toggle('fa-chevron-down');
+                        dropdownArrow.classList.toggle('fa-chevron-up');
+                    });
+                }
+
+                // Navigation links
+                if (navLinks.length > 0) {
+                    navLinks.forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            if (link.classList.contains('logout-sidebar')) {
+                                e.preventDefault();
+                                handleLogout();
+                                return;
+                            }
+                            
+                            e.preventDefault();
+                            
+                            const section = link.getAttribute('data-section');
+                            if (section) {
+                                loadDashboardContent(section);
+                            }
+                            
+                            // Close sidebar on mobile after selection
+                            if (window.innerWidth <= 1024) {
+                                sidebar.classList.remove('open');
+                            }
+                        });
+                    });
+                }
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (userProfileTop && userDropdown && 
+                        !userProfileTop.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                        dropdownArrow.classList.remove('fa-chevron-up');
+                        dropdownArrow.classList.add('fa-chevron-down');
+                    }
+                    
+                    // Close sidebar when clicking outside on mobile
+                    if (window.innerWidth <= 1024 && 
+                        sidebar && sidebar.classList.contains('open') && 
+                        !sidebar.contains(e.target) && 
+                        e.target !== hamburger) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+
+                // Logout handlers
+                if (logoutLink) {
+                    logoutLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        handleLogout();
+                    });
+                }
+
+                if (logoutSidebarLinks.length > 0) {
+                    logoutSidebarLinks.forEach(link => {
+                        link.addEventListener('click', (e) => {
                             e.preventDefault();
                             handleLogout();
-                            return;
-                        }
-                        
-                        e.preventDefault();
-                        
-                        // Update active state
-                        navLinks.forEach(nav => nav.classList.remove('active'));
-                        link.classList.add('active');
-                        
-                        // Get the page name from the link text
-                        const pageName = link.textContent.trim();
-                        
-                        // Update main content based on selection
-                        const mainContent = document.querySelector('.main-content');
-                        const iconClass = link.querySelector('i').className;
-                        
-                        // Update page title
-                        const pageTitleElem = document.querySelector('.page-title h1');
-                        if (pageTitleElem) pageTitleElem.textContent = pageName;
-                        
-                        // Update main content
-                        if (mainContent) {
-                            mainContent.innerHTML = `
-                                <div class="placeholder-icon">
-                                    <i class="${iconClass}"></i>
-                                </div>
-                                <h1>${pageName}</h1>
-                                <p>This is the ${pageName} section. Content would load here based on your selection.</p>
-                                
-                                <div class="dashboard-container">
-                                    <div class="dashboard-cards">
-                                        <div class="dashboard-card">
-                                            <div class="card-icon" style="color: var(--primary-green);">
-                                                <i class="${iconClass}"></i>
-                                            </div>
-                                            <h3 class="card-title">${pageName} Overview</h3>
-                                            <p class="card-text">In the full application, this section would display relevant tools and data for ${pageName.toLowerCase()}.</p>
-                                        </div>
-                                        
-                                        <div class="dashboard-card">
-                                            <div class="card-icon" style="color: var(--accent-green);">
-                                                <i class="fas fa-tasks"></i>
-                                            </div>
-                                            <h3 class="card-title">Quick Actions</h3>
-                                            <p class="card-text">Common tasks and actions related to ${pageName.toLowerCase()} would appear here.</p>
-                                        </div>
-                                        
-                                        <div class="dashboard-card">
-                                            <div class="card-icon" style="color: var(--accent-blue);">
-                                                <i class="fas fa-chart-line"></i>
-                                            </div>
-                                            <h3 class="card-title">Statistics</h3>
-                                            <p class="card-text">Relevant statistics and analytics for ${pageName.toLowerCase()} management.</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="footer">
-                                        <p>© 2023 Alliance Girls High School - Alama Hub. All rights reserved.</p>
-                                        <div class="footer-links">
-                                            <a href="#">Privacy Policy</a>
-                                            <a href="#">Terms of Service</a>
-                                            <a href="#">Help Center</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                        
-                        // Close sidebar on mobile after selection
-                        if (window.innerWidth <= 1024) {
-                            sidebar.classList.remove('open');
-                        }
+                        });
                     });
-                });
+                }
             }
 
             // Handle logout
@@ -992,6 +3463,7 @@
                         // Clear localStorage
                         localStorage.removeItem('teacherName');
                         localStorage.removeItem('teacherTSC');
+                        localStorage.removeItem('teacherProfileImage');
                         
                         console.log('Logout successful, redirecting to login...');
                         
@@ -1004,68 +3476,8 @@
                 }
             }
 
-            // Attach logout handlers
-            if (logoutLink) {
-                logoutLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    handleLogout();
-                });
-            }
-
-            if (logoutSidebarLinks.length > 0) {
-                logoutSidebarLinks.forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        handleLogout();
-                    });
-                });
-            }
-
-            // Adjust top header on sidebar toggle for mobile
-            function adjustHeaderForMobile() {
-                const topHeader = document.getElementById('topHeader');
-                if (topHeader) {
-                    if (window.innerWidth <= 1024) {
-                        if (sidebar.classList.contains('open')) {
-                            topHeader.style.left = '320px';
-                        } else {
-                            topHeader.style.left = '0';
-                        }
-                    } else {
-                        topHeader.style.left = '280px';
-                    }
-                }
-            }
-
-            // Initialize dashboard
-            function initializeDashboard() {
-                console.log('Starting dashboard initialization...');
-                
-                // Load user data
-                loadUserData();
-                
-                // Set up responsive adjustments
-                adjustHeaderForMobile();
-                window.addEventListener('resize', adjustHeaderForMobile);
-                
-                // Adjust header when sidebar toggles
-                if (hamburger) {
-                    hamburger.addEventListener('click', adjustHeaderForMobile);
-                }
-                
-                // Close sidebar when clicking on mobile
-                document.addEventListener('click', (e) => {
-                    if (window.innerWidth <= 1024 && 
-                        sidebar && sidebar.classList.contains('open') && 
-                        !sidebar.contains(e.target) && 
-                        e.target !== hamburger) {
-                        sidebar.classList.remove('open');
-                        adjustHeaderForMobile();
-                    }
-                });
-                
-                console.log('Dashboard initialization complete');
-            }
+            // Make functions available globally for onclick handlers
+            window.loadDashboardContent = loadDashboardContent;
 
             // Start initialization when DOM is ready
             if (document.readyState === 'loading') {
@@ -1073,6 +3485,7 @@
             } else {
                 initializeDashboard();
             }
+
         })();
     </script>
 </body>
