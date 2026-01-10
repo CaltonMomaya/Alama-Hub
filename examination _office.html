@@ -1,0 +1,3192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examination Office - Alliance Girls High School</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary-green: #075824;
+            --secondary-green: #377437;
+            --accent-green: #9BAE30;
+            --muted-green: #5D8B70;
+            --accent-blue: #333687;
+            --background-light: #F4F4F4;
+            --text-light: #FFFFFF;
+            --sidebar-width: 280px;
+            --card-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            --hover-shadow: 0 15px 30px rgba(0,0,0,0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* Top Header with User Profile */
+        .top-header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: var(--sidebar-width);
+            background-color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 999;
+            transition: left 0.3s ease;
+        }
+
+        .page-title h1 {
+            color: var(--primary-green);
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .page-title p {
+            color: var(--muted-green);
+            font-size: 0.9rem;
+        }
+
+        .user-profile-top {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 8px 15px;
+            background-color: rgba(7, 88, 36, 0.05);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .user-profile-top:hover {
+            background-color: rgba(7, 88, 36, 0.1);
+        }
+
+        .user-avatar-top {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+
+        .user-avatar-top img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info-top h4 {
+            color: var(--primary-green);
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+        }
+
+        .user-info-top p {
+            color: var(--muted-green);
+            font-size: 0.8rem;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            padding: 15px;
+            min-width: 200px;
+            display: none;
+            z-index: 1001;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            color: #555;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(7, 88, 36, 0.05);
+            color: var(--primary-green);
+        }
+
+        .dropdown-item i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        /* Sidebar Header */
+        .sidebar-header {
+            background-color: var(--primary-green);
+            color: var(--text-light);
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .badge-container {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: white;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            margin: 0 auto 15px;
+        }
+
+        .school-badge {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 8px;
+        }
+
+        .badge-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-green);
+            color: white;
+            font-size: 28px;
+        }
+
+        .sidebar-title h1 {
+            font-size: 1.8rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-title h2 {
+            font-size: 1rem;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            box-shadow: 3px 0 15px rgba(0, 0, 0, 0.08);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-section-title {
+            padding: 20px 25px 10px;
+            font-size: 0.85rem;
+            color: var(--muted-green);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            border-bottom: 1px solid #eee;
+            margin: 0 15px;
+        }
+
+        .nav-item {
+            margin-bottom: 3px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 16px 25px;
+            color: #555;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(7, 88, 36, 0.05);
+            color: var(--primary-green);
+            border-left-color: var(--accent-green);
+        }
+
+        .nav-link.active {
+            background-color: rgba(7, 88, 36, 0.1);
+            color: var(--primary-green);
+            font-weight: 600;
+            border-left-color: var(--primary-green);
+        }
+
+        .nav-link i {
+            margin-right: 15px;
+            width: 22px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .nav-badge {
+            background-color: var(--accent-green);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: auto;
+        }
+
+        /* Session-dependent styling for menu items */
+        .nav-link.session-dependent {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .nav-link.session-dependent.active-session {
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        /* Main content area */
+        .main-content {
+            flex: 1;
+            padding: 100px 40px 40px;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            transition: margin-left 0.3s ease;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        /* Data display sections */
+        .data-section {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto 40px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(7, 88, 36, 0.1);
+        }
+
+        .section-title h2 {
+            color: var(--primary-green);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title h2 i {
+            color: var(--accent-green);
+        }
+
+        .section-info {
+            color: var(--muted-green);
+            font-size: 1rem;
+        }
+
+        /* Data Cards Layout */
+        .data-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .data-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: none;
+        }
+
+        .data-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .card-header i {
+            font-size: 1.8rem;
+        }
+
+        .card-header h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 25px;
+            flex-grow: 1;
+        }
+
+        .card-footer {
+            padding: 15px 25px;
+            background-color: rgba(7, 88, 36, 0.03);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Progress Bars for Forms */
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .progress-title {
+            color: var(--primary-green);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .progress-percentage {
+            background-color: rgba(7, 88, 36, 0.1);
+            color: var(--primary-green);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background-color: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), var(--secondary-green));
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .progress-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--muted-green);
+        }
+
+        /* Subject Management */
+        .subject-management {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 1024px) {
+            .subject-management {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .subject-list-container, .subject-form-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .subject-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .subject-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s ease;
+        }
+
+        .subject-item:hover {
+            background-color: rgba(7, 88, 36, 0.05);
+        }
+
+        .subject-info h4 {
+            color: var(--primary-green);
+            margin-bottom: 5px;
+        }
+
+        .subject-info p {
+            color: var(--muted-green);
+            font-size: 0.9rem;
+        }
+
+        .subject-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(155, 174, 48, 0.1);
+        }
+
+        /* Action Buttons */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-green);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(7, 88, 36, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #2a2c6e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(51, 54, 135, 0.2);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-green);
+            border: 2px solid var(--primary-green);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(7, 88, 36, 0.05);
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+
+        /* Exam Sessions Table */
+        .exam-sessions-table {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 40px;
+            overflow-x: auto;
+        }
+
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background-color: rgba(7, 88, 36, 0.05);
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-open {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-closed {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-in-progress {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        /* Report Generation */
+        .report-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .report-option {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .report-option:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .report-icon {
+            font-size: 3rem;
+            color: var(--primary-green);
+            margin-bottom: 15px;
+        }
+
+        /* Email Templates */
+        .email-templates {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 40px;
+        }
+
+        .template-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .template-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .template-card:hover {
+            border-color: var(--accent-green);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        /* Hamburger menu for mobile */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background-color: var(--primary-green);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Footer - CENTERED */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--muted-green);
+            font-size: 0.9rem;
+            margin-top: 60px;
+            width: 100%;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer p {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            line-height: 1.5;
+            margin: 0 auto 15px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: var(--primary-green);
+            text-decoration: underline;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(7, 88, 36, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-green);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin: 30px 0;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--muted-green);
+            opacity: 0.3;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: var(--primary-green);
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            max-width: 500px;
+            margin: 0 auto;
+            color: #666;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            background-color: rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 100px 20px 40px;
+                width: 100%;
+            }
+
+            .top-header {
+                left: 0;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+            
+            .data-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .top-header {
+                padding: 15px 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .user-profile-top {
+                align-self: flex-end;
+                margin-top: 10px;
+            }
+
+            .user-info-top h4 {
+                font-size: 0.9rem;
+            }
+
+            .user-info-top p {
+                font-size: 0.75rem;
+            }
+            
+            .data-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .table-controls {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 120px 15px 30px;
+            }
+
+            .user-info-top {
+                display: none;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .modal-content {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hamburger Menu for Mobile -->
+    <div class="hamburger" id="hamburger">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Top Header with User Profile -->
+    <div class="top-header" id="topHeader">
+        <div class="page-title">
+            <h1 id="pageTitle">Examination Office Dashboard</h1>
+            <p id="pageSubtitle">Alliance Girls High School - Full Examination Control</p>
+        </div>
+        
+        <div class="user-profile-top" id="userProfileTop">
+            <div class="user-avatar-top" id="userAvatar">
+                EX
+            </div>
+            <div class="user-info-top">
+                <h4 id="userName">Examination Officer</h4>
+                <p id="userRole">Examination Office</p>
+            </div>
+            <i class="fas fa-chevron-down" id="dropdownArrow"></i>
+        </div>
+        
+        <!-- User Dropdown Menu -->
+        <div class="user-dropdown" id="userDropdown">
+            <a href="#" class="dropdown-item">
+                <i class="fas fa-user-edit"></i> Edit Profile
+            </a>
+            <a href="#" class="dropdown-item">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="#" class="dropdown-item">
+                <i class="fas fa-question-circle"></i> Help & Support
+            </a>
+            <div style="height: 1px; background-color: #eee; margin: 10px 0;"></div>
+            <a href="#" class="dropdown-item" id="logoutLink">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="startExamModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-play-circle"></i> Start New Exam Session</h3>
+                <button class="modal-close" id="startExamModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Exam Session Name</label>
+                    <input type="text" id="examSessionName" placeholder="e.g., Term 1 Examinations 2026">
+                </div>
+                <div class="form-group">
+                    <label>Select Forms (Forms 3 & 4 only)</label>
+                    <select id="examForms" multiple style="height: 120px;">
+                        <option value="Form 3">Form 3</option>
+                        <option value="Form 4">Form 4</option>
+                        <option value="Grade 10">Grade 10</option>
+                        <option value="Grade 11">Grade 11</option>
+                        <option value="Grade 12">Grade 12</option>
+                    </select>
+                    <small style="color: var(--muted-green);">Hold Ctrl/Cmd to select multiple forms</small>
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="examStartDate">
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="date" id="examEndDate">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="examDescription" rows="3" placeholder="Brief description of the exam session"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelStartExam">Cancel</button>
+                <button class="btn btn-primary" id="confirmStartExam">Start Exam Session</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="closeExamModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-stop-circle"></i> Close Exam Session</h3>
+                <button class="modal-close" id="closeExamModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to close this exam session? This will:</p>
+                <ul style="margin: 15px 0; padding-left: 20px; color: #666;">
+                    <li>Lock all marks entries for this session</li>
+                    <li>Prevent further modifications</li>
+                    <li>Enable report generation</li>
+                    <li>Update teacher dashboard exam session status</li>
+                </ul>
+                <div class="form-group">
+                    <label>Closing Remarks (Optional)</label>
+                    <textarea id="closingRemarks" rows="3" placeholder="Reason for closing the session"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelCloseExam">Cancel</button>
+                <button class="btn btn-danger" id="confirmCloseExam">Close Exam Session</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="reportModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-alt"></i> Generate Report Cards</h3>
+                <button class="modal-close" id="reportModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Form</label>
+                    <select id="reportForm">
+                        <option value="">All Forms</option>
+                        <option value="Form 3">Form 3</option>
+                        <option value="Form 4">Form 4</option>
+                        <option value="Grade 10">Grade 10</option>
+                        <option value="Grade 11">Grade 11</option>
+                        <option value="Grade 12">Grade 12</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Stream</label>
+                    <select id="reportStream">
+                        <option value="">All Streams</option>
+                        <option value="North">North</option>
+                        <option value="South">South</option>
+                        <option value="East">East</option>
+                        <option value="West">West</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Report Type</label>
+                    <select id="reportType">
+                        <option value="detailed">Detailed Report Cards</option>
+                        <option value="summary">Class Summary Report</option>
+                        <option value="subject">Subject Performance Report</option>
+                        <option value="comparative">Comparative Analysis</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Include</label>
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="includeRank" checked> Student Rank
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="includeGrade" checked> Grades
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="includeComments" checked> Teacher Comments
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="includeAttendance"> Attendance
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Format</label>
+                    <div style="display: flex; gap: 20px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="radio" name="format" value="pdf" checked> PDF
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="radio" name="format" value="excel"> Excel
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="radio" name="format" value="word"> Word
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelReport">Cancel</button>
+                <button class="btn btn-primary" id="generateReport">Generate Report</button>
+                <button class="btn btn-secondary" id="previewReport">Preview</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Left Navigation Pane -->
+    <div class="sidebar" id="sidebar">
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+            <div class="badge-container">
+                <div class="badge-fallback">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+            </div>
+            <div class="sidebar-title">
+                <h1>Examination Office</h1>
+                <h2>Full Control Panel</h2>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <ul class="sidebar-nav">
+            <li class="nav-section-title">Exam Control</li>
+            <li class="nav-item">
+                <a href="#" class="nav-link active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" id="startExamSession" data-section="start-exam">
+                    <i class="fas fa-play-circle"></i> Start Exam Session
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="subject_management.html" class="nav-link" id="subjectManagementLink">
+                    <i class="fas fa-book"></i> Subject Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-section="close-exam">
+                    <i class="fas fa-stop-circle"></i> Close Exam Sessions
+                </a>
+            </li>
+            
+            <li class="nav-section-title">Progress Monitoring</li>
+            <li class="nav-item">
+                <a href="#" class="nav-link session-dependent" data-section="progress">
+                    <i class="fas fa-chart-line"></i> Marks Submission Progress
+                    <span class="nav-badge" id="progressBadge">0</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link session-dependent" data-section="status">
+                    <i class="fas fa-clipboard-check"></i> Form Status Overview
+                </a>
+            </li>
+            
+            <li class="nav-section-title">Reporting & Communication</li>
+            <li class="nav-item">
+                <a href="#" class="nav-link session-dependent" data-section="reports">
+                    <i class="fas fa-file-alt"></i> Generate Report Cards
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link session-dependent" data-section="combine-results">
+                    <i class="fas fa-cogs"></i> Combine Results
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link session-dependent" data-section="email-parents">
+                    <i class="fas fa-envelope"></i> Email Parents
+                    <span class="nav-badge" id="emailBadge">0</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link session-dependent" data-section="analytics">
+                    <i class="fas fa-chart-bar"></i> Analytics & Insights
+                </a>
+            </li>
+            
+            <li class="nav-section-title">System</li>
+            <li class="nav-item">
+                <a href="#" class="nav-link session-dependent" data-section="settings">
+                    <i class="fas fa-cog"></i> System Settings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link session-dependent" data-section="backup">
+                    <i class="fas fa-database"></i> Backup & Restore
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link logout-sidebar">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content" id="mainContent">
+        <!-- Content will be dynamically loaded here -->
+    </div>
+
+    <script>
+        // Initialize Examination Office Dashboard
+        (function() {
+            // Prevent multiple initializations
+            if (window.examOfficeInitialized) return;
+            window.examOfficeInitialized = true;
+            
+            console.log('Initializing Examination Office Dashboard...');
+            
+            // Initialize Supabase client
+            let supabase;
+            let currentUser = null;
+            
+            try {
+                const supabaseUrl = 'https://eloqizcahwxavsbalxii.supabase.co';
+                const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsb3FpemNhaHd4YXZzYmFseGlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MTQ4OTUsImV4cCI6MjA4MzI5MDg5NX0.SGogIbdShzCLv2TovpdS1BDf6GJx4mu0iz9s25BGRRQ';
+                
+                supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+                console.log('Supabase client initialized for Examination Office');
+            } catch (error) {
+                console.error('Failed to initialize Supabase:', error);
+                alert('Failed to initialize application. Please refresh the page.');
+                return;
+            }
+
+            // DOM Elements
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const userProfileTop = document.getElementById('userProfileTop');
+            const userDropdown = document.getElementById('userDropdown');
+            const dropdownArrow = document.getElementById('dropdownArrow');
+            const logoutLink = document.getElementById('logoutLink');
+            const logoutSidebarLinks = document.querySelectorAll('.logout-sidebar');
+            const userNameElement = document.getElementById('userName');
+            const pageTitleElement = document.getElementById('pageTitle');
+            const pageSubtitleElement = document.getElementById('pageSubtitle');
+            const mainContent = document.getElementById('mainContent');
+            
+            // Modal elements
+            const startExamModal = document.getElementById('startExamModal');
+            const startExamModalClose = document.getElementById('startExamModalClose');
+            const cancelStartExam = document.getElementById('cancelStartExam');
+            const confirmStartExam = document.getElementById('confirmStartExam');
+            const startExamSessionLink = document.getElementById('startExamSession');
+            
+            const closeExamModal = document.getElementById('closeExamModal');
+            const closeExamModalClose = document.getElementById('closeExamModalClose');
+            const cancelCloseExam = document.getElementById('cancelCloseExam');
+            const confirmCloseExam = document.getElementById('confirmCloseExam');
+            
+            const reportModal = document.getElementById('reportModal');
+            const reportModalClose = document.getElementById('reportModalClose');
+            const cancelReport = document.getElementById('cancelReport');
+            const generateReport = document.getElementById('generateReport');
+            const previewReport = document.getElementById('previewReport');
+
+            // State variables
+            let examSessions = [];
+            let activeSession = null;
+            
+            // Forms 3, 4 and Grades only - Forms 1 & 2 removed
+            let formsStatus = [
+                { form: 'Form 3', totalTeachers: 15, submitted: 8, progress: 53, status: 'warning' },
+                { form: 'Form 4', totalTeachers: 16, submitted: 14, progress: 88, status: 'good' },
+                { form: 'Grade 10', totalTeachers: 10, submitted: 4, progress: 40, status: 'poor' },
+                { form: 'Grade 11', totalTeachers: 11, submitted: 6, progress: 55, status: 'warning' },
+                { form: 'Grade 12', totalTeachers: 18, submitted: 15, progress: 83, status: 'good' }
+            ];
+
+            let emailTemplates = [
+                { id: 1, name: 'Term Results Notification', subject: 'Term Examination Results - {Student Name}', category: 'results' },
+                { id: 2, name: 'Parent-Teacher Meeting', subject: 'Invitation: Parent-Teacher Meeting', category: 'meeting' },
+                { id: 3, name: 'Poor Performance Alert', subject: 'Academic Performance Concern - {Student Name}', category: 'alert' },
+                { id: 4, name: 'Excellent Performance', subject: 'Congratulations on Excellent Performance!', category: 'congratulations' }
+            ];
+
+            // Function to load user data
+            async function loadUserData() {
+                try {
+                    console.log('Loading examination officer data...');
+                    
+                    // Check if user is logged in
+                    const { data: { user }, error: userError } = await supabase.auth.getUser();
+                    
+                    if (userError) {
+                        console.error('Auth error:', userError);
+                        redirectToLogin();
+                        return;
+                    }
+                    
+                    if (!user) {
+                        console.error('No user found - redirecting to login');
+                        redirectToLogin();
+                        return;
+                    }
+                    
+                    currentUser = user;
+                    console.log('Examination officer authenticated:', user.id);
+                    
+                    // Load exam sessions from database
+                    await loadExamSessions();
+                    
+                    // Check for active session
+                    await checkActiveSession();
+                    
+                    // Load dashboard content
+                    loadDashboardContent();
+                    
+                } catch (error) {
+                    console.error('Error loading user data:', error);
+                    // Use default values
+                    updateBadgeCounts();
+                }
+            }
+
+            // Function to redirect to login
+            function redirectToLogin() {
+                window.location.href = 'index.html';
+            }
+
+            // Function to load exam sessions from database
+            async function loadExamSessions() {
+                try {
+                    console.log('Loading exam sessions from database...');
+                    
+                    const { data, error } = await supabase
+                        .from('exam_sessions')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    
+                    if (error) {
+                        console.error('Error loading exam sessions:', error);
+                        // Create table if it doesn't exist
+                        if (error.message.includes('does not exist')) {
+                            await createExamSessionsTable();
+                            examSessions = [];
+                        } else {
+                            throw error;
+                        }
+                    } else {
+                        examSessions = data || [];
+                        console.log(`Loaded ${examSessions.length} exam sessions`);
+                    }
+                } catch (error) {
+                    console.error('Error in loadExamSessions:', error);
+                    examSessions = [];
+                }
+            }
+
+            // Function to create exam_sessions table if it doesn't exist
+            async function createExamSessionsTable() {
+                console.log('Creating exam_sessions table...');
+                
+                // This would be done via SQL in Supabase dashboard
+                // For now, we'll use an empty array
+                examSessions = [];
+            }
+
+            // Function to check for active session and update UI
+            async function checkActiveSession() {
+                activeSession = examSessions.find(session => session.status === 'active');
+                
+                // Update session-dependent menu items
+                updateSessionDependentMenuItems(!!activeSession);
+                
+                return activeSession;
+            }
+
+            // Function to update session-dependent menu items
+            function updateSessionDependentMenuItems(hasActiveSession) {
+                const sessionDependentLinks = document.querySelectorAll('.session-dependent');
+                
+                sessionDependentLinks.forEach(link => {
+                    if (hasActiveSession) {
+                        link.classList.add('active-session');
+                        link.style.cursor = 'pointer';
+                        link.style.opacity = '1';
+                    } else {
+                        link.classList.remove('active-session');
+                        link.style.cursor = 'not-allowed';
+                        link.style.opacity = '0.5';
+                        
+                        // Prevent clicking if no active session
+                        link.addEventListener('click', function(e) {
+                            if (!hasActiveSession) {
+                                e.preventDefault();
+                                alert('No active exam session. Please start an exam session first.');
+                            }
+                        });
+                    }
+                });
+                
+                // Subject management is always active
+                const subjectManagementLink = document.getElementById('subjectManagementLink');
+                if (subjectManagementLink) {
+                    subjectManagementLink.classList.add('active-session');
+                    subjectManagementLink.style.cursor = 'pointer';
+                    subjectManagementLink.style.opacity = '1';
+                }
+            }
+
+            // Function to update teacher dashboard exam sessions
+            async function updateTeacherDashboardSessions(session) {
+                try {
+                    console.log('Updating teacher dashboard sessions...');
+                    
+                    // Get all forms from the session
+                    const sessionForms = session.forms || [];
+                    
+                    // Create or update exam_forms in the database
+                    const updates = sessionForms.map(form => ({
+                        name: form,
+                        status: 'open',
+                        last_updated: new Date().toISOString(),
+                        session_id: session.id,
+                        session_name: session.name,
+                        session_description: session.description || '',
+                        start_date: session.start_date,
+                        end_date: session.end_date,
+                        created_by: 'examination_office'
+                    }));
+                    
+                    // First, close all previous sessions
+                    const { error: closeError } = await supabase
+                        .from('exam_forms')
+                        .update({ status: 'closed' })
+                        .neq('status', 'closed');
+                    
+                    if (closeError) {
+                        console.error('Error closing previous sessions:', closeError);
+                    }
+                    
+                    // Then update or insert new session forms
+                    for (const update of updates) {
+                        const { data: existing, error: checkError } = await supabase
+                            .from('exam_forms')
+                            .select('id')
+                            .eq('name', update.name)
+                            .maybeSingle();
+                        
+                        if (checkError && checkError.code !== 'PGRST116') {
+                            console.error('Error checking existing form:', checkError);
+                        }
+                        
+                        if (existing) {
+                            // Update existing
+                            const { error: updateError } = await supabase
+                                .from('exam_forms')
+                                .update(update)
+                                .eq('id', existing.id);
+                            
+                            if (updateError) {
+                                console.error('Error updating form:', updateError);
+                            }
+                        } else {
+                            // Insert new
+                            const { error: insertError } = await supabase
+                                .from('exam_forms')
+                                .insert([update]);
+                            
+                            if (insertError) {
+                                console.error('Error inserting form:', insertError);
+                            }
+                        }
+                    }
+                    
+                    console.log('Teacher dashboard sessions updated successfully');
+                    
+                } catch (error) {
+                    console.error('Error updating teacher dashboard sessions:', error);
+                }
+            }
+
+            // Function to close teacher dashboard sessions
+            async function closeTeacherDashboardSessions(sessionId) {
+                try {
+                    console.log('Closing teacher dashboard sessions...');
+                    
+                    // Update all forms for this session to closed
+                    const { error } = await supabase
+                        .from('exam_forms')
+                        .update({ 
+                            status: 'closed',
+                            close_reason: 'admin closed the session since all marks were received',
+                            closed_at: new Date().toISOString()
+                        })
+                        .eq('session_id', sessionId);
+                    
+                    if (error) {
+                        console.error('Error closing teacher dashboard sessions:', error);
+                    } else {
+                        console.log('Teacher dashboard sessions closed successfully');
+                    }
+                } catch (error) {
+                    console.error('Error in closeTeacherDashboardSessions:', error);
+                }
+            }
+
+            // Function to load dashboard content
+            function loadDashboardContent(section = 'dashboard') {
+                console.log('Loading section:', section);
+                
+                let content = '';
+                let pageTitle = '';
+                let pageSubtitle = '';
+                
+                switch(section) {
+                    case 'dashboard':
+                        pageTitle = 'Examination Office Dashboard';
+                        pageSubtitle = 'Full Control Panel - Alliance Girls High School';
+                        content = generateDashboardContent();
+                        break;
+                    case 'start-exam':
+                        pageTitle = 'Start Exam Session';
+                        pageSubtitle = 'Initiate new examination sessions (Forms 3 & 4 only)';
+                        content = generateStartExamContent();
+                        break;
+                    case 'close-exam':
+                        pageTitle = 'Close Exam Sessions';
+                        pageSubtitle = 'Finalize and close examination sessions';
+                        content = generateCloseExamContent();
+                        break;
+                    case 'progress':
+                        pageTitle = 'Marks Submission Progress';
+                        pageSubtitle = 'Real-time tracking of marks submission (Forms 3 & 4 only)';
+                        content = generateProgressContent();
+                        break;
+                    case 'status':
+                        pageTitle = 'Form Status Overview';
+                        pageSubtitle = 'Status of marks submission per form (Forms 3 & 4 only)';
+                        content = generateStatusContent();
+                        break;
+                    case 'reports':
+                        pageTitle = 'Generate Report Cards';
+                        pageSubtitle = 'Create and distribute student reports';
+                        content = generateReportsContent();
+                        break;
+                    case 'combine-results':
+                        pageTitle = 'Combine Results';
+                        pageSubtitle = 'Merge and analyze examination results';
+                        content = generateCombineResultsContent();
+                        break;
+                    case 'email-parents':
+                        pageTitle = 'Email Parents';
+                        pageSubtitle = 'Communicate results to parents/guardians';
+                        content = generateEmailContent();
+                        break;
+                    default:
+                        pageTitle = section.charAt(0).toUpperCase() + section.slice(1);
+                        pageSubtitle = `${pageTitle} Management`;
+                        content = generateDefaultContent(section);
+                }
+                
+                // Update page title
+                if (pageTitleElement) pageTitleElement.textContent = pageTitle;
+                if (pageSubtitleElement) pageSubtitleElement.textContent = pageSubtitle;
+                
+                // Update main content
+                if (mainContent) {
+                    mainContent.innerHTML = content;
+                    
+                    // Initialize section-specific functionality
+                    if (section === 'progress') {
+                        initializeProgressBars();
+                    }
+                }
+                
+                // Update active nav link
+                navLinks.forEach(link => {
+                    if (link.getAttribute('data-section') === section) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+                
+                // Close sidebar on mobile
+                if (window.innerWidth <= 1024) {
+                    sidebar.classList.remove('open');
+                }
+            }
+
+            // Content generation functions
+            function generateDashboardContent() {
+                const openSessions = examSessions.filter(s => s.status === 'active').length;
+                const closedSessions = examSessions.filter(s => s.status === 'closed').length;
+                const totalTeachers = formsStatus.reduce((sum, form) => sum + form.totalTeachers, 0);
+                const submittedTeachers = formsStatus.reduce((sum, form) => sum + form.submitted, 0);
+                const overallProgress = Math.round((submittedTeachers / totalTeachers) * 100);
+                
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-tachometer-alt"></i> Examination Office Dashboard</h2>
+                            <div class="section-info">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                        </div>
+                        
+                        <div class="data-cards">
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-play-circle"></i>
+                                    <h3>Active Exam Sessions</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div style="text-align: center; padding: 20px 0;">
+                                        <div style="font-size: 3rem; color: var(--accent-green); font-weight: bold;">${openSessions}</div>
+                                        <p style="color: var(--muted-green); margin-top: 10px;">Currently Active</p>
+                                        <p style="font-size: 0.9rem; margin-top: 5px;">Forms 3, 4 & Grades only</p>
+                                        ${activeSession ? `
+                                            <div style="margin-top: 15px; padding: 10px; background-color: rgba(155, 174, 48, 0.1); border-radius: 8px;">
+                                                <strong>${activeSession.name}</strong><br>
+                                                <small>${activeSession.forms ? activeSession.forms.join(', ') : 'No forms'}</small>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <span>View All Sessions</span>
+                                    <button class="btn btn-outline" onclick="loadDashboardContent('close-exam')">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h3>Submission Progress</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div style="text-align: center; padding: 20px 0;">
+                                        <div style="font-size: 3rem; color: var(--accent-green); font-weight: bold;">${overallProgress}%</div>
+                                        <p style="color: var(--muted-green); margin-top: 10px;">Overall Completion</p>
+                                        <p style="font-size: 0.9rem; margin-top: 5px;">${submittedTeachers}/${totalTeachers} teachers submitted</p>
+                                        <p style="font-size: 0.85rem; color: var(--muted-green);">Forms 3, 4 & Grades only</p>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <span>View Details</span>
+                                    <button class="btn btn-outline" onclick="loadDashboardContent('progress')">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-users"></i>
+                                    <h3>Forms Status</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div style="text-align: center; padding: 20px 0;">
+                                        <div style="font-size: 3rem; color: var(--accent-green); font-weight: bold;">${formsStatus.length}</div>
+                                        <p style="color: var(--muted-green); margin-top: 10px;">Forms/Grades Being Monitored</p>
+                                        <p style="font-size: 0.9rem; margin-top: 5px;">${formsStatus.filter(f => f.progress >= 80).length} forms on track</p>
+                                        <p style="font-size: 0.85rem; color: var(--muted-green);">Forms 3, 4 & Grades only</p>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <span>View Status</span>
+                                    <button class="btn btn-outline" onclick="loadDashboardContent('status')">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section-title" style="margin-top: 40px;">
+                            <h2><i class="fas fa-exclamation-circle"></i> Quick Actions</h2>
+                        </div>
+                        
+                        <div class="data-cards">
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-play-circle"></i>
+                                    <h3>Start New Exam Session</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+                                        Initiate a new examination session for Forms 3, 4 and Grades only.
+                                    </p>
+                                    <p style="color: var(--muted-green); font-size: 0.9rem; font-style: italic;">
+                                        Note: Forms 1 & 2 are not included in examination sessions.
+                                    </p>
+                                </div>
+                                <div class="card-footer">
+                                    <button class="btn btn-primary" onclick="showStartExamModal()">
+                                        <i class="fas fa-play"></i> Start Session
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-book"></i>
+                                    <h3>Manage Subjects</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+                                        Add, edit, or remove subjects and assign teachers.
+                                    </p>
+                                </div>
+                                <div class="card-footer">
+                                    <a href="subject_management.html" class="btn btn-primary">
+                                        <i class="fas fa-cog"></i> Manage Subjects
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-file-alt"></i>
+                                    <h3>Generate Reports</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+                                        Create report cards and examination summaries.
+                                    </p>
+                                </div>
+                                <div class="card-footer">
+                                    <button class="btn btn-primary" onclick="showReportModal()">
+                                        <i class="fas fa-download"></i> Generate Reports
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 40px; background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow);">
+                            <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-info-circle"></i> Important Information
+                            </h3>
+                            <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
+                                <strong>Forms 1 & 2 are excluded from the examination system.</strong> This dashboard only tracks Forms 3, 4, and Grade levels for examination purposes.
+                            </p>
+                            <p style="color: var(--muted-green); font-style: italic;">
+                                All data shown in this dashboard pertains to Forms 3, 4, Grade 10, Grade 11, and Grade 12 only.
+                            </p>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Examination Office. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function generateStartExamContent() {
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-play-circle"></i> Start New Exam Session</h2>
+                            <div class="section-info">Initiate examination sessions for Forms 3, 4 and Grades only</div>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: var(--card-shadow); margin-bottom: 40px;">
+                            <h3 style="color: var(--primary-green); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-info-circle"></i> New Exam Session Setup
+                            </h3>
+                            <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
+                                Create a new examination session for Forms 3, 4, and Grade levels only. Forms 1 & 2 are not included in the examination system.
+                            </p>
+                            
+                            <div class="form-group">
+                                <label>Exam Session Name</label>
+                                <input type="text" id="newExamName" placeholder="e.g., Term 1 Examinations 2026" style="max-width: 500px;">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Select Forms to Include (Forms 3, 4 & Grades only)</label>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px;">
+                                        <input type="checkbox" name="selectedForms" value="Form 3"> Form 3
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px;">
+                                        <input type="checkbox" name="selectedForms" value="Form 4"> Form 4
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px;">
+                                        <input type="checkbox" name="selectedForms" value="Grade 10"> Grade 10
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px;">
+                                        <input type="checkbox" name="selectedForms" value="Grade 11"> Grade 11
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px;">
+                                        <input type="checkbox" name="selectedForms" value="Grade 12"> Grade 12
+                                    </label>
+                                </div>
+                                <p style="color: var(--muted-green); font-size: 0.9rem; margin-top: 10px; font-style: italic;">
+                                    Note: Forms 1 & 2 are not available for examination sessions.
+                                </p>
+                            </div>
+                            
+                            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <label>Start Date</label>
+                                    <input type="date" id="newExamStartDate">
+                                </div>
+                                <div>
+                                    <label>End Date</label>
+                                    <input type="date" id="newExamEndDate">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Additional Instructions (Optional)</label>
+                                <textarea id="newExamInstructions" rows="4" placeholder="Any special instructions for teachers..."></textarea>
+                            </div>
+                            
+                            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                                <button class="btn btn-primary" onclick="createNewExamSession()">
+                                    <i class="fas fa-play-circle"></i> Start Exam Session
+                                </button>
+                                <button class="btn btn-outline" onclick="loadDashboardContent('dashboard')">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="section-title">
+                            <h2><i class="fas fa-history"></i> Recent Exam Sessions</h2>
+                            <div class="section-info">${examSessions.length} total sessions (Forms 3, 4 & Grades only)</div>
+                        </div>
+                        
+                        <div class="exam-sessions-table">
+                            <div class="table-controls">
+                                <div>
+                                    <input type="text" placeholder="Search sessions..." style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; width: 300px;">
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn btn-outline">
+                                        <i class="fas fa-filter"></i> Filter
+                                    </button>
+                                    <button class="btn btn-outline">
+                                        <i class="fas fa-download"></i> Export
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Session Name</th>
+                                        <th>Forms/Grades</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Status</th>
+                                        <th>Progress</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${examSessions.map(session => `
+                                        <tr>
+                                            <td><strong>${session.name}</strong></td>
+                                            <td>${session.forms ? session.forms.join(', ') : 'Not specified'}</td>
+                                            <td>${session.start_date || 'N/A'}</td>
+                                            <td>${session.end_date || 'N/A'}</td>
+                                            <td>
+                                                <span class="status-badge ${session.status === 'active' ? 'status-open' : 'status-closed'}">
+                                                    ${session.status === 'active' ? 'Active' : 'Closed'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div style="display: flex; align-items: center; gap: 10px;">
+                                                    <div style="width: 100px; height: 8px; background: #eee; border-radius: 4px;">
+                                                        <div style="width: ${session.progress || 0}%; height: 100%; background: ${(session.progress || 0) === 100 ? '#28a745' : '#ffc107'}; border-radius: 4px;"></div>
+                                                    </div>
+                                                    <span>${session.progress || 0}%</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style="display: flex; gap: 8px;">
+                                                    <button class="btn btn-sm btn-outline" onclick="viewSessionDetails('${session.id}')">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    ${session.status === 'active' ? `
+                                                        <button class="btn btn-sm btn-danger" onclick="closeSession('${session.id}')">
+                                                            <i class="fas fa-stop"></i>
+                                                        </button>
+                                                    ` : ''}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Examination Office. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function generateCloseExamContent() {
+                const activeSessions = examSessions.filter(s => s.status === 'active');
+                
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-stop-circle"></i> Close Exam Sessions</h2>
+                            <div class="section-info">${activeSessions.length} active sessions available for closing (Forms 3, 4 & Grades only)</div>
+                        </div>
+                        
+                        ${activeSessions.length === 0 ? `
+                            <div class="empty-state">
+                                <i class="fas fa-check-circle"></i>
+                                <h3>No Active Exam Sessions</h3>
+                                <p>There are currently no exam sessions that need to be closed.</p>
+                                <button class="btn btn-primary" style="margin-top: 20px;" onclick="loadDashboardContent('start-exam')">
+                                    <i class="fas fa-play-circle"></i> Start New Session
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="data-cards">
+                                ${activeSessions.map(session => `
+                                    <div class="data-card">
+                                        <div class="card-header">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <h3>${session.name}</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div style="margin-bottom: 15px;">
+                                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                                    <span style="color: var(--muted-green);">Forms/Grades:</span>
+                                                    <span style="font-weight: 600;">${session.forms ? session.forms.join(', ') : 'Not specified'}</span>
+                                                </div>
+                                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                                    <span style="color: var(--muted-green);">Dates:</span>
+                                                    <span>${session.start_date || 'N/A'} to ${session.end_date || 'N/A'}</span>
+                                                </div>
+                                                <div style="display: flex; justify-content: space-between;">
+                                                    <span style="color: var(--muted-green);">Progress:</span>
+                                                    <span style="font-weight: 600; color: ${(session.progress || 0) === 100 ? '#28a745' : '#ffc107'}">${session.progress || 0}%</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div style="margin-top: 20px;">
+                                                <div style="height: 10px; background: #eee; border-radius: 5px;">
+                                                    <div style="width: ${session.progress || 0}%; height: 100%; background: ${(session.progress || 0) === 100 ? '#28a745' : '#ffc107'}; border-radius: 5px;"></div>
+                                                </div>
+                                                <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.9rem; color: var(--muted-green);">
+                                                    <span>Marks submission</span>
+                                                    <span>${session.progress || 0}%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <button class="btn btn-danger" onclick="closeSessionNow('${session.id}', '${session.name}')">
+                                                <i class="fas fa-stop-circle"></i> Close Session
+                                            </button>
+                                            <button class="btn btn-outline" onclick="viewSessionProgress('${session.id}')">
+                                                <i class="fas fa-chart-line"></i> View Progress
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
+                        
+                        <div style="margin-top: 40px; background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow);">
+                            <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-info-circle"></i> About Closing Exam Sessions
+                            </h3>
+                            <p style="line-height: 1.6; color: #666; margin-bottom: 15px;">
+                                When you close an exam session (Forms 3, 4 & Grades only):
+                            </p>
+                            <ul style="color: #666; line-height: 1.6; padding-left: 20px; margin-bottom: 20px;">
+                                <li>All marks become locked and cannot be modified</li>
+                                <li>Teachers can no longer submit or edit marks</li>
+                                <li>The session becomes available for report generation</li>
+                                <li>Parents can be notified of results</li>
+                                <li>Analytical reports can be generated</li>
+                                <li>Teacher dashboard exam sessions will show "admin closed the session since all marks were received"</li>
+                            </ul>
+                            <p style="color: var(--muted-green); font-style: italic;">
+                                Note: It's recommended to close sessions only when all marks have been submitted and verified.
+                            </p>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Examination Office. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function generateProgressContent() {
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-chart-line"></i> Marks Submission Progress</h2>
+                            <div class="section-info">Real-time tracking for Forms 3, 4 and Grades only</div>
+                        </div>
+                        
+                        <div class="progress-container">
+                            ${formsStatus.map(form => `
+                                <div class="progress-card">
+                                    <div class="progress-header">
+                                        <div class="progress-title">${form.form}</div>
+                                        <div class="progress-percentage">${form.progress}%</div>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${form.progress}%"></div>
+                                    </div>
+                                    <div class="progress-details">
+                                        <span>${form.submitted}/${form.totalTeachers} teachers submitted</span>
+                                        <span style="color: ${form.status === 'good' ? '#28a745' : form.status === 'warning' ? '#ffc107' : '#dc3545'}">
+                                            ${form.status === 'good' ? 'On Track' : form.status === 'warning' ? 'Needs Attention' : 'Behind Schedule'}
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px;">
+                            <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow);">
+                                <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-bell"></i> Notifications
+                                </h3>
+                                <div style="max-height: 300px; overflow-y: auto;">
+                                    <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; gap: 15px; align-items: start;">
+                                        <i class="fas fa-exclamation-triangle" style="color: #ffc107;"></i>
+                                        <div>
+                                            <p style="font-weight: 600; margin-bottom: 5px;">Grade 10 teachers need reminders</p>
+                                            <p style="color: var(--muted-green); font-size: 0.9rem;">Only 40% of teachers have submitted marks</p>
+                                            <p style="color: var(--muted-green); font-size: 0.85rem; margin-top: 5px;">2 hours ago</p>
+                                        </div>
+                                    </div>
+                                    <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; gap: 15px; align-items: start;">
+                                        <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                                        <div>
+                                            <p style="font-weight: 600; margin-bottom: 5px;">Form 4 marks complete</p>
+                                            <p style="color: var(--muted-green); font-size: 0.9rem;">All 16 teachers have submitted marks</p>
+                                            <p style="color: var(--muted-green); font-size: 0.85rem; margin-top: 5px;">Yesterday</p>
+                                        </div>
+                                    </div>
+                                    <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; gap: 15px; align-items: start;">
+                                        <i class="fas fa-info-circle" style="color: var(--accent-blue);"></i>
+                                        <div>
+                                            <p style="font-weight: 600; margin-bottom: 5px;">Form 3 deadline approaching</p>
+                                            <p style="color: var(--muted-green); font-size: 0.9rem;">Deadline: 2 days remaining</p>
+                                            <p style="color: var(--muted-green); font-size: 0.85rem; margin-top: 5px;">Today</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow);">
+                                <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-bullhorn"></i> Send Reminders
+                                </h3>
+                                <div class="form-group">
+                                    <label>Select Forms (Forms 3, 4 & Grades only)</label>
+                                    <select multiple style="height: 150px;">
+                                        ${formsStatus.map(form => `
+                                            <option value="${form.form}">${form.form} (${form.progress}% complete)</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Message</label>
+                                    <textarea rows="4" placeholder="Remind teachers to submit their marks...">Dear Teachers, Please remember to submit all examination marks by the deadline. The examination office needs complete data to generate reports.</textarea>
+                                </div>
+                                <button class="btn btn-primary" style="width: 100%;">
+                                    <i class="fas fa-paper-plane"></i> Send Reminders
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Examination Office. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function generateStatusContent() {
+                const totalTeachers = formsStatus.reduce((sum, form) => sum + form.totalTeachers, 0);
+                const submittedTeachers = formsStatus.reduce((sum, form) => sum + form.submitted, 0);
+                const overallProgress = Math.round((submittedTeachers / totalTeachers) * 100);
+                
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-clipboard-check"></i> Form Status Overview</h2>
+                            <div class="section-info">Overall Progress: ${overallProgress}% (${submittedTeachers}/${totalTeachers} teachers) - Forms 3, 4 & Grades only</div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-bottom: 40px;">
+                            ${formsStatus.map(form => {
+                                let statusColor = '#28a745';
+                                let statusIcon = 'fa-check-circle';
+                                let statusText = 'Good';
+                                
+                                if (form.status === 'warning') {
+                                    statusColor = '#ffc107';
+                                    statusIcon = 'fa-exclamation-triangle';
+                                    statusText = 'Warning';
+                                } else if (form.status === 'poor') {
+                                    statusColor = '#dc3545';
+                                    statusIcon = 'fa-exclamation-circle';
+                                    statusText = 'Poor';
+                                }
+                                
+                                return `
+                                    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                            <h3 style="color: var(--primary-green);">${form.form}</h3>
+                                            <div style="display: flex; align-items: center; gap: 8px; color: ${statusColor};">
+                                                <i class="fas ${statusIcon}"></i>
+                                                <span style="font-weight: 600;">${statusText}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="margin-bottom: 20px;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                                <span style="color: var(--muted-green);">Progress:</span>
+                                                <span style="font-weight: 600;">${form.progress}%</span>
+                                            </div>
+                                            <div style="height: 10px; background: #eee; border-radius: 5px;">
+                                                <div style="width: ${form.progress}%; height: 100%; background: ${statusColor}; border-radius: 5px;"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                            <span style="color: var(--muted-green);">Teachers Submitted:</span>
+                                            <span>${form.submitted}/${form.totalTeachers}</span>
+                                        </div>
+                                        
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                            <span style="color: var(--muted-green);">Remaining:</span>
+                                            <span>${form.totalTeachers - form.submitted} teachers</span>
+                                        </div>
+                                        
+                                        <div style="margin-top: 20px;">
+                                            <button class="btn btn-outline" style="width: 100%;" onclick="viewFormDetails('${form.form}')">
+                                                <i class="fas fa-list"></i> View Teacher List
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        
+                        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow); margin-bottom: 40px;">
+                            <h3 style="color: var(--primary-green); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-chart-bar"></i> Overall Statistics (Forms 3, 4 & Grades only)
+                            </h3>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                                <div style="text-align: center; padding: 20px; background: rgba(7, 88, 36, 0.05); border-radius: 8px;">
+                                    <div style="font-size: 2.5rem; color: var(--primary-green); font-weight: bold;">${formsStatus.length}</div>
+                                    <div style="color: var(--muted-green);">Total Forms/Grades</div>
+                                </div>
+                                <div style="text-align: center; padding: 20px; background: rgba(40, 167, 69, 0.1); border-radius: 8px;">
+                                    <div style="font-size: 2.5rem; color: #28a745; font-weight: bold;">${formsStatus.filter(f => f.status === 'good').length}</div>
+                                    <div style="color: #28a745;">On Track</div>
+                                </div>
+                                <div style="text-align: center; padding: 20px; background: rgba(255, 193, 7, 0.1); border-radius: 8px;">
+                                    <div style="font-size: 2.5rem; color: #ffc107; font-weight: bold;">${formsStatus.filter(f => f.status === 'warning').length}</div>
+                                    <div style="color: #ffc107;">Needs Attention</div>
+                                </div>
+                                <div style="text-align: center; padding: 20px; background: rgba(220, 53, 69, 0.1); border-radius: 8px;">
+                                    <div style="font-size: 2.5rem; color: #dc3545; font-weight: bold;">${formsStatus.filter(f => f.status === 'poor').length}</div>
+                                    <div style="color: #dc3545;">Behind Schedule</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Examination Office. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function generateReportsContent() {
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-file-alt"></i> Generate Report Cards</h2>
+                            <div class="section-info">Create and distribute student examination reports (Forms 3, 4 & Grades only)</div>
+                        </div>
+                        
+                        <div class="report-options">
+                            <div class="report-option" onclick="showReportModal()">
+                                <div class="report-icon">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                                <h3 style="color: var(--primary-green); margin-bottom: 10px;">Individual Report Cards</h3>
+                                <p style="color: #666;">Generate personalized report cards for each student</p>
+                            </div>
+                            
+                            <div class="report-option" onclick="generateClassSummary()">
+                                <div class="report-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <h3 style="color: var(--primary-green); margin-bottom: 10px;">Class Summary Reports</h3>
+                                <p style="color: #666;">Create summary reports for entire classes or streams</p>
+                            </div>
+                            
+                            <div class="report-option" onclick="generateSubjectReport()">
+                                <div class="report-icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <h3 style="color: var(--primary-green); margin-bottom: 10px;">Subject Performance Reports</h3>
+                                <p style="color: #666;">Analyze performance by subject across forms</p>
+                            </div>
+                            
+                            <div class="report-option" onclick="generateComparativeReport()">
+                                <div class="report-icon">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <h3 style="color: var(--primary-green); margin-bottom: 10px;">Comparative Analysis</h3>
+                                <p style="color: #666;">Compare performance across terms, years, or streams</p>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow); margin-bottom: 40px;">
+                            <h3 style="color: var(--primary-green); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-history"></i> Recent Reports
+                            </h3>
+                            
+                            <table style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Report Name</th>
+                                        <th>Generated</th>
+                                        <th>Format</th>
+                                        <th>Size</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Term 1 Report Cards - Form 3</td>
+                                        <td>2026-01-10</td>
+                                        <td>PDF</td>
+                                        <td>15.2 MB</td>
+                                        <td>
+                                            <div style="display: flex; gap: 10px;">
+                                                <button class="btn btn-sm btn-outline">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mid-Term Summary - Form 4</td>
+                                        <td>2025-11-20</td>
+                                        <td>Excel</td>
+                                        <td>8.7 MB</td>
+                                        <td>
+                                            <div style="display: flex; gap: 10px;">
+                                                <button class="btn btn-sm btn-outline">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Subject Analysis - Mathematics</td>
+                                        <td>2025-10-15</td>
+                                        <td>PDF</td>
+                                        <td>5.3 MB</td>
+                                        <td>
+                                            <div style="display: flex; gap: 10px;">
+                                                <button class="btn btn-sm btn-outline">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Examination Office. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function generateCombineResultsContent() {
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-cogs"></i> Combine Results</h2>
+                            <div class="section-info">Merge and analyze examination results from multiple sources (Forms 3, 4 & Grades only)</div>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: var(--card-shadow); margin-bottom: 40px;">
+                            <h3 style="color: var(--primary-green); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-project-diagram"></i> Combine Examination Results
+                            </h3>
+                            
+                            <div class="form-group">
+                                <label>Select Exam Sessions to Combine</label>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 10px;">
+                                    ${examSessions.map(session => `
+                                        <label style="display: flex; align-items: center; gap: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                                            <input type="checkbox" name="combineSessions" value="${session.id}">
+                                            <div>
+                                                <div style="font-weight: 600;">${session.name}</div>
+                                                <div style="font-size: 0.9rem; color: var(--muted-green);">${session.forms ? session.forms.join(', ') : 'Not specified'}</div>
+                                            </div>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Combination Method</label>
+                                <select id="combinationMethod" style="max-width: 300px;">
+                                    <option value="average">Average Scores</option>
+                                    <option value="weighted">Weighted Average</option>
+                                    <option value="best">Best Performance</option>
+                                    <option value="latest">Latest Results Only</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Output Format</label>
+                                <div style="display: flex; gap: 20px; margin-top: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="radio" name="outputFormat" value="combined" checked> Combined Report
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="radio" name="outputFormat" value="individual"> Individual Reports
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="radio" name="outputFormat" value="analysis"> Analysis Only
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                                <button class="btn btn-primary" onclick="combineResults()">
+                                    <i class="fas fa-cogs"></i> Combine Results
+                                </button>
+                                <button class="btn btn-secondary" onclick="previewCombinedResults()">
+                                    <i class="fas fa-eye"></i> Preview
+                                </button>
+                                <button class="btn btn-outline" onclick="clearCombination()">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px;">
+                            <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow);">
+                                <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-info-circle"></i> About Combining Results
+                                </h3>
+                                <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
+                                    This feature allows you to combine results from multiple exam sessions (Forms 3, 4 & Grades only) to create:
+                                </p>
+                                <ul style="color: #666; line-height: 1.6; padding-left: 20px;">
+                                    <li>Comprehensive term reports</li>
+                                    <li>Year-to-date performance analysis</li>
+                                    <li>Cumulative grade point averages</li>
+                                    <li>Comparative performance reports</li>
+                                </ul>
+                            </div>
+                            
+                            <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow);">
+                                <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-lightbulb"></i> Best Practices
+                                </h3>
+                                <ul style="color: #666; line-height: 1.6; padding-left: 20px;">
+                                    <li>Combine results from the same academic year</li>
+                                    <li>Use weighted averages for term results</li>
+                                    <li>Verify data consistency before combining</li>
+                                    <li>Preview combined results before finalizing</li>
+                                    <li>Backup original data before modifications</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Examination Office. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function generateEmailContent() {
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-envelope"></i> Email Parents/Guardians</h2>
+                            <div class="section-info">Communicate examination results to parents and guardians (Forms 3, 4 & Grades only)</div>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: var(--card-shadow); margin-bottom: 40px;">
+                            <h3 style="color: var(--primary-green); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-envelope-open-text"></i> Send Results Notification
+                            </h3>
+                            
+                            <div class="form-group">
+                                <label>Select Email Template</label>
+                                <select id="emailTemplate" style="max-width: 400px;">
+                                    <option value="">-- Select Template --</option>
+                                    ${emailTemplates.map(template => `
+                                        <option value="${template.id}">${template.name}</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Recipients (Forms 3, 4 & Grades only)</label>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                                        <input type="checkbox" name="emailRecipients" value="all" checked> All Parents
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                                        <input type="checkbox" name="emailRecipients" value="form3"> Form 3 Parents
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                                        <input type="checkbox" name="emailRecipients" value="form4"> Form 4 Parents
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                                        <input type="checkbox" name="emailRecipients" value="grade10"> Grade 10 Parents
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                                        <input type="checkbox" name="emailRecipients" value="grade11"> Grade 11 Parents
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Email Subject</label>
+                                <input type="text" id="emailSubject" placeholder="e.g., Term 1 Examination Results" style="max-width: 500px;">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Email Content</label>
+                                <textarea id="emailContent" rows="10" placeholder="Compose your email here...">
+Dear Parent/Guardian,
+
+We are pleased to share the examination results for your child. The results reflect their performance in the recent examinations.
+
+Please find the attached report card for detailed performance analysis.
+
+Best regards,
+Examination Office
+Alliance Girls High School
+                                </textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Attachments</label>
+                                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f9f9f9; border-radius: 8px;">
+                                        <input type="checkbox" name="attachments" value="report"> Report Cards (PDF)
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f9f9f9; border-radius: 8px;">
+                                        <input type="checkbox" name="attachments" value="summary"> Class Summary
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f9f9f9; border-radius: 8px;">
+                                        <input type="checkbox" name="attachments" value="comments"> Teacher Comments
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                                <button class="btn btn-primary" onclick="sendResultsEmail()">
+                                    <i class="fas fa-paper-plane"></i> Send Emails
+                                </button>
+                                <button class="btn btn-secondary" onclick="previewEmail()">
+                                    <i class="fas fa-eye"></i> Preview
+                                </button>
+                                <button class="btn btn-outline" onclick="saveEmailTemplate()">
+                                    <i class="fas fa-save"></i> Save Template
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="email-templates">
+                            <h3 style="color: var(--primary-green); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-file-alt"></i> Email Templates
+                            </h3>
+                            
+                            <div class="template-list">
+                                ${emailTemplates.map(template => `
+                                    <div class="template-card">
+                                        <h4 style="color: var(--primary-green); margin-bottom: 10px;">${template.name}</h4>
+                                        <p style="color: var(--muted-green); font-size: 0.9rem; margin-bottom: 15px;">Subject: ${template.subject}</p>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span class="status-badge" style="background: ${template.category === 'results' ? '#d4edda' : template.category === 'meeting' ? '#cce5ff' : template.category === 'alert' ? '#f8d7da' : '#fff3cd'}; color: ${template.category === 'results' ? '#155724' : template.category === 'meeting' ? '#004085' : template.category === 'alert' ? '#721c24' : '#856404'}">
+                                                ${template.category}
+                                            </span>
+                                            <div style="display: flex; gap: 10px;">
+                                                <button class="btn btn-sm btn-outline" onclick="loadTemplate(${template.id})">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline" onclick="deleteTemplate(${template.id})">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Examination Office. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function generateDefaultContent(section) {
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-cog"></i> ${section.charAt(0).toUpperCase() + section.slice(1)}</h2>
+                            <div class="section-info">Feature under development</div>
+                        </div>
+                        
+                        <div class="empty-state">
+                            <i class="fas fa-tools" style="font-size: 4rem;"></i>
+                            <h3>${section.charAt(0).toUpperCase() + section.slice(1)} Management</h3>
+                            <p>This feature is currently under development. Check back soon for updates!</p>
+                            <button class="btn btn-primary" style="margin-top: 20px;" onclick="loadDashboardContent('dashboard')">
+                                <i class="fas fa-home"></i> Return to Dashboard
+                            </button>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Examination Office. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Update badge counts
+            function updateBadgeCounts() {
+                const progressBadge = document.getElementById('progressBadge');
+                const emailBadge = document.getElementById('emailBadge');
+                
+                if (progressBadge) {
+                    const formsNeedingAttention = formsStatus.filter(f => f.status !== 'good').length;
+                    progressBadge.textContent = formsNeedingAttention;
+                }
+                
+                if (emailBadge) {
+                    // Mock data for emails pending
+                    emailBadge.textContent = '0';
+                }
+            }
+
+            // Initialize progress bars
+            function initializeProgressBars() {
+                // Progress bars are already initialized in the content generation
+            }
+
+            // Show start exam modal
+            function showStartExamModal() {
+                if (startExamModal) {
+                    startExamModal.classList.add('show');
+                }
+            }
+
+            // Show report modal
+            function showReportModal() {
+                if (reportModal) {
+                    reportModal.classList.add('show');
+                }
+            }
+
+            // Create new exam session
+            async function createNewExamSession() {
+                try {
+                    const name = document.getElementById('newExamName')?.value;
+                    const startDate = document.getElementById('newExamStartDate')?.value;
+                    const endDate = document.getElementById('newExamEndDate')?.value;
+                    
+                    if (!name || !startDate || !endDate) {
+                        alert('Please fill in all required fields');
+                        return;
+                    }
+                    
+                    const selectedForms = Array.from(document.querySelectorAll('input[name="selectedForms"]:checked'))
+                        .map(cb => cb.value);
+                    
+                    if (selectedForms.length === 0) {
+                        alert('Please select at least one form or grade');
+                        return;
+                    }
+                    
+                    // Create new session object
+                    const newSession = {
+                        name: name,
+                        forms: selectedForms,
+                        start_date: startDate,
+                        end_date: endDate,
+                        status: 'active',
+                        progress: 0,
+                        description: document.getElementById('newExamInstructions')?.value || '',
+                        created_at: new Date().toISOString(),
+                        created_by: currentUser?.id || 'examination_office'
+                    };
+                    
+                    // Save to database
+                    const { data, error } = await supabase
+                        .from('exam_sessions')
+                        .insert([newSession])
+                        .select();
+                    
+                    if (error) {
+                        console.error('Error creating exam session:', error);
+                        alert('Failed to create exam session. Please try again.');
+                        return;
+                    }
+                    
+                    // Add to local array
+                    if (data && data[0]) {
+                        examSessions.unshift(data[0]);
+                        activeSession = data[0];
+                        
+                        // Update teacher dashboard
+                        await updateTeacherDashboardSessions(data[0]);
+                        
+                        // Update session-dependent menu items
+                        updateSessionDependentMenuItems(true);
+                        
+                        alert(`Exam session "${name}" has been started successfully!`);
+                        
+                        // Reload content
+                        loadDashboardContent('close-exam');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error in createNewExamSession:', error);
+                    alert('An error occurred while creating the exam session.');
+                }
+            }
+
+            // Close session
+            function closeSessionNow(sessionId, sessionName) {
+                if (!confirm(`Are you sure you want to close the exam session "${sessionName}"? This will lock all marks and update teacher dashboards.`)) {
+                    return;
+                }
+                
+                if (closeExamModal) {
+                    closeExamModal.dataset.sessionId = sessionId;
+                    closeExamModal.dataset.sessionName = sessionName;
+                    closeExamModal.classList.add('show');
+                }
+            }
+
+            // Global functions for onclick handlers
+            window.loadDashboardContent = loadDashboardContent;
+            window.showStartExamModal = showStartExamModal;
+            window.showReportModal = showReportModal;
+            window.createNewExamSession = createNewExamSession;
+            window.closeSessionNow = closeSessionNow;
+            window.viewSessionDetails = async function(id) {
+                const session = examSessions.find(s => s.id === id);
+                if (session) {
+                    const forms = session.forms ? session.forms.join(', ') : 'Not specified';
+                    const startDate = session.start_date || 'Not specified';
+                    const endDate = session.end_date || 'Not specified';
+                    const status = session.status === 'active' ? 'Active' : 'Closed';
+                    const progress = session.progress || 0;
+                    const description = session.description || 'No description';
+                    
+                    alert(`Session Details:\n\nName: ${session.name}\nForms: ${forms}\nDates: ${startDate} to ${endDate}\nStatus: ${status}\nProgress: ${progress}%\nDescription: ${description}`);
+                }
+            };
+            window.closeSession = closeSessionNow;
+            window.viewSessionProgress = function(id) {
+                loadDashboardContent('progress');
+            };
+            window.viewFormDetails = function(formName) {
+                alert(`Detailed view for ${formName} would open here.`);
+            };
+            window.generateClassSummary = function() {
+                alert('Class summary report generation would start here.');
+            };
+            window.generateSubjectReport = function() {
+                alert('Subject performance report generation would start here.');
+            };
+            window.generateComparativeReport = function() {
+                alert('Comparative analysis report generation would start here.');
+            };
+            window.combineResults = function() {
+                alert('Results combination process would start here.');
+            };
+            window.previewCombinedResults = function() {
+                alert('Preview of combined results would show here.');
+            };
+            window.clearCombination = function() {
+                alert('Combination settings cleared.');
+            };
+            window.sendResultsEmail = function() {
+                alert('Email sending process would start here.');
+            };
+            window.previewEmail = function() {
+                alert('Email preview would show here.');
+            };
+            window.saveEmailTemplate = function() {
+                alert('Email template saved successfully!');
+            };
+            window.loadTemplate = function(id) {
+                const template = emailTemplates.find(t => t.id === id);
+                if (template) {
+                    document.getElementById('emailSubject').value = template.subject;
+                    alert(`Template "${template.name}" loaded.`);
+                }
+            };
+            window.deleteTemplate = function(id) {
+                if (confirm('Delete this email template?')) {
+                    alert('Template deleted successfully!');
+                }
+            };
+
+            // Event Listeners for Modals
+            if (startExamModalClose) {
+                startExamModalClose.addEventListener('click', () => {
+                    startExamModal.classList.remove('show');
+                });
+            }
+
+            if (cancelStartExam) {
+                cancelStartExam.addEventListener('click', () => {
+                    startExamModal.classList.remove('show');
+                });
+            }
+
+            if (confirmStartExam) {
+                confirmStartExam.addEventListener('click', async () => {
+                    // Get values from modal
+                    const name = document.getElementById('examSessionName').value;
+                    const startDate = document.getElementById('examStartDate').value;
+                    const endDate = document.getElementById('examEndDate').value;
+                    
+                    if (!name || !startDate || !endDate) {
+                        alert('Please fill in all required fields');
+                        return;
+                    }
+                    
+                    const selectedOptions = Array.from(document.getElementById('examForms').selectedOptions);
+                    const selectedForms = selectedOptions.map(option => option.value);
+                    
+                    if (selectedForms.length === 0) {
+                        alert('Please select at least one form or grade');
+                        return;
+                    }
+                    
+                    // Create new exam session
+                    const newSession = {
+                        name: name,
+                        forms: selectedForms,
+                        start_date: startDate,
+                        end_date: endDate,
+                        status: 'active',
+                        progress: 0,
+                        description: document.getElementById('examDescription').value || '',
+                        created_at: new Date().toISOString(),
+                        created_by: currentUser?.id || 'examination_office'
+                    };
+                    
+                    try {
+                        // Save to database
+                        const { data, error } = await supabase
+                            .from('exam_sessions')
+                            .insert([newSession])
+                            .select();
+                        
+                        if (error) {
+                            console.error('Error creating exam session:', error);
+                            alert('Failed to create exam session. Please try again.');
+                            return;
+                        }
+                        
+                        // Add to local array
+                        if (data && data[0]) {
+                            examSessions.unshift(data[0]);
+                            activeSession = data[0];
+                            
+                            // Update teacher dashboard
+                            await updateTeacherDashboardSessions(data[0]);
+                            
+                            // Update session-dependent menu items
+                            updateSessionDependentMenuItems(true);
+                            
+                            alert(`Exam session "${name}" has been started successfully!`);
+                            
+                            // Close modal
+                            startExamModal.classList.remove('show');
+                            
+                            // Reload dashboard
+                            loadDashboardContent('close-exam');
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error in confirmStartExam:', error);
+                        alert('An error occurred while creating the exam session.');
+                    }
+                });
+            }
+
+            if (closeExamModalClose) {
+                closeExamModalClose.addEventListener('click', () => {
+                    closeExamModal.classList.remove('show');
+                });
+            }
+
+            if (cancelCloseExam) {
+                cancelCloseExam.addEventListener('click', () => {
+                    closeExamModal.classList.remove('show');
+                });
+            }
+
+            if (confirmCloseExam) {
+                confirmCloseExam.addEventListener('click', async () => {
+                    const sessionId = closeExamModal.dataset.sessionId;
+                    const sessionName = closeExamModal.dataset.sessionName;
+                    
+                    if (!sessionId) return;
+                    
+                    try {
+                        // Update session status in database
+                        const { error } = await supabase
+                            .from('exam_sessions')
+                            .update({ 
+                                status: 'closed',
+                                closed_at: new Date().toISOString(),
+                                closing_remarks: document.getElementById('closingRemarks').value || ''
+                            })
+                            .eq('id', sessionId);
+                        
+                        if (error) {
+                            console.error('Error closing exam session:', error);
+                            alert('Failed to close exam session. Please try again.');
+                            return;
+                        }
+                        
+                        // Update local array
+                        const sessionIndex = examSessions.findIndex(s => s.id === sessionId);
+                        if (sessionIndex !== -1) {
+                            examSessions[sessionIndex].status = 'closed';
+                            examSessions[sessionIndex].closed_at = new Date().toISOString();
+                        }
+                        
+                        // Close teacher dashboard sessions
+                        await closeTeacherDashboardSessions(sessionId);
+                        
+                        // Update active session
+                        activeSession = null;
+                        updateSessionDependentMenuItems(false);
+                        
+                        alert(`Exam session "${sessionName}" has been closed successfully!`);
+                        
+                        // Close modal
+                        closeExamModal.classList.remove('show');
+                        
+                        // Reload content
+                        loadDashboardContent('close-exam');
+                        
+                    } catch (error) {
+                        console.error('Error in confirmCloseExam:', error);
+                        alert('An error occurred while closing the exam session.');
+                    }
+                });
+            }
+
+            if (reportModalClose) {
+                reportModalClose.addEventListener('click', () => {
+                    reportModal.classList.remove('show');
+                });
+            }
+
+            if (cancelReport) {
+                cancelReport.addEventListener('click', () => {
+                    reportModal.classList.remove('show');
+                });
+            }
+
+            if (generateReport) {
+                generateReport.addEventListener('click', () => {
+                    const form = document.getElementById('reportForm').value;
+                    const stream = document.getElementById('reportStream').value;
+                    const type = document.getElementById('reportType').value;
+                    
+                    alert(`Generating ${type} report for ${form || 'all forms'}${stream ? `, ${stream} stream` : ''}...`);
+                    reportModal.classList.remove('show');
+                });
+            }
+
+            if (previewReport) {
+                previewReport.addEventListener('click', () => {
+                    alert('Report preview would open in a new window.');
+                });
+            }
+
+            // Close modals when clicking outside
+            document.addEventListener('click', (e) => {
+                if (startExamModal && startExamModal.classList.contains('show') && 
+                    !startExamModal.contains(e.target) && !e.target.closest('#startExamSession')) {
+                    startExamModal.classList.remove('show');
+                }
+                
+                if (closeExamModal && closeExamModal.classList.contains('show') && 
+                    !closeExamModal.contains(e.target)) {
+                    closeExamModal.classList.remove('show');
+                }
+                
+                if (reportModal && reportModal.classList.contains('show') && 
+                    !reportModal.contains(e.target) && !e.target.closest('.report-option')) {
+                    reportModal.classList.remove('show');
+                }
+            });
+
+            // Start exam session link
+            if (startExamSessionLink) {
+                startExamSessionLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    loadDashboardContent('start-exam');
+                });
+            }
+
+            // Initialize dashboard
+            function initializeDashboard() {
+                console.log('Starting examination office dashboard initialization...');
+                
+                // Load user data
+                loadUserData();
+                
+                // Set up event listeners for navigation, profile, etc.
+                setupEventListeners();
+                
+                // Set default dates for modals
+                const today = new Date().toISOString().split('T')[0];
+                const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                
+                if (document.getElementById('examStartDate')) {
+                    document.getElementById('examStartDate').value = today;
+                }
+                if (document.getElementById('examEndDate')) {
+                    document.getElementById('examEndDate').value = nextWeek;
+                }
+                if (document.getElementById('newExamStartDate')) {
+                    document.getElementById('newExamStartDate').value = today;
+                }
+                if (document.getElementById('newExamEndDate')) {
+                    document.getElementById('newExamEndDate').value = nextWeek;
+                }
+                
+                console.log('Examination office dashboard initialization complete');
+            }
+
+            // Setup event listeners
+            function setupEventListeners() {
+                // Hamburger menu
+                if (hamburger) {
+                    hamburger.addEventListener('click', () => {
+                        sidebar.classList.toggle('open');
+                    });
+                }
+
+                // User dropdown
+                if (userProfileTop) {
+                    userProfileTop.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        userDropdown.classList.toggle('show');
+                        dropdownArrow.classList.toggle('fa-chevron-down');
+                        dropdownArrow.classList.toggle('fa-chevron-up');
+                    });
+                }
+
+                // Navigation links
+                if (navLinks.length > 0) {
+                    navLinks.forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            if (link.classList.contains('logout-sidebar')) {
+                                e.preventDefault();
+                                handleLogout();
+                                return;
+                            }
+                            
+                            // Skip the subject management link - it's an external link
+                            if (link.getAttribute('href') === 'subject_management.html') {
+                                return;
+                            }
+                            
+                            e.preventDefault();
+                            
+                            const section = link.getAttribute('data-section');
+                            if (section) {
+                                loadDashboardContent(section);
+                            }
+                            
+                            // Close sidebar on mobile after selection
+                            if (window.innerWidth <= 1024) {
+                                sidebar.classList.remove('open');
+                            }
+                        });
+                    });
+                }
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (userProfileTop && userDropdown && 
+                        !userProfileTop.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                        dropdownArrow.classList.remove('fa-chevron-up');
+                        dropdownArrow.classList.add('fa-chevron-down');
+                    }
+                    
+                    // Close sidebar when clicking outside on mobile
+                    if (window.innerWidth <= 1024 && 
+                        sidebar && sidebar.classList.contains('open') && 
+                        !sidebar.contains(e.target) && 
+                        e.target !== hamburger) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+
+                // Logout handlers
+                if (logoutLink) {
+                    logoutLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        handleLogout();
+                    });
+                }
+
+                if (logoutSidebarLinks.length > 0) {
+                    logoutSidebarLinks.forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            handleLogout();
+                        });
+                    });
+                }
+            }
+
+            // Handle logout
+            async function handleLogout() {
+                if (confirm('Are you sure you want to logout?')) {
+                    try {
+                        const { error } = await supabase.auth.signOut();
+                        if (error) throw error;
+                        
+                        console.log('Logout successful, redirecting to login...');
+                        
+                        // Redirect to login page
+                        window.location.href = 'index.html';
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                        alert('Error during logout. Please try again.');
+                    }
+                }
+            }
+
+            // Start initialization when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initializeDashboard);
+            } else {
+                initializeDashboard();
+            }
+
+        })();
+    </script>
+</body>
+</html>
