@@ -6,6 +6,9 @@
     <title>Alama Hub - Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Add jsPDF library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --primary-green: #075824;
@@ -1874,10 +1877,10 @@
                         </div>
                         <div class="action-buttons">
                             <button class="btn btn-primary" id="saveAllMarks">
-                                <i class="fas fa-save"></i> Save All Marks
+                                <i class="fas fa-save"></i> Send to Exam Office
                             </button>
-                            <button class="btn btn-secondary" id="loadExistingMarks">
-                                <i class="fas fa-sync-alt"></i> Load Existing Marks
+                            <button class="btn btn-secondary" id="generatePDF">
+                                <i class="fas fa-file-pdf"></i> Generate PDF
                             </button>
                             <button class="btn btn-outline" onclick="switchEnterMarksView('subject')">
                                 <i class="fas fa-arrow-left"></i> Back to Subjects
@@ -1937,8 +1940,8 @@
                         <button class="btn btn-outline" id="clearMarksForm">
                             <i class="fas fa-trash"></i> Clear Marks
                         </button>
-                        <button class="btn btn-outline" id="exportMarks">
-                            <i class="fas fa-download"></i> Export Marks
+                        <button class="btn btn-outline" id="loadExistingMarks">
+                            <i class="fas fa-sync-alt"></i> Load Existing Marks
                         </button>
                     </div>
                 </div>
@@ -1996,21 +1999,6 @@
                     <span class="nav-badge" id="marksCount">0</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link" data-section="upload">
-                    <i class="fas fa-upload"></i> Upload to Exam Centre
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link" data-section="reports">
-                    <i class="fas fa-chart-bar"></i> Reports & Analytics
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link" data-section="export">
-                    <i class="fas fa-file-export"></i> Export Data
-                </a>
-            </li>
             
             <li class="nav-section-title">Communication</li>
             <li class="nav-item">
@@ -2023,11 +2011,6 @@
                 <a href="#" class="nav-link" data-section="notifications">
                     <i class="fas fa-bell"></i> Notifications
                     <span class="nav-badge" id="notificationCount">0</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link" data-section="events">
-                    <i class="fas fa-calendar-check"></i> Events & Deadlines
                 </a>
             </li>
             
@@ -2155,10 +2138,10 @@
             const marksStudentCount = document.getElementById('marksStudentCount');
             const marksTableBody = document.getElementById('marksTableBody');
             const saveAllMarks = document.getElementById('saveAllMarks');
+            const generatePDF = document.getElementById('generatePDF');
             const loadExistingMarks = document.getElementById('loadExistingMarks');
             const calculateGrades = document.getElementById('calculateGrades');
             const clearMarksForm = document.getElementById('clearMarksForm');
-            const exportMarks = document.getElementById('exportMarks');
             const examType = document.getElementById('examType');
             const maxScore = document.getElementById('maxScore');
             const examDate = document.getElementById('examDate');
@@ -2175,6 +2158,7 @@
             let studentRows = [];
             let studentCounter = 1;
             let isUpdateMode = false;
+            let totalRegisteredStudents = 0;
             
             // Enter Marks state variables
             let currentMarksForm = null;
@@ -2190,24 +2174,13 @@
             let chatMessages = {};
             let chatUsers = [];
 
-            // Exam Sessions state
+            // Exam Sessions state - UPDATED: Only Form 3, Form 4, Grade 10, Grade 11, Grade 12
             let examForms = [
-                { name: 'Form 1', grade: 'Grade 8', status: 'open', exams: ['Term 1', 'CAT 1'] },
-                { name: 'Form 2', grade: 'Grade 9', status: 'open', exams: ['Term 2', 'CAT 2'] },
-                { name: 'Form 3', grade: 'Grade 10', status: 'closed', exams: [] },
-                { name: 'Form 4', grade: 'Grade 11', status: 'closed', exams: [] },
-                { name: 'Grade 10', grade: 'Grade 10', status: 'open', exams: ['Term 1', 'Mid-Term'] },
-                { name: 'Grade 11', grade: 'Grade 11', status: 'open', exams: ['Term 2', 'CAT 1'] },
-                { name: 'Grade 12', grade: 'Grade 12', status: 'closed', exams: [] },
-                { name: 'Grade 13', grade: 'Grade 13', status: 'open', exams: ['Final', 'Practical'] },
-                { name: 'Form 1E', grade: 'Grade 8E', status: 'open', exams: ['Term 1'] },
-                { name: 'Form 2W', grade: 'Grade 9W', status: 'closed', exams: [] },
-                { name: 'Form 3N', grade: 'Grade 10N', status: 'open', exams: ['CAT 1'] },
-                { name: 'Form 4S', grade: 'Grade 11S', status: 'closed', exams: [] },
-                { name: 'Grade 10A', grade: 'Grade 10A', status: 'open', exams: ['Term 3'] },
-                { name: 'Grade 11B', grade: 'Grade 11B', status: 'closed', exams: [] },
-                { name: 'Grade 12C', grade: 'Grade 12C', status: 'open', exams: ['Main Exam'] },
-                { name: 'Grade 13D', grade: 'Grade 13D', status: 'open', exams: ['Assignment'] }
+                { name: 'Form 3', grade: 'Grade 10', status: 'open', exams: ['Term 1', 'CAT 1', 'Main Exam'] },
+                { name: 'Form 4', grade: 'Grade 11', status: 'open', exams: ['Term 2', 'CAT 2', 'Final'] },
+                { name: 'Grade 10', grade: 'Grade 10', status: 'open', exams: ['Term 1', 'Mid-Term', 'CAT 1'] },
+                { name: 'Grade 11', grade: 'Grade 11', status: 'open', exams: ['Term 2', 'CAT 2', 'Practical'] },
+                { name: 'Grade 12', grade: 'Grade 12', status: 'open', exams: ['Term 3', 'Final', 'Main Exam'] }
             ];
 
             // Function to get user data from Supabase
@@ -2294,6 +2267,9 @@
                     // Load teacher assignments, streams, forms, and subjects
                     await loadTeacherAssignments();
                     
+                    // Load total registered students count
+                    await loadTotalRegisteredStudents();
+                    
                     // Load dashboard content
                     loadDashboardContent();
                     
@@ -2306,6 +2282,36 @@
                     console.log('Using localStorage as fallback:', savedName, savedTSC);
                     updateUserDisplay(savedName, savedTSC, savedImage);
                     currentTeacherTSC = savedTSC;
+                }
+            }
+
+            // Function to load total registered students count
+            async function loadTotalRegisteredStudents() {
+                try {
+                    console.log('Loading total registered students count...');
+                    
+                    if (!currentTeacherTSC || currentTeacherTSC === 'N/A') {
+                        totalRegisteredStudents = 0;
+                        return;
+                    }
+                    
+                    // Count all students registered by this teacher
+                    const { count, error } = await supabase
+                        .from('students')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('teacher_tsc', currentTeacherTSC);
+                    
+                    if (error) {
+                        console.error('Error counting students:', error);
+                        totalRegisteredStudents = 0;
+                    } else {
+                        totalRegisteredStudents = count || 0;
+                        console.log(`Total registered students: ${totalRegisteredStudents}`);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error in loadTotalRegisteredStudents:', error);
+                    totalRegisteredStudents = 0;
                 }
             }
 
@@ -2496,11 +2502,10 @@
                     formCountElement.textContent = teacherForms.length;
                 }
                 
-                // Update marks count badge (estimated students)
+                // Update marks count badge (use total registered students instead of estimation)
                 const marksCountElement = document.getElementById('marksCount');
                 if (marksCountElement) {
-                    const estimatedStudents = teacherStreams.length * 40;
-                    marksCountElement.textContent = estimatedStudents;
+                    marksCountElement.textContent = totalRegisteredStudents;
                 }
                 
                 // Update exam count badge
@@ -2519,7 +2524,8 @@
                     subjects: teacherSubjects.length,
                     forms: teacherForms.length,
                     streams: teacherStreams.length,
-                    assignments: teacherAssignments.length
+                    assignments: teacherAssignments.length,
+                    totalStudents: totalRegisteredStudents
                 });
             }
 
@@ -2711,8 +2717,8 @@
                                             <span class="info-value">${teacherForms.length}</span>
                                         </div>
                                         <div class="info-row">
-                                            <span class="info-label">Estimated Students:</span>
-                                            <span class="info-value">${teacherStreams.length * 40}</span>
+                                            <span class="info-label">Registered Students:</span>
+                                            <span class="info-value">${totalRegisteredStudents}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -2736,8 +2742,8 @@
                                     </div>
                                 </div>
                                 <div class="card-footer">
-                                    <span>View Reports</span>
-                                    <button class="btn btn-outline" onclick="loadDashboardContent('reports')">
+                                    <span>Enter Marks</span>
+                                    <button class="btn btn-outline" onclick="loadDashboardContent('enter-marks')">
                                         <i class="fas fa-arrow-right"></i>
                                     </button>
                                 </div>
@@ -3164,6 +3170,7 @@
                                 <li>Enter exam marks for students in an Excel-like interface</li>
                                 <li>Save marks to the database</li>
                                 <li>View and update existing marks</li>
+                                <li>Generate PDF reports for student confirmation</li>
                             </ul>
                             <p style="color: var(--muted-green); font-style: italic;">
                                 Note: Only students registered in the "Register Students" section will appear here.
@@ -3337,11 +3344,11 @@
                 alert(`Form Details:\n\nForm: ${form.name}\nGrade: ${form.grade}\nStatus: ${form.status === 'open' ? 'Open for Marks Entry' : 'Closed - No Examinations'}\n\n${details}`);
             }
 
-            // Initialize Messaging System
+            // Initialize Messaging System with real teachers
             async function initializeMessaging() {
                 try {
-                    // Load all teachers for messaging
-                    await loadAllTeachers();
+                    // Load all teachers for messaging from database
+                    await loadAllRealTeachers();
                     
                     // Setup event listeners for messaging
                     setupMessagingEvents();
@@ -3354,106 +3361,158 @@
                 }
             }
 
-            // Load all teachers for messaging
-            async function loadAllTeachers() {
+            // Load all real teachers from database for messaging
+            async function loadAllRealTeachers() {
                 try {
-                    console.log('Loading all teachers for messaging...');
+                    console.log('Loading all real teachers for messaging...');
                     
-                    // Get current user's name
-                    const currentUserName = userNameElement.textContent;
+                    // Get current user's ID and TSC
+                    const currentUserTSC = currentTeacherTSC;
                     
-                    // In a real app, you would fetch from Supabase
-                    // For demo, create mock teacher data
-                    chatUsers = [
-                        { id: 1, name: 'John Kamau', tsc: 'TSC12345', status: 'online', unread: 0 },
-                        { id: 2, name: 'Mary Wanjiku', tsc: 'TSC12346', status: 'online', unread: 3 },
-                        { id: 3, name: 'Peter Otieno', tsc: 'TSC12347', status: 'away', unread: 0 },
-                        { id: 4, name: 'Grace Akinyi', tsc: 'TSC12348', status: 'online', unread: 1 },
-                        { id: 5, name: 'David Mwangi', tsc: 'TSC12349', status: 'offline', unread: 0 },
-                        { id: 6, name: 'Sarah Omondi', tsc: 'TSC12350', status: 'online', unread: 0 },
-                        { id: 7, name: 'James Kariuki', tsc: 'TSC12351', status: 'away', unread: 7 },
-                        { id: 8, name: 'Lucy Nyambura', tsc: 'TSC12352', status: 'online', unread: 0 }
-                    ].filter(teacher => teacher.name !== currentUserName);
+                    // Load all teachers from database (excluding current user)
+                    const { data: teachers, error } = await supabase
+                        .from('teachers')
+                        .select('id, full_name, tsc_number, email, profile_image_url')
+                        .neq('tsc_number', currentUserTSC)
+                        .order('full_name', { ascending: true });
+                    
+                    if (error) {
+                        console.error('Error loading teachers:', error);
+                        throw error;
+                    }
+                    
+                    if (!teachers || teachers.length === 0) {
+                        console.log('No other teachers found in database');
+                        chatUsers = [];
+                        return;
+                    }
+                    
+                    console.log(`Loaded ${teachers.length} teachers from database`);
+                    
+                    // Transform teachers data for chat system
+                    chatUsers = teachers.map(teacher => ({
+                        id: teacher.id,
+                        name: teacher.full_name || 'Teacher',
+                        tsc: teacher.tsc_number || 'N/A',
+                        email: teacher.email || '',
+                        profileImage: teacher.profile_image_url || null,
+                        status: 'online', // Default status
+                        unread: 0 // Will be loaded from messages
+                    }));
+                    
+                    // Load unread message counts for each user
+                    await loadUnreadMessageCounts();
                     
                     // Initialize chat messages for each user
-                    chatUsers.forEach(user => {
-                        if (!chatMessages[user.id]) {
-                            chatMessages[user.id] = generateMockChatHistory(user.name);
-                        }
-                    });
+                    await loadChatHistory();
                     
                     // Populate contacts list
                     populateContactsList();
                     
                 } catch (error) {
-                    console.error('Error loading teachers:', error);
+                    console.error('Error loading real teachers:', error);
                     // Create fallback data
-                    chatUsers = [
-                        { id: 1, name: 'Demo Teacher 1', tsc: 'TSC99991', status: 'online', unread: 2 },
-                        { id: 2, name: 'Demo Teacher 2', tsc: 'TSC99992', status: 'online', unread: 0 }
-                    ];
+                    chatUsers = [];
                     populateContactsList();
                 }
             }
 
-            // Generate mock chat history for demo
-            function generateMockChatHistory(teacherName) {
-                const messages = [];
-                const greetings = [
-                    `Hello! How are the ${teacherName.split(' ')[0]} classes going?`,
-                    `Hi there! Do you have the exam timetable for next week?`,
-                    `Good morning! Can we coordinate on the Form 3 field trip?`,
-                    `Hey! Have you submitted the term reports yet?`
-                ];
-                
-                const responses = [
-                    `Hi! Everything is going well, thanks for asking.`,
-                    `Yes, I have the timetable. I'll send it over.`,
-                    `Morning! Yes, let's discuss the field trip details.`,
-                    `Not yet, I'm working on them today.`
-                ];
-                
-                // Add some initial messages
-                messages.push({
-                    id: 1,
-                    sender: teacherName,
-                    text: greetings[Math.floor(Math.random() * greetings.length)],
-                    time: '09:30 AM',
-                    date: '2026-01-08',
-                    isSent: false
-                });
-                
-                messages.push({
-                    id: 2,
-                    sender: userNameElement.textContent,
-                    text: responses[Math.floor(Math.random() * responses.length)],
-                    time: '09:35 AM',
-                    date: '2026-01-08',
-                    isSent: true
-                });
-                
-                // Add a few more messages
-                for (let i = 3; i <= 5; i++) {
-                    const isSent = Math.random() > 0.5;
-                    messages.push({
-                        id: i,
-                        sender: isSent ? userNameElement.textContent : teacherName,
-                        text: isSent ? `Message ${i} from me about school matters.` : `Message ${i} from ${teacherName} regarding collaboration.`,
-                        time: `${10 + i}:${i * 10} AM`,
-                        date: '2026-01-08',
-                        isSent: isSent
+            // Load unread message counts for each teacher
+            async function loadUnreadMessageCounts() {
+                try {
+                    if (!currentUser || !teacherId) return;
+                    
+                    // Load messages where current user is recipient and not read
+                    const { data: unreadMessages, error } = await supabase
+                        .from('teacher_messages')
+                        .select('sender_id')
+                        .eq('recipient_id', teacherId)
+                        .eq('is_read', false);
+                    
+                    if (error) {
+                        console.error('Error loading unread messages:', error);
+                        return;
+                    }
+                    
+                    // Count unread messages per sender
+                    const unreadCounts = {};
+                    unreadMessages.forEach(msg => {
+                        unreadCounts[msg.sender_id] = (unreadCounts[msg.sender_id] || 0) + 1;
                     });
+                    
+                    // Update chat users with unread counts
+                    chatUsers.forEach(user => {
+                        user.unread = unreadCounts[user.id] || 0;
+                    });
+                    
+                } catch (error) {
+                    console.error('Error in loadUnreadMessageCounts:', error);
                 }
-                
-                return messages;
             }
 
-            // Populate contacts list
+            // Load chat history from database
+            async function loadChatHistory() {
+                try {
+                    if (!currentUser || !teacherId) return;
+                    
+                    // Load all messages involving current user
+                    const { data: messages, error } = await supabase
+                        .from('teacher_messages')
+                        .select('*')
+                        .or(`sender_id.eq.${teacherId},recipient_id.eq.${teacherId}`)
+                        .order('created_at', { ascending: true });
+                    
+                    if (error) {
+                        console.error('Error loading chat history:', error);
+                        return;
+                    }
+                    
+                    // Initialize chatMessages object
+                    chatMessages = {};
+                    
+                    // Group messages by conversation (other user)
+                    messages.forEach(message => {
+                        const otherUserId = message.sender_id === teacherId ? 
+                            message.recipient_id : message.sender_id;
+                        
+                        if (!chatMessages[otherUserId]) {
+                            chatMessages[otherUserId] = [];
+                        }
+                        
+                        chatMessages[otherUserId].push({
+                            id: message.id,
+                            sender: message.sender_name,
+                            text: message.message_text,
+                            time: new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                            date: new Date(message.created_at).toISOString().split('T')[0],
+                            isSent: message.sender_id === teacherId,
+                            isRead: message.is_read,
+                            timestamp: new Date(message.created_at)
+                        });
+                    });
+                    
+                } catch (error) {
+                    console.error('Error in loadChatHistory:', error);
+                }
+            }
+
+            // Populate contacts list with real teachers
             function populateContactsList() {
                 const contactsList = document.getElementById('contactsList');
                 if (!contactsList) return;
                 
                 contactsList.innerHTML = '';
+                
+                if (chatUsers.length === 0) {
+                    contactsList.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--muted-green);">
+                            <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                            <h4>No Other Teachers Found</h4>
+                            <p>No other teachers are currently registered in the system.</p>
+                        </div>
+                    `;
+                    return;
+                }
                 
                 chatUsers.forEach(user => {
                     const contactItem = document.createElement('div');
@@ -3466,7 +3525,12 @@
                         : '';
                     
                     contactItem.innerHTML = `
-                        <div class="contact-avatar">${initials}</div>
+                        <div class="contact-avatar">
+                            ${user.profileImage ? 
+                                `<img src="${user.profileImage}" alt="${user.name}">` : 
+                                initials
+                            }
+                        </div>
                         <div class="contact-info">
                             <h4>${user.name}</h4>
                             <p>TSC: ${user.tsc}</p>
@@ -3486,15 +3550,15 @@
             }
 
             // Select a chat user
-            function selectChatUser(user) {
+            async function selectChatUser(user) {
                 currentChatUser = user;
+                
+                // Mark messages as read in database
+                await markMessagesAsRead(user.id);
                 
                 // Update UI
                 updateChatHeader(user);
                 displayChatMessages(user.id);
-                
-                // Mark messages as read
-                markMessagesAsRead(user.id);
                 
                 // Show chat input
                 document.getElementById('messageInputContainer').style.display = 'block';
@@ -3502,10 +3566,50 @@
                 // Update active contact in list
                 document.querySelectorAll('.contact-item').forEach(item => {
                     item.classList.remove('active');
-                    if (parseInt(item.dataset.userId) === user.id) {
+                    if (item.dataset.userId === user.id) {
                         item.classList.add('active');
                     }
                 });
+            }
+
+            // Mark messages as read in database
+            async function markMessagesAsRead(userId) {
+                try {
+                    if (!currentUser || !teacherId) return;
+                    
+                    // Update messages as read in database
+                    const { error } = await supabase
+                        .from('teacher_messages')
+                        .update({ is_read: true })
+                        .eq('sender_id', userId)
+                        .eq('recipient_id', teacherId)
+                        .eq('is_read', false);
+                    
+                    if (error) {
+                        console.error('Error marking messages as read:', error);
+                        return;
+                    }
+                    
+                    // Update local state
+                    const user = chatUsers.find(u => u.id === userId);
+                    if (user) {
+                        user.unread = 0;
+                        updateBadgeCounts();
+                        updateContactList();
+                    }
+                    
+                    // Update chat messages locally
+                    if (chatMessages[userId]) {
+                        chatMessages[userId].forEach(msg => {
+                            if (!msg.isSent) {
+                                msg.isRead = true;
+                            }
+                        });
+                    }
+                    
+                } catch (error) {
+                    console.error('Error in markMessagesAsRead:', error);
+                }
             }
 
             // Update chat header
@@ -3524,7 +3628,11 @@
                                                 user.status === 'away' ? '#f39c12' : '#95a5a6';
                 }
                 if (chatUserAvatar) {
-                    chatUserAvatar.innerHTML = getInitials(user.name);
+                    if (user.profileImage) {
+                        chatUserAvatar.innerHTML = `<img src="${user.profileImage}" alt="${user.name}">`;
+                    } else {
+                        chatUserAvatar.innerHTML = getInitials(user.name);
+                    }
                 }
             }
 
@@ -3548,29 +3656,59 @@
                 
                 chatMessagesContainer.innerHTML = '';
                 
+                // Group messages by date
+                const messagesByDate = {};
                 messages.forEach(message => {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `message ${message.isSent ? 'sent' : 'received'}`;
+                    const date = message.date;
+                    if (!messagesByDate[date]) {
+                        messagesByDate[date] = [];
+                    }
+                    messagesByDate[date].push(message);
+                });
+                
+                // Display messages grouped by date
+                Object.keys(messagesByDate).sort().forEach(date => {
+                    // Add date separator
+                    const dateSeparator = document.createElement('div');
+                    dateSeparator.className = 'message-date-separator';
+                    dateSeparator.style.textAlign = 'center';
+                    dateSeparator.style.margin = '15px 0';
+                    dateSeparator.style.color = 'var(--muted-green)';
+                    dateSeparator.style.fontSize = '0.85rem';
+                    dateSeparator.textContent = formatDate(date);
+                    chatMessagesContainer.appendChild(dateSeparator);
                     
-                    messageDiv.innerHTML = `
-                        <div>${message.text}</div>
-                        <div class="message-time">${message.time} | ${message.date}</div>
-                    `;
-                    
-                    chatMessagesContainer.appendChild(messageDiv);
+                    // Add messages for this date
+                    messagesByDate[date].forEach(message => {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = `message ${message.isSent ? 'sent' : 'received'}`;
+                        
+                        messageDiv.innerHTML = `
+                            <div>${message.text}</div>
+                            <div class="message-time">${message.time}${message.isSent && message.isRead ? ' ✓✓' : ''}</div>
+                        `;
+                        
+                        chatMessagesContainer.appendChild(messageDiv);
+                    });
                 });
                 
                 // Scroll to bottom
                 chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
             }
 
-            // Mark messages as read
-            function markMessagesAsRead(userId) {
-                const user = chatUsers.find(u => u.id === userId);
-                if (user) {
-                    user.unread = 0;
-                    updateBadgeCounts();
-                    updateContactList();
+            // Format date for display
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                const today = new Date();
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (date.toDateString() === today.toDateString()) {
+                    return 'Today';
+                } else if (date.toDateString() === yesterday.toDateString()) {
+                    return 'Yesterday';
+                } else {
+                    return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                 }
             }
 
@@ -3581,7 +3719,7 @@
                 
                 const contactItems = contactsList.querySelectorAll('.contact-item');
                 contactItems.forEach(item => {
-                    const userId = parseInt(item.dataset.userId);
+                    const userId = item.dataset.userId;
                     const user = chatUsers.find(u => u.id === userId);
                     if (user) {
                         const unreadBadge = item.querySelector('.unread-count');
@@ -3616,10 +3754,10 @@
                 const messageInput = document.getElementById('messageInput');
                 
                 if (sendButton && messageInput) {
-                    const sendMessageHandler = () => {
+                    const sendMessageHandler = async () => {
                         const message = messageInput.value.trim();
                         if (message && currentChatUser) {
-                            sendMessage(message);
+                            await sendRealMessage(message);
                             messageInput.value = '';
                         }
                     };
@@ -3636,9 +3774,9 @@
                 // Clear chat
                 const clearChatButton = document.getElementById('clearChat');
                 if (clearChatButton) {
-                    clearChatButton.addEventListener('click', () => {
+                    clearChatButton.addEventListener('click', async () => {
                         if (currentChatUser && confirm('Clear chat history with this user?')) {
-                            clearChat(currentChatUser.id);
+                            await clearChatHistory(currentChatUser.id);
                         }
                     });
                 }
@@ -3652,73 +3790,103 @@
                 }
             }
 
-            // Send a message
-            function sendMessage(text) {
-                if (!currentChatUser || !text.trim()) return;
+            // Send a real message to database
+            async function sendRealMessage(text) {
+                if (!currentChatUser || !text.trim() || !currentUser || !teacherId) return;
                 
-                const newMessage = {
-                    id: Date.now(),
-                    sender: userNameElement.textContent,
-                    text: text,
-                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    date: new Date().toISOString().split('T')[0],
-                    isSent: true
-                };
-                
-                // Add to messages
-                if (!chatMessages[currentChatUser.id]) {
-                    chatMessages[currentChatUser.id] = [];
-                }
-                chatMessages[currentChatUser.id].push(newMessage);
-                
-                // Display the message
-                displayChatMessages(currentChatUser.id);
-                
-                // Simulate a response after 1-3 seconds
-                setTimeout(() => {
-                    simulateResponse(currentChatUser);
-                }, 1000 + Math.random() * 2000);
-                
-                // Update unread count for the other user
-                const otherUser = chatUsers.find(u => u.id === currentChatUser.id);
-                if (otherUser) {
-                    otherUser.unread++;
-                    updateBadgeCounts();
-                    updateContactList();
+                try {
+                    const messageData = {
+                        sender_id: teacherId,
+                        sender_name: userNameElement.textContent,
+                        recipient_id: currentChatUser.id,
+                        recipient_name: currentChatUser.name,
+                        message_text: text,
+                        is_read: false
+                    };
+                    
+                    // Insert message into database
+                    const { data: newMessage, error } = await supabase
+                        .from('teacher_messages')
+                        .insert([messageData])
+                        .select()
+                        .single();
+                    
+                    if (error) {
+                        console.error('Error sending message:', error);
+                        alert('Failed to send message. Please try again.');
+                        return;
+                    }
+                    
+                    // Add message to local state
+                    const message = {
+                        id: newMessage.id,
+                        sender: userNameElement.textContent,
+                        text: text,
+                        time: new Date(newMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        date: new Date(newMessage.created_at).toISOString().split('T')[0],
+                        isSent: true,
+                        isRead: false,
+                        timestamp: new Date(newMessage.created_at)
+                    };
+                    
+                    // Add to local chat messages
+                    if (!chatMessages[currentChatUser.id]) {
+                        chatMessages[currentChatUser.id] = [];
+                    }
+                    chatMessages[currentChatUser.id].push(message);
+                    
+                    // Update recipient's unread count
+                    const recipientUser = chatUsers.find(u => u.id === currentChatUser.id);
+                    if (recipientUser) {
+                        recipientUser.unread++;
+                        updateBadgeCounts();
+                        updateContactList();
+                    }
+                    
+                    // Display the message
+                    displayChatMessages(currentChatUser.id);
+                    
+                    console.log('Message sent successfully:', newMessage.id);
+                    
+                } catch (error) {
+                    console.error('Error in sendRealMessage:', error);
+                    alert('Error sending message. Please try again.');
                 }
             }
 
-            // Simulate a response
-            function simulateResponse(user) {
-                const responses = [
-                    "Thanks for your message!",
-                    "I'll get back to you on that.",
-                    "Sounds good, let's discuss this further.",
-                    "I agree with your suggestion.",
-                    "Can we meet tomorrow to discuss this?",
-                    "I'll check and get back to you."
-                ];
-                
-                const response = responses[Math.floor(Math.random() * responses.length)];
-                
-                const responseMessage = {
-                    id: Date.now() + 1,
-                    sender: user.name,
-                    text: response,
-                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    date: new Date().toISOString().split('T')[0],
-                    isSent: false
-                };
-                
-                chatMessages[user.id].push(responseMessage);
-                displayChatMessages(user.id);
-            }
-
-            // Clear chat history
-            function clearChat(userId) {
-                if (chatMessages[userId]) {
+            // Clear chat history from database
+            async function clearChatHistory(userId) {
+                try {
+                    if (!currentUser || !teacherId) return;
+                    
+                    // Delete messages between current user and selected user
+                    const { error } = await supabase
+                        .from('teacher_messages')
+                        .delete()
+                        .or(`and(sender_id.eq.${teacherId},recipient_id.eq.${userId}),and(sender_id.eq.${userId},recipient_id.eq.${teacherId})`);
+                    
+                    if (error) {
+                        console.error('Error clearing chat:', error);
+                        alert('Failed to clear chat history.');
+                        return;
+                    }
+                    
+                    // Clear local messages
                     chatMessages[userId] = [];
                     displayChatMessages(userId);
+                    
+                    // Reset unread count
+                    const user = chatUsers.find(u => u.id === userId);
+                    if (user) {
+                        user.unread = 0;
+                        updateBadgeCounts();
+                        updateContactList();
+                    }
+                    
+                    console.log('Chat history cleared successfully');
+                    
+                } catch (error) {
+                    console.error('Error in clearChatHistory:', error);
                 }
             }
 
@@ -3743,9 +3911,15 @@
 
             // Load initial chat data
             function loadInitialChatData() {
-                // Select first user by default if available
+                // Select first user by default if available and has unread messages
                 if (chatUsers.length > 0) {
-                    selectChatUser(chatUsers[0]);
+                    // Find user with unread messages first
+                    const userWithUnread = chatUsers.find(user => user.unread > 0);
+                    if (userWithUnread) {
+                        selectChatUser(userWithUnread);
+                    } else if (chatUsers.length > 0) {
+                        selectChatUser(chatUsers[0]);
+                    }
                 }
             }
 
@@ -4904,7 +5078,6 @@
                         form_grade: currentSelectedForm || 'Not specified',
                         teacher_tsc: currentTeacherTSC,
                         teacher_name: userNameElement.textContent.trim()
-                        // REMOVED school_id: 'AGHS' completely - it's causing the error!
                     };
                     
                     // Validate data before saving
@@ -4962,7 +5135,7 @@
                             studentRows[rowIndex].isNew = false;
                             result = 'updated';
                         } else {
-                            // Insert new student - FIXED: removed school_id from insert
+                            // Insert new student
                             const { data, error } = await supabase
                                 .from('students')
                                 .insert([studentData])
@@ -5028,6 +5201,10 @@
                     
                     // Update student count
                     updateStudentCount();
+                    
+                    // Update total registered students count
+                    await loadTotalRegisteredStudents();
+                    updateBadgeCounts();
                     
                 } catch (error) {
                     console.error('Error saving student:', error);
@@ -5221,6 +5398,10 @@
                     // Update student count
                     updateStudentCount();
                     
+                    // Update total registered students count
+                    await loadTotalRegisteredStudents();
+                    updateBadgeCounts();
+                    
                     console.log('Student deleted successfully!');
                     
                 } catch (error) {
@@ -5337,7 +5518,6 @@
                             form_grade: currentSelectedForm || 'Not specified',
                             teacher_tsc: currentTeacherTSC,
                             teacher_name: userNameElement.textContent.trim()
-                            // REMOVED school_id: 'AGHS' completely
                         };
                         
                         const error = validateStudentData(studentData);
@@ -5395,7 +5575,7 @@
                     if (studentsToInsert.length > 0) {
                         for (const studentData of studentsToInsert) {
                             try {
-                                // Try to insert - FIXED: no school_id in insert
+                                // Try to insert
                                 const { data, error } = await supabase
                                     .from('students')
                                     .insert([studentData])
@@ -5447,6 +5627,8 @@
                     // Reload students to get updated IDs
                     if (savedCount > 0 || updatedCount > 0) {
                         await loadExistingStudents(currentSelectedStream);
+                        await loadTotalRegisteredStudents();
+                        updateBadgeCounts();
                     }
                     
                     // Show summary
@@ -5477,7 +5659,7 @@
                 }
             }
 
-            // Function to save all marks
+            // Function to save all marks - UPDATED TO CLEAR MARKS AFTER SAVING
             async function saveAllMarksToDatabase() {
                 // Save button reference for later
                 const saveButton = saveAllMarks;
@@ -5586,7 +5768,12 @@
                         }
                     });
                     
-                    alert(`${marksToSave.length} marks saved successfully!`);
+                    // Clear marks from input fields to prepare for next entry
+                    setTimeout(() => {
+                        clearMarksAfterSave();
+                    }, 500);
+                    
+                    alert(`${marksToSave.length} marks saved successfully!\n\nMarks have been cleared from the form. You can now enter marks for the next subject or exam.`);
                     
                 } catch (error) {
                     console.error('Error in saveAllMarksToDatabase:', error);
@@ -5594,7 +5781,177 @@
                 } finally {
                     // Restore button state
                     saveButton.disabled = false;
-                    saveButton.innerHTML = '<i class="fas fa-save"></i> Save All Marks';
+                    saveButton.innerHTML = '<i class="fas fa-save"></i> Send to exam office';
+                }
+            }
+
+            // Function to clear marks after saving
+            function clearMarksAfterSave() {
+                marksRows.forEach(row => {
+                    row.marks = '';
+                    row.grade = '';
+                    row.status = 'Pending';
+                    
+                    const marksInput = document.querySelector(`#${row.id} .marks-input`);
+                    const gradeInput = document.querySelector(`#${row.id} .grade-input`);
+                    const statusElement = document.getElementById(`status-${row.id}`);
+                    
+                    if (marksInput) marksInput.value = '';
+                    if (gradeInput) gradeInput.value = '';
+                    if (statusElement) {
+                        statusElement.textContent = 'Pending';
+                        statusElement.style.backgroundColor = '#fff3cd';
+                        statusElement.style.color = '#856404';
+                    }
+                });
+                
+                // Focus on first marks input for quick entry
+                const firstMarksInput = marksTableBody.querySelector('.marks-input');
+                if (firstMarksInput) {
+                    setTimeout(() => {
+                        firstMarksInput.focus();
+                    }, 100);
+                }
+            }
+
+            // Function to generate PDF report
+            function generatePDFReport() {
+                try {
+                    if (marksRows.length === 0) {
+                        alert('No marks to generate PDF for');
+                        return;
+                    }
+                    
+                    // Filter rows with marks
+                    const rowsWithMarks = marksRows.filter(row => row.marks && row.marks !== '');
+                    
+                    if (rowsWithMarks.length === 0) {
+                        alert('No marks entered to generate PDF');
+                        return;
+                    }
+                    
+                    // Initialize jsPDF
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF('portrait', 'mm', 'a4');
+                    
+                    // Add school logo/header
+                    doc.setFillColor(7, 88, 36); // Primary green
+                    doc.rect(0, 0, 210, 30, 'F');
+                    
+                    // School title
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(20);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Alliance Girls High School', 105, 15, { align: 'center' });
+                    
+                    // Subtitle
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('Exam Marks Report - For Student Confirmation', 105, 22, { align: 'center' });
+                    
+                    // Reset text color
+                    doc.setTextColor(0, 0, 0);
+                    
+                    // Add report details
+                    const reportDetails = [
+                        `Subject: ${currentMarksSubject}`,
+                        `Stream: ${currentMarksStream}`,
+                        `Form: ${currentMarksForm}`,
+                        `Exam Type: ${examType.value}`,
+                        `Exam Date: ${examDate.value}`,
+                        `Maximum Score: ${maxScore.value}`,
+                        `Teacher: ${userNameElement.textContent} (TSC: ${currentTeacherTSC})`,
+                        `Report Generated: ${new Date().toLocaleDateString()}`
+                    ];
+                    
+                    doc.setFontSize(10);
+                    let yPos = 40;
+                    reportDetails.forEach(detail => {
+                        doc.text(detail, 15, yPos);
+                        yPos += 6;
+                    });
+                    
+                    // Add a line separator
+                    yPos += 4;
+                    doc.setDrawColor(7, 88, 36);
+                    doc.setLineWidth(0.5);
+                    doc.line(15, yPos, 195, yPos);
+                    yPos += 8;
+                    
+                    // Create table data
+                    const tableData = rowsWithMarks.map((row, index) => [
+                        (index + 1).toString(),
+                        row.admissionNo.toString(),
+                        row.studentName,
+                        row.marks.toString(),
+                        row.grade || 'N/A',
+                        `${((parseFloat(row.marks) / row.maxScore) * 100).toFixed(1)}%`
+                    ]);
+                    
+                    // Add table header
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Marks Summary', 105, yPos, { align: 'center' });
+                    yPos += 8;
+                    
+                    // Create table
+                    doc.autoTable({
+                        startY: yPos,
+                        head: [['#', 'Admission No.', 'Student Name', 'Marks', 'Grade', 'Percentage']],
+                        body: tableData,
+                        theme: 'striped',
+                        headStyles: { 
+                            fillColor: [7, 88, 36],
+                            textColor: [255, 255, 255],
+                            fontSize: 10
+                        },
+                        bodyStyles: { fontSize: 9 },
+                        alternateRowStyles: { fillColor: [240, 240, 240] },
+                        margin: { left: 15, right: 15 }
+                    });
+                    
+                    // Add statistics
+                    const finalY = doc.lastAutoTable.finalY + 15;
+                    const totalStudents = rowsWithMarks.length;
+                    const averageMarks = rowsWithMarks.reduce((sum, row) => sum + parseFloat(row.marks), 0) / totalStudents;
+                    const averagePercentage = (averageMarks / parseInt(maxScore.value)) * 100;
+                    const highestMarks = Math.max(...rowsWithMarks.map(row => parseFloat(row.marks)));
+                    const lowestMarks = Math.min(...rowsWithMarks.map(row => parseFloat(row.marks)));
+                    
+                    doc.setFontSize(11);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Statistics:', 15, finalY);
+                    
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Total Students: ${totalStudents}`, 15, finalY + 8);
+                    doc.text(`Average Marks: ${averageMarks.toFixed(2)}/${maxScore.value} (${averagePercentage.toFixed(1)}%)`, 15, finalY + 16);
+                    doc.text(`Highest Marks: ${highestMarks}`, 15, finalY + 24);
+                    doc.text(`Lowest Marks: ${lowestMarks}`, 15, finalY + 32);
+                    
+                    // Add footer note
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'italic');
+                    doc.setTextColor(100, 100, 100);
+                    doc.text('This report is for student confirmation purposes only. Please verify the marks with your teacher if you have any concerns.', 
+                             15, finalY + 45, { maxWidth: 180 });
+                    
+                    // Add teacher signature area
+                    doc.setFontSize(10);
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('Teacher\'s Signature: ___________________________', 15, finalY + 60);
+                    doc.text('Date: ___________________________', 15, finalY + 70);
+                    
+                    // Save the PDF
+                    const fileName = `Marks_Report_${currentMarksSubject}_${currentMarksStream}_${examType.value}_${new Date().toISOString().split('T')[0]}.pdf`;
+                    doc.save(fileName);
+                    
+                    console.log('PDF generated successfully:', fileName);
+                    
+                } catch (error) {
+                    console.error('Error generating PDF:', error);
+                    alert('Error generating PDF. Please try again.');
                 }
             }
 
@@ -5645,61 +6002,6 @@
                     // For other browsers
                     link.href = URL.createObjectURL(blob);
                     const filename = `students_${currentSelectedStream.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
-                    link.download = filename;
-                    link.click();
-                }
-            }
-
-            // Function to export marks to CSV
-            function exportMarksToCSV() {
-                if (marksRows.length === 0) {
-                    alert('No marks to export');
-                    return;
-                }
-                
-                // Filter rows that have marks
-                const rowsToExport = marksRows.filter(row => row.marks && row.marks !== '');
-                
-                if (rowsToExport.length === 0) {
-                    alert('No marks entered to export');
-                    return;
-                }
-                
-                // Create CSV content
-                const headers = ['Admission No.', 'Student Name', 'Subject', 'Stream', 'Form', 'Exam Type', 'Marks Obtained', 'Max Score', 'Percentage', 'Grade', 'Exam Date', 'Teacher', 'TSC Number'];
-                const csvRows = [headers.join(',')];
-                
-                rowsToExport.forEach(row => {
-                    const percentage = row.marks ? ((parseFloat(row.marks) / row.maxScore) * 100).toFixed(2) : '';
-                    
-                    const csvRow = [
-                        `"${row.admissionNo}"`,
-                        `"${row.studentName}"`,
-                        `"${currentMarksSubject}"`,
-                        `"${currentMarksStream}"`,
-                        `"${currentMarksForm}"`,
-                        `"${examType.value}"`,
-                        row.marks,
-                        row.maxScore,
-                        percentage,
-                        `"${row.grade || ''}"`,
-                        `"${examDate.value}"`,
-                        `"${userNameElement.textContent}"`,
-                        `"${currentTeacherTSC}"`
-                    ];
-                    csvRows.push(csvRow.join(','));
-                });
-                
-                const csvContent = csvRows.join('\n');
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                
-                const filename = `marks_${currentMarksSubject}_${currentMarksStream}_${examType.value}_${new Date().toISOString().split('T')[0]}.csv`;
-                
-                if (navigator.msSaveBlob) {
-                    navigator.msSaveBlob(blob, filename);
-                } else {
-                    link.href = URL.createObjectURL(blob);
                     link.download = filename;
                     link.click();
                 }
@@ -5801,6 +6103,7 @@
             window.calculateGradeForRow = calculateGradeForRow;
             window.calculateAllGrades = calculateAllGrades;
             window.showFormDetails = showFormDetails;
+            window.generatePDFReport = generatePDFReport;
 
             // Event Listeners for Stream Modal
             if (streamModalClose) {
@@ -5888,6 +6191,11 @@
                 saveAllMarks.addEventListener('click', saveAllMarksToDatabase);
             }
             
+            // Generate PDF button
+            if (generatePDF) {
+                generatePDF.addEventListener('click', generatePDFReport);
+            }
+            
             // Load Existing Marks button
             if (loadExistingMarks) {
                 loadExistingMarks.addEventListener('click', loadExistingMarksFromDatabase);
@@ -5901,11 +6209,6 @@
             // Clear Marks button
             if (clearMarksForm) {
                 clearMarksForm.addEventListener('click', clearMarksFormData);
-            }
-            
-            // Export Marks button
-            if (exportMarks) {
-                exportMarks.addEventListener('click', exportMarksToCSV);
             }
             
             // When exam type changes, reload marks
