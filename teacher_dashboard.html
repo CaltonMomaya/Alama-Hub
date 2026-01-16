@@ -513,262 +513,6 @@
             gap: 10px;
         }
 
-        /* Messaging System */
-        .messages-container {
-            display: flex;
-            gap: 20px;
-            height: 70vh;
-            background: white;
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
-        }
-
-        .contacts-sidebar {
-            width: 300px;
-            border-right: 1px solid #eee;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .contacts-header {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            background-color: var(--primary-green);
-            color: white;
-        }
-
-        .contacts-header h3 {
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .search-contacts {
-            margin-top: 15px;
-        }
-
-        .search-contacts input {
-            width: 100%;
-            padding: 10px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: white;
-        }
-
-        .search-contacts input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .contacts-list {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .contact-item {
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .contact-item:hover {
-            background-color: rgba(7, 88, 36, 0.05);
-        }
-
-        .contact-item.active {
-            background-color: rgba(7, 88, 36, 0.1);
-        }
-
-        .contact-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-green), var(--accent-green));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 1rem;
-            overflow: hidden;
-        }
-
-        .contact-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .contact-info h4 {
-            color: var(--primary-green);
-            font-size: 0.95rem;
-            margin-bottom: 3px;
-        }
-
-        .contact-info p {
-            color: var(--muted-green);
-            font-size: 0.8rem;
-            text-align: left;
-        }
-
-        .contact-status {
-            margin-left: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 5px;
-        }
-
-        .unread-count {
-            background-color: var(--accent-green);
-            color: white;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 10px;
-            min-width: 20px;
-            text-align: center;
-        }
-
-        .status-indicator {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: #cccccc;
-        }
-
-        .status-indicator.online {
-            background-color: #2ecc71;
-        }
-
-        .status-indicator.away {
-            background-color: #f39c12;
-        }
-
-        .chat-window {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-header {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .chat-header-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            background-color: #f9f9f9;
-        }
-
-        .message {
-            max-width: 70%;
-            padding: 12px 15px;
-            border-radius: 18px;
-            position: relative;
-            line-height: 1.4;
-        }
-
-        .message.sent {
-            align-self: flex-end;
-            background-color: var(--primary-green);
-            color: white;
-            border-bottom-right-radius: 5px;
-        }
-
-        .message.received {
-            align-self: flex-start;
-            background-color: white;
-            color: #333;
-            border-bottom-left-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .message-time {
-            font-size: 0.75rem;
-            opacity: 0.7;
-            margin-top: 5px;
-            text-align: right;
-        }
-
-        .message-input-container {
-            padding: 20px;
-            border-top: 1px solid #eee;
-            background: white;
-        }
-
-        .message-input-wrapper {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .message-input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 25px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .message-input:focus {
-            outline: none;
-            border-color: var(--accent-green);
-        }
-
-        .send-button {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background-color: var(--primary-green);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s ease;
-        }
-
-        .send-button:hover {
-            background-color: var(--secondary-green);
-        }
-
-        .no-chat-selected {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            color: var(--muted-green);
-        }
-
-        .no-chat-selected i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-
         /* Subject and Form Info */
         .subject-info, .form-info {
             display: flex;
@@ -1016,6 +760,39 @@
             display: flex;
             justify-content: flex-end;
             gap: 15px;
+        }
+
+        /* Password Change Modal */
+        .password-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2001;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-modal.show {
+            display: flex;
+        }
+
+        .password-input-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--muted-green);
+            cursor: pointer;
         }
 
         /* Stream Selection Modal - UPDATED TO 3/4 WIDTH */
@@ -1501,16 +1278,6 @@
             .exam-sessions-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
-            .messages-container {
-                flex-direction: column;
-                height: 80vh;
-            }
-            
-            .contacts-sidebar {
-                width: 100%;
-                height: 300px;
-            }
         }
 
         @media (max-width: 768px) {
@@ -1651,10 +1418,7 @@
         
         <div class="user-profile-top" id="userProfileTop">
             <div class="user-avatar-top" id="userAvatar">
-                <img id="profileImage" alt="Profile Picture" onerror="this.style.display='none'">
-                <div class="profile-upload-overlay" id="profileUploadTrigger">
-                    <i class="fas fa-camera"></i>
-                </div>
+                <!-- Profile image will be dynamically added here -->
             </div>
             <div class="user-info-top">
                 <h4 id="userName">Loading...</h4>
@@ -1669,6 +1433,9 @@
             <a href="#" class="dropdown-item" id="editProfileLink">
                 <i class="fas fa-user-edit"></i> Edit Profile
             </a>
+            <a href="#" class="dropdown-item" id="changePasswordLink">
+                <i class="fas fa-key"></i> Change Password
+            </a>
             <a href="#" class="dropdown-item">
                 <i class="fas fa-cog"></i> Settings
             </a>
@@ -1682,11 +1449,11 @@
         </div>
     </div>
 
-    <!-- Profile Picture Modal -->
+    <!-- Profile Picture Modal - ENHANCED -->
     <div class="profile-modal" id="profileModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-user-circle"></i> Update Profile Picture</h3>
+                <h3><i class="fas fa-user-circle"></i> Update Profile</h3>
                 <button class="modal-close" id="modalClose">&times;</button>
             </div>
             <div class="modal-body">
@@ -1708,17 +1475,73 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Profile Information</label>
+                    <label>Full Name</label>
                     <input type="text" id="editFullName" placeholder="Full Name">
                 </div>
                 
                 <div class="form-group">
+                    <label>TSC Number</label>
                     <input type="text" id="editTSC" placeholder="TSC Number">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="editEmail" placeholder="Email Address" disabled style="background-color: #f5f5f5;">
+                    <small style="color: var(--muted-green); font-size: 0.85rem;">Email cannot be changed. Contact admin.</small>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" id="cancelProfileUpdate">Cancel</button>
                 <button class="btn btn-primary" id="saveProfileUpdate">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div class="profile-modal" id="passwordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> Change Password</h3>
+                <button class="modal-close" id="passwordModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <div class="password-input-container">
+                        <input type="password" id="currentPassword" placeholder="Enter current password">
+                        <button type="button" class="toggle-password" data-target="currentPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>New Password</label>
+                    <div class="password-input-container">
+                        <input type="password" id="newPassword" placeholder="Enter new password">
+                        <button type="button" class="toggle-password" data-target="newPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <small style="color: var(--muted-green); font-size: 0.85rem;">Password must be at least 8 characters</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <div class="password-input-container">
+                        <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                        <button type="button" class="toggle-password" data-target="confirmPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="passwordError" style="color: #e74c3c; font-size: 0.9rem; margin-top: 15px; display: none;"></div>
+                <div id="passwordSuccess" style="color: #2ecc71; font-size: 0.9rem; margin-top: 15px; display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelPasswordChange">Cancel</button>
+                <button class="btn btn-primary" id="savePasswordChange">Change Password</button>
             </div>
         </div>
     </div>
@@ -1910,7 +1733,7 @@
                         </div>
                         <div style="flex: 1; min-width: 200px;">
                             <label style="display: block; margin-bottom: 5px; color: var(--primary-green); font-weight: 600;">Exam Date:</label>
-                            <input type="date" id="examDate" class="editable-cell" style="width: 100%;" value="${new Date().toISOString().split('T')[0]}">
+                            <input type="date" id="examDate" class="editable-cell" style="width: 100%;">
                         </div>
                     </div>
                     
@@ -2000,20 +1823,6 @@
                 </a>
             </li>
             
-            <li class="nav-section-title">Communication</li>
-            <li class="nav-item">
-                <a href="#" class="nav-link" data-section="messages">
-                    <i class="fas fa-comments"></i> Messages
-                    <span class="nav-badge" id="messageCount">0</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link" data-section="notifications">
-                    <i class="fas fa-bell"></i> Notifications
-                    <span class="nav-badge" id="notificationCount">0</span>
-                </a>
-            </li>
-            
             <li class="nav-section-title">Account</li>
             <li class="nav-item">
                 <a href="#" class="nav-link" data-section="settings">
@@ -2080,18 +1889,28 @@
             const userTSCElement = document.getElementById('userTSC');
             const pageTitleElement = document.getElementById('pageTitle');
             const pageSubtitleElement = document.getElementById('pageSubtitle');
-            const profileImageElement = document.getElementById('profileImage');
             const profileUploadTrigger = document.getElementById('profileUploadTrigger');
             const editProfileLink = document.getElementById('editProfileLink');
+            const changePasswordLink = document.getElementById('changePasswordLink');
             const profileModal = document.getElementById('profileModal');
+            const passwordModal = document.getElementById('passwordModal');
             const modalClose = document.getElementById('modalClose');
             const cancelProfileUpdate = document.getElementById('cancelProfileUpdate');
             const saveProfileUpdate = document.getElementById('saveProfileUpdate');
+            const passwordModalClose = document.getElementById('passwordModalClose');
+            const cancelPasswordChange = document.getElementById('cancelPasswordChange');
+            const savePasswordChange = document.getElementById('savePasswordChange');
             const profilePreviewImg = document.getElementById('profilePreviewImg');
             const fileUploadArea = document.getElementById('fileUploadArea');
             const profileImageInput = document.getElementById('profileImageInput');
             const editFullName = document.getElementById('editFullName');
             const editTSC = document.getElementById('editTSC');
+            const editEmail = document.getElementById('editEmail');
+            const currentPassword = document.getElementById('currentPassword');
+            const newPassword = document.getElementById('newPassword');
+            const confirmPassword = document.getElementById('confirmPassword');
+            const passwordError = document.getElementById('passwordError');
+            const passwordSuccess = document.getElementById('passwordSuccess');
             const mainContent = document.getElementById('mainContent');
             
             // Stream modal elements
@@ -2168,11 +1987,9 @@
             let marksCounter = 1;
             let studentsForMarks = [];
 
-            // Messaging state variables
-            let allTeachers = [];
-            let currentChatUser = null;
-            let chatMessages = {};
-            let chatUsers = [];
+            // Get today's date in YYYY-MM-DD format
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
 
             // Exam Sessions state - UPDATED: Only Form 3, Form 4, Grade 10, Grade 11, Grade 12
             let examForms = [
@@ -2233,7 +2050,8 @@
                             updateUserDisplay(
                                 authUserData.full_name || 'Teacher',
                                 authUserData.tsc_number || 'N/A',
-                                authUserData.profile_image_url || null
+                                authUserData.profile_image_url || null,
+                                user.email
                             );
                             currentTeacherTSC = authUserData.tsc_number || 'N/A';
                         } else {
@@ -2243,7 +2061,8 @@
                             updateUserDisplay(
                                 teacherByEmail.full_name || 'Teacher',
                                 teacherByEmail.tsc_number || 'N/A',
-                                teacherByEmail.profile_image_url || null
+                                teacherByEmail.profile_image_url || null,
+                                teacherByEmail.email || user.email
                             );
                             currentTeacherTSC = teacherByEmail.tsc_number || 'N/A';
                         }
@@ -2253,7 +2072,8 @@
                         updateUserDisplay(
                             teacherData.full_name || 'Teacher',
                             teacherData.tsc_number || 'N/A',
-                            teacherData.profile_image_url || null
+                            teacherData.profile_image_url || null,
+                            teacherData.email || user.email
                         );
                         currentTeacherTSC = teacherData.tsc_number || 'N/A';
                     }
@@ -2279,10 +2099,17 @@
                     const savedName = localStorage.getItem('teacherName') || 'Teacher';
                     const savedTSC = localStorage.getItem('teacherTSC') || 'N/A';
                     const savedImage = localStorage.getItem('teacherProfileImage') || null;
+                    const savedEmail = localStorage.getItem('teacherEmail') || 'teacher@school.com';
                     console.log('Using localStorage as fallback:', savedName, savedTSC);
-                    updateUserDisplay(savedName, savedTSC, savedImage);
+                    updateUserDisplay(savedName, savedTSC, savedImage, savedEmail);
                     currentTeacherTSC = savedTSC;
                 }
+            }
+
+            // Function to redirect to login
+            function redirectToLogin() {
+                console.log('Redirecting to login page...');
+                window.location.href = 'index.html';
             }
 
             // Function to load total registered students count
@@ -2514,12 +2341,6 @@
                     examCountElement.textContent = examForms.filter(form => form.status === 'open').length;
                 }
                 
-                // Update message count badge
-                const messageCountElement = document.getElementById('messageCount');
-                if (messageCountElement) {
-                    messageCountElement.textContent = getUnreadMessageCount();
-                }
-                
                 console.log('Badge counts updated:', {
                     subjects: teacherSubjects.length,
                     forms: teacherForms.length,
@@ -2527,48 +2348,6 @@
                     assignments: teacherAssignments.length,
                     totalStudents: totalRegisteredStudents
                 });
-            }
-
-            // Function to update user display
-            function updateUserDisplay(fullName, tscNumber, profileImageUrl) {
-                console.log('Updating UI with:', {fullName, tscNumber, profileImageUrl});
-                
-                // Get initials for avatar
-                const initials = getInitials(fullName);
-                
-                // Update all display elements
-                if (userNameElement) userNameElement.textContent = fullName;
-                if (userAvatarElement && !profileImageUrl) {
-                    userAvatarElement.textContent = initials;
-                    userAvatarElement.style.background = 'linear-gradient(135deg, var(--primary-green), var(--accent-green))';
-                }
-                if (userTSCElement) userTSCElement.textContent = `TSC: ${tscNumber}`;
-                
-                // Update profile image if available
-                if (profileImageUrl) {
-                    currentProfileImage = profileImageUrl;
-                    if (profileImageElement) {
-                        profileImageElement.src = profileImageUrl;
-                        profileImageElement.style.display = 'block';
-                        userAvatarElement.textContent = '';
-                    }
-                    if (profilePreviewImg) {
-                        profilePreviewImg.src = profileImageUrl;
-                    }
-                }
-                
-                // Update edit form
-                if (editFullName) editFullName.value = fullName;
-                if (editTSC) editTSC.value = tscNumber;
-                
-                // Save to localStorage for persistence
-                localStorage.setItem('teacherName', fullName);
-                localStorage.setItem('teacherTSC', tscNumber);
-                if (profileImageUrl) {
-                    localStorage.setItem('teacherProfileImage', profileImageUrl);
-                }
-                
-                console.log('User display updated successfully');
             }
 
             // Function to get initials from full name
@@ -2581,6 +2360,88 @@
                     .join('')
                     .toUpperCase()
                     .substring(0, 2);
+            }
+
+            // Function to update user display - FIXED VERSION
+            function updateUserDisplay(fullName, tscNumber, profileImageUrl, email) {
+                console.log('Updating UI with:', {fullName, tscNumber, profileImageUrl, email});
+                
+                // Get initials for avatar
+                const initials = getInitials(fullName);
+                
+                // Update all display elements
+                if (userNameElement) userNameElement.textContent = fullName;
+                
+                // Clear the avatar element first
+                userAvatarElement.innerHTML = '';
+                
+                // Handle profile image (could be base64 or URL)
+                if (profileImageUrl) {
+                    currentProfileImage = profileImageUrl;
+                    
+                    // Create image element
+                    const img = document.createElement('img');
+                    img.src = profileImageUrl;
+                    img.alt = fullName;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '50%';
+                    
+                    // Add upload overlay
+                    const overlay = document.createElement('div');
+                    overlay.className = 'profile-upload-overlay';
+                    overlay.innerHTML = '<i class="fas fa-camera"></i>';
+                    overlay.onclick = () => {
+                        profileImageInput.click();
+                    };
+                    
+                    // Add elements to avatar
+                    userAvatarElement.appendChild(img);
+                    userAvatarElement.appendChild(overlay);
+                    
+                    // Remove background gradient
+                    userAvatarElement.style.background = 'transparent';
+                    
+                } else {
+                    // No image, show initials
+                    currentProfileImage = null;
+                    
+                    // Set background gradient and show initials
+                    userAvatarElement.style.background = 'linear-gradient(135deg, var(--primary-green), var(--accent-green))';
+                    userAvatarElement.textContent = initials;
+                    userAvatarElement.style.color = 'white';
+                    userAvatarElement.style.display = 'flex';
+                    userAvatarElement.style.alignItems = 'center';
+                    userAvatarElement.style.justifyContent = 'center';
+                    userAvatarElement.style.fontWeight = 'bold';
+                    userAvatarElement.style.fontSize = '1.2rem';
+                    
+                    // Add click event to show upload option
+                    userAvatarElement.style.cursor = 'pointer';
+                    userAvatarElement.onclick = () => {
+                        profileImageInput.click();
+                    };
+                }
+                
+                if (userTSCElement) userTSCElement.textContent = `TSC: ${tscNumber}`;
+                
+                // Update edit form
+                if (editFullName) editFullName.value = fullName;
+                if (editTSC) editTSC.value = tscNumber;
+                if (editEmail) editEmail.value = email || '';
+                
+                // Save to localStorage for persistence
+                localStorage.setItem('teacherName', fullName);
+                localStorage.setItem('teacherTSC', tscNumber);
+                localStorage.setItem('teacherEmail', email || '');
+                if (profileImageUrl) {
+                    localStorage.setItem('teacherProfileImage', profileImageUrl);
+                } else {
+                    localStorage.removeItem('teacherProfileImage');
+                }
+                
+                console.log('User display updated successfully');
             }
 
             // Function to load dashboard content
@@ -2617,10 +2478,15 @@
                         pageSubtitle = 'Enter examination marks for your classes';
                         content = generateEnterMarksContent();
                         break;
-                    case 'messages':
-                        pageTitle = 'Messages';
-                        pageSubtitle = 'Chat with other teachers and staff';
-                        content = generateMessagesContent();
+                    case 'settings':
+                        pageTitle = 'Settings';
+                        pageSubtitle = 'Manage your account settings';
+                        content = generateSettingsContent();
+                        break;
+                    case 'help':
+                        pageTitle = 'Help & Support';
+                        pageSubtitle = 'Get help and support for using Alama Hub';
+                        content = generateHelpContent();
                         break;
                     default:
                         pageTitle = section.charAt(0).toUpperCase() + section.slice(1);
@@ -2639,8 +2505,6 @@
                     // Initialize section-specific functionality
                     if (section === 'exam-marks') {
                         initializeExamSessions();
-                    } else if (section === 'messages') {
-                        initializeMessaging();
                     }
                 }
                 
@@ -3189,58 +3053,251 @@
                 `;
             }
 
-            function generateMessagesContent() {
+            function generateSettingsContent() {
                 return `
                     <div class="data-section">
                         <div class="section-title">
-                            <h2><i class="fas fa-comments"></i> Messages</h2>
-                            <div class="section-info">Chat with other teachers and staff members</div>
+                            <h2><i class="fas fa-cog"></i> Settings</h2>
+                            <div class="section-info">Manage your account settings and preferences</div>
                         </div>
                         
-                        <div class="messages-container" id="messagesContainer">
-                            <div class="contacts-sidebar">
-                                <div class="contacts-header">
-                                    <h3><i class="fas fa-users"></i> Contacts</h3>
-                                    <div class="search-contacts">
-                                        <input type="text" id="contactSearch" placeholder="Search teachers...">
+                        <div class="data-cards">
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-user-cog"></i>
+                                    <h3>Profile Settings</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-info">
+                                        <div class="info-row">
+                                            <span class="info-label">Full Name:</span>
+                                            <span class="info-value">${userNameElement.textContent}</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">TSC Number:</span>
+                                            <span class="info-value">${currentTeacherTSC}</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">Email:</span>
+                                            <span class="info-value">${currentUser?.email || 'Not available'}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="contacts-list" id="contactsList">
-                                    <!-- Contacts will be loaded here -->
+                                <div class="card-footer">
+                                    <span>Update Profile</span>
+                                    <button class="btn btn-outline" onclick="openProfileModal()">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
                                 </div>
                             </div>
-                            <div class="chat-window">
-                                <div class="chat-header" id="chatHeader" style="display: none;">
-                                    <div class="chat-header-info">
-                                        <div class="contact-avatar" id="chatUserAvatar">
-                                            <i class="fas fa-user"></i>
+                            
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-key"></i>
+                                    <h3>Change Password</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-info">
+                                        <div class="info-row">
+                                            <span class="info-label">Password:</span>
+                                            <span class="info-value">••••••••</span>
                                         </div>
-                                        <div>
-                                            <h3 id="chatUserName">Select a contact</h3>
-                                            <p id="chatUserStatus" style="color: var(--muted-green); font-size: 0.9rem;">Online</p>
+                                        <div class="info-row">
+                                            <span class="info-label">Last Changed:</span>
+                                            <span class="info-value">${new Date().toLocaleDateString()}</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">Security:</span>
+                                            <span class="info-value">Strong</span>
                                         </div>
                                     </div>
-                                    <div>
-                                        <button class="btn btn-outline" id="clearChat">
-                                            <i class="fas fa-trash"></i> Clear Chat
-                                        </button>
+                                </div>
+                                <div class="card-footer">
+                                    <span>Change Password</span>
+                                    <button class="btn btn-outline" onclick="openPasswordModal()">
+                                        <i class="fas fa-lock"></i> Change
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-bell"></i>
+                                    <h3>Notifications</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-info">
+                                        <div class="info-row">
+                                            <span class="info-label">Email Notifications:</span>
+                                            <span class="info-value">Enabled</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">Exam Alerts:</span>
+                                            <span class="info-value">Enabled</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">Grade Updates:</span>
+                                            <span class="info-value">Enabled</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="chat-messages" id="chatMessages">
-                                    <div class="no-chat-selected">
-                                        <i class="fas fa-comment-alt"></i>
-                                        <h3>Select a contact to start chatting</h3>
-                                        <p>Choose a teacher from the contacts list to begin your conversation</p>
+                                <div class="card-footer">
+                                    <span>Notification Settings</span>
+                                    <button class="btn btn-outline" onclick="alert('Notification settings feature is under development.')">
+                                        <i class="fas fa-cog"></i> Configure
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 40px; background: white; padding: 25px; border-radius: 12px; box-shadow: var(--card-shadow);">
+                            <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-info-circle"></i> About Alama Hub
+                            </h3>
+                            <p style="line-height: 1.6; color: #666; margin-bottom: 15px;">
+                                Alama Hub is a comprehensive teacher management system designed specifically for Alliance Girls High School.
+                                It helps teachers manage student registration, exam marks, and academic records efficiently.
+                            </p>
+                            <div class="info-row" style="margin-top: 15px;">
+                                <span class="info-label">Version:</span>
+                                <span class="info-value">2.1.0</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Last Updated:</span>
+                                <span class="info-value">March 2026</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Support:</span>
+                                <span class="info-value">support@alliancegirls.ac.ke</span>
+                            </div>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Alama Hub. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function generateHelpContent() {
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-question-circle"></i> Help & Support</h2>
+                            <div class="section-info">Get assistance with using Alama Hub</div>
+                        </div>
+                        
+                        <div class="data-cards">
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-book"></i>
+                                    <h3>User Guide</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p style="line-height: 1.6; color: #666; margin-bottom: 15px;">
+                                        Comprehensive guide to using all features of Alama Hub.
+                                    </p>
+                                    <ul style="color: #666; line-height: 1.6; padding-left: 20px;">
+                                        <li>Student Registration</li>
+                                        <li>Marks Entry</li>
+                                        <li>Exam Management</li>
+                                        <li>Profile Settings</li>
+                                    </ul>
+                                </div>
+                                <div class="card-footer">
+                                    <span>Download Guide</span>
+                                    <button class="btn btn-outline" onclick="alert('User guide download feature is under development.')">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-video"></i>
+                                    <h3>Video Tutorials</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p style="line-height: 1.6; color: #666; margin-bottom: 15px;">
+                                        Step-by-step video tutorials for common tasks.
+                                    </p>
+                                    <ul style="color: #666; line-height: 1.6; padding-left: 20px;">
+                                        <li>How to Register Students</li>
+                                        <li>Entering Exam Marks</li>
+                                        <li>Generating Reports</li>
+                                        <li>Troubleshooting</li>
+                                    </ul>
+                                </div>
+                                <div class="card-footer">
+                                    <span>Watch Tutorials</span>
+                                    <button class="btn btn-outline" onclick="alert('Video tutorials are coming soon.')">
+                                        <i class="fas fa-play"></i> Watch
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="data-card">
+                                <div class="card-header">
+                                    <i class="fas fa-headset"></i>
+                                    <h3>Contact Support</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-info">
+                                        <div class="info-row">
+                                            <span class="info-label">Email:</span>
+                                            <span class="info-value">support@alliancegirls.ac.ke</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">Phone:</span>
+                                            <span class="info-value">+254 20 123 4567</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">Hours:</span>
+                                            <span class="info-value">Mon-Fri, 8AM-5PM</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="message-input-container" id="messageInputContainer" style="display: none;">
-                                    <div class="message-input-wrapper">
-                                        <input type="text" class="message-input" id="messageInput" placeholder="Type your message here...">
-                                        <button class="send-button" id="sendMessage">
-                                            <i class="fas fa-paper-plane"></i>
-                                        </button>
-                                    </div>
+                                <div class="card-footer">
+                                    <span>Get Help</span>
+                                    <button class="btn btn-outline" onclick="alert('Please email support@alliancegirls.ac.ke for assistance.')">
+                                        <i class="fas fa-envelope"></i> Contact
+                                    </button>
                                 </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 40px; background: white; padding: 25px; border-radius: 12px; box-shadow: var(--card-shadow);">
+                            <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-info-circle"></i> Frequently Asked Questions
+                            </h3>
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="color: var(--primary-green); margin-bottom: 10px;">Q: How do I register students?</h4>
+                                <p style="line-height: 1.6; color: #666;">
+                                    A: Navigate to "Register Students" in the sidebar, select your teaching form and stream, then use the Excel-like interface to add students.
+                                </p>
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="color: var(--primary-green); margin-bottom: 10px;">Q: How do I enter exam marks?</h4>
+                                <p style="line-height: 1.6; color: #666;">
+                                    A: Go to "Enter Marks" in the sidebar, select your form, stream, and subject, then enter marks for each student.
+                                </p>
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="color: var(--primary-green); margin-bottom: 10px;">Q: Can I export student lists?</h4>
+                                <p style="line-height: 1.6; color: #666;">
+                                    A: Yes, in the student registration interface, click "Export to Excel" to download a CSV file.
+                                </p>
+                            </div>
+                            <div>
+                                <h4 style="color: var(--primary-green); margin-bottom: 10px;">Q: How do I update my profile?</h4>
+                                <p style="line-height: 1.6; color: #666;">
+                                    A: Click on your profile picture in the top right corner and select "Edit Profile" or go to Settings section.
+                                </p>
                             </div>
                         </div>
                         
@@ -3342,585 +3399,6 @@
                     : 'This form currently has no examinations scheduled.';
                 
                 alert(`Form Details:\n\nForm: ${form.name}\nGrade: ${form.grade}\nStatus: ${form.status === 'open' ? 'Open for Marks Entry' : 'Closed - No Examinations'}\n\n${details}`);
-            }
-
-            // Initialize Messaging System with real teachers
-            async function initializeMessaging() {
-                try {
-                    // Load all teachers for messaging from database
-                    await loadAllRealTeachers();
-                    
-                    // Setup event listeners for messaging
-                    setupMessagingEvents();
-                    
-                    // Load initial chat data
-                    loadInitialChatData();
-                    
-                } catch (error) {
-                    console.error('Error initializing messaging:', error);
-                }
-            }
-
-            // Load all real teachers from database for messaging
-            async function loadAllRealTeachers() {
-                try {
-                    console.log('Loading all real teachers for messaging...');
-                    
-                    // Get current user's ID and TSC
-                    const currentUserTSC = currentTeacherTSC;
-                    
-                    // Load all teachers from database (excluding current user)
-                    const { data: teachers, error } = await supabase
-                        .from('teachers')
-                        .select('id, full_name, tsc_number, email, profile_image_url')
-                        .neq('tsc_number', currentUserTSC)
-                        .order('full_name', { ascending: true });
-                    
-                    if (error) {
-                        console.error('Error loading teachers:', error);
-                        throw error;
-                    }
-                    
-                    if (!teachers || teachers.length === 0) {
-                        console.log('No other teachers found in database');
-                        chatUsers = [];
-                        return;
-                    }
-                    
-                    console.log(`Loaded ${teachers.length} teachers from database`);
-                    
-                    // Transform teachers data for chat system
-                    chatUsers = teachers.map(teacher => ({
-                        id: teacher.id,
-                        name: teacher.full_name || 'Teacher',
-                        tsc: teacher.tsc_number || 'N/A',
-                        email: teacher.email || '',
-                        profileImage: teacher.profile_image_url || null,
-                        status: 'online', // Default status
-                        unread: 0 // Will be loaded from messages
-                    }));
-                    
-                    // Load unread message counts for each user
-                    await loadUnreadMessageCounts();
-                    
-                    // Initialize chat messages for each user
-                    await loadChatHistory();
-                    
-                    // Populate contacts list
-                    populateContactsList();
-                    
-                } catch (error) {
-                    console.error('Error loading real teachers:', error);
-                    // Create fallback data
-                    chatUsers = [];
-                    populateContactsList();
-                }
-            }
-
-            // Load unread message counts for each teacher
-            async function loadUnreadMessageCounts() {
-                try {
-                    if (!currentUser || !teacherId) return;
-                    
-                    // Load messages where current user is recipient and not read
-                    const { data: unreadMessages, error } = await supabase
-                        .from('teacher_messages')
-                        .select('sender_id')
-                        .eq('recipient_id', teacherId)
-                        .eq('is_read', false);
-                    
-                    if (error) {
-                        console.error('Error loading unread messages:', error);
-                        return;
-                    }
-                    
-                    // Count unread messages per sender
-                    const unreadCounts = {};
-                    unreadMessages.forEach(msg => {
-                        unreadCounts[msg.sender_id] = (unreadCounts[msg.sender_id] || 0) + 1;
-                    });
-                    
-                    // Update chat users with unread counts
-                    chatUsers.forEach(user => {
-                        user.unread = unreadCounts[user.id] || 0;
-                    });
-                    
-                } catch (error) {
-                    console.error('Error in loadUnreadMessageCounts:', error);
-                }
-            }
-
-            // Load chat history from database
-            async function loadChatHistory() {
-                try {
-                    if (!currentUser || !teacherId) return;
-                    
-                    // Load all messages involving current user
-                    const { data: messages, error } = await supabase
-                        .from('teacher_messages')
-                        .select('*')
-                        .or(`sender_id.eq.${teacherId},recipient_id.eq.${teacherId}`)
-                        .order('created_at', { ascending: true });
-                    
-                    if (error) {
-                        console.error('Error loading chat history:', error);
-                        return;
-                    }
-                    
-                    // Initialize chatMessages object
-                    chatMessages = {};
-                    
-                    // Group messages by conversation (other user)
-                    messages.forEach(message => {
-                        const otherUserId = message.sender_id === teacherId ? 
-                            message.recipient_id : message.sender_id;
-                        
-                        if (!chatMessages[otherUserId]) {
-                            chatMessages[otherUserId] = [];
-                        }
-                        
-                        chatMessages[otherUserId].push({
-                            id: message.id,
-                            sender: message.sender_name,
-                            text: message.message_text,
-                            time: new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                            date: new Date(message.created_at).toISOString().split('T')[0],
-                            isSent: message.sender_id === teacherId,
-                            isRead: message.is_read,
-                            timestamp: new Date(message.created_at)
-                        });
-                    });
-                    
-                } catch (error) {
-                    console.error('Error in loadChatHistory:', error);
-                }
-            }
-
-            // Populate contacts list with real teachers
-            function populateContactsList() {
-                const contactsList = document.getElementById('contactsList');
-                if (!contactsList) return;
-                
-                contactsList.innerHTML = '';
-                
-                if (chatUsers.length === 0) {
-                    contactsList.innerHTML = `
-                        <div style="text-align: center; padding: 40px; color: var(--muted-green);">
-                            <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
-                            <h4>No Other Teachers Found</h4>
-                            <p>No other teachers are currently registered in the system.</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                chatUsers.forEach(user => {
-                    const contactItem = document.createElement('div');
-                    contactItem.className = 'contact-item';
-                    contactItem.dataset.userId = user.id;
-                    
-                    const initials = getInitials(user.name);
-                    const unreadBadge = user.unread > 0 
-                        ? `<span class="unread-count">${user.unread}</span>`
-                        : '';
-                    
-                    contactItem.innerHTML = `
-                        <div class="contact-avatar">
-                            ${user.profileImage ? 
-                                `<img src="${user.profileImage}" alt="${user.name}">` : 
-                                initials
-                            }
-                        </div>
-                        <div class="contact-info">
-                            <h4>${user.name}</h4>
-                            <p>TSC: ${user.tsc}</p>
-                        </div>
-                        <div class="contact-status">
-                            ${unreadBadge}
-                            <div class="status-indicator ${user.status}"></div>
-                        </div>
-                    `;
-                    
-                    contactItem.addEventListener('click', () => {
-                        selectChatUser(user);
-                    });
-                    
-                    contactsList.appendChild(contactItem);
-                });
-            }
-
-            // Select a chat user
-            async function selectChatUser(user) {
-                currentChatUser = user;
-                
-                // Mark messages as read in database
-                await markMessagesAsRead(user.id);
-                
-                // Update UI
-                updateChatHeader(user);
-                displayChatMessages(user.id);
-                
-                // Show chat input
-                document.getElementById('messageInputContainer').style.display = 'block';
-                
-                // Update active contact in list
-                document.querySelectorAll('.contact-item').forEach(item => {
-                    item.classList.remove('active');
-                    if (item.dataset.userId === user.id) {
-                        item.classList.add('active');
-                    }
-                });
-            }
-
-            // Mark messages as read in database
-            async function markMessagesAsRead(userId) {
-                try {
-                    if (!currentUser || !teacherId) return;
-                    
-                    // Update messages as read in database
-                    const { error } = await supabase
-                        .from('teacher_messages')
-                        .update({ is_read: true })
-                        .eq('sender_id', userId)
-                        .eq('recipient_id', teacherId)
-                        .eq('is_read', false);
-                    
-                    if (error) {
-                        console.error('Error marking messages as read:', error);
-                        return;
-                    }
-                    
-                    // Update local state
-                    const user = chatUsers.find(u => u.id === userId);
-                    if (user) {
-                        user.unread = 0;
-                        updateBadgeCounts();
-                        updateContactList();
-                    }
-                    
-                    // Update chat messages locally
-                    if (chatMessages[userId]) {
-                        chatMessages[userId].forEach(msg => {
-                            if (!msg.isSent) {
-                                msg.isRead = true;
-                            }
-                        });
-                    }
-                    
-                } catch (error) {
-                    console.error('Error in markMessagesAsRead:', error);
-                }
-            }
-
-            // Update chat header
-            function updateChatHeader(user) {
-                const chatHeader = document.getElementById('chatHeader');
-                const chatUserName = document.getElementById('chatUserName');
-                const chatUserStatus = document.getElementById('chatUserStatus');
-                const chatUserAvatar = document.getElementById('chatUserAvatar');
-                
-                if (chatHeader) chatHeader.style.display = 'flex';
-                if (chatUserName) chatUserName.textContent = user.name;
-                if (chatUserStatus) {
-                    chatUserStatus.textContent = user.status === 'online' ? 'Online' : 
-                                               user.status === 'away' ? 'Away' : 'Offline';
-                    chatUserStatus.style.color = user.status === 'online' ? '#2ecc71' : 
-                                                user.status === 'away' ? '#f39c12' : '#95a5a6';
-                }
-                if (chatUserAvatar) {
-                    if (user.profileImage) {
-                        chatUserAvatar.innerHTML = `<img src="${user.profileImage}" alt="${user.name}">`;
-                    } else {
-                        chatUserAvatar.innerHTML = getInitials(user.name);
-                    }
-                }
-            }
-
-            // Display chat messages
-            function displayChatMessages(userId) {
-                const chatMessagesContainer = document.getElementById('chatMessages');
-                if (!chatMessagesContainer) return;
-                
-                const messages = chatMessages[userId] || [];
-                
-                if (messages.length === 0) {
-                    chatMessagesContainer.innerHTML = `
-                        <div class="no-chat-selected">
-                            <i class="fas fa-comment-alt"></i>
-                            <h3>No messages yet</h3>
-                            <p>Start a conversation with ${chatUsers.find(u => u.id === userId)?.name || 'this teacher'}</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                chatMessagesContainer.innerHTML = '';
-                
-                // Group messages by date
-                const messagesByDate = {};
-                messages.forEach(message => {
-                    const date = message.date;
-                    if (!messagesByDate[date]) {
-                        messagesByDate[date] = [];
-                    }
-                    messagesByDate[date].push(message);
-                });
-                
-                // Display messages grouped by date
-                Object.keys(messagesByDate).sort().forEach(date => {
-                    // Add date separator
-                    const dateSeparator = document.createElement('div');
-                    dateSeparator.className = 'message-date-separator';
-                    dateSeparator.style.textAlign = 'center';
-                    dateSeparator.style.margin = '15px 0';
-                    dateSeparator.style.color = 'var(--muted-green)';
-                    dateSeparator.style.fontSize = '0.85rem';
-                    dateSeparator.textContent = formatDate(date);
-                    chatMessagesContainer.appendChild(dateSeparator);
-                    
-                    // Add messages for this date
-                    messagesByDate[date].forEach(message => {
-                        const messageDiv = document.createElement('div');
-                        messageDiv.className = `message ${message.isSent ? 'sent' : 'received'}`;
-                        
-                        messageDiv.innerHTML = `
-                            <div>${message.text}</div>
-                            <div class="message-time">${message.time}${message.isSent && message.isRead ? ' ✓✓' : ''}</div>
-                        `;
-                        
-                        chatMessagesContainer.appendChild(messageDiv);
-                    });
-                });
-                
-                // Scroll to bottom
-                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
-            }
-
-            // Format date for display
-            function formatDate(dateString) {
-                const date = new Date(dateString);
-                const today = new Date();
-                const yesterday = new Date(today);
-                yesterday.setDate(yesterday.getDate() - 1);
-                
-                if (date.toDateString() === today.toDateString()) {
-                    return 'Today';
-                } else if (date.toDateString() === yesterday.toDateString()) {
-                    return 'Yesterday';
-                } else {
-                    return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                }
-            }
-
-            // Update contact list
-            function updateContactList() {
-                const contactsList = document.getElementById('contactsList');
-                if (!contactsList) return;
-                
-                const contactItems = contactsList.querySelectorAll('.contact-item');
-                contactItems.forEach(item => {
-                    const userId = item.dataset.userId;
-                    const user = chatUsers.find(u => u.id === userId);
-                    if (user) {
-                        const unreadBadge = item.querySelector('.unread-count');
-                        if (user.unread > 0) {
-                            if (unreadBadge) {
-                                unreadBadge.textContent = user.unread;
-                            } else {
-                                const statusDiv = item.querySelector('.contact-status');
-                                if (statusDiv) {
-                                    const badge = document.createElement('span');
-                                    badge.className = 'unread-count';
-                                    badge.textContent = user.unread;
-                                    statusDiv.insertBefore(badge, statusDiv.firstChild);
-                                }
-                            }
-                        } else if (unreadBadge) {
-                            unreadBadge.remove();
-                        }
-                    }
-                });
-            }
-
-            // Get unread message count
-            function getUnreadMessageCount() {
-                return chatUsers.reduce((total, user) => total + user.unread, 0);
-            }
-
-            // Setup messaging event listeners
-            function setupMessagingEvents() {
-                // Send message
-                const sendButton = document.getElementById('sendMessage');
-                const messageInput = document.getElementById('messageInput');
-                
-                if (sendButton && messageInput) {
-                    const sendMessageHandler = async () => {
-                        const message = messageInput.value.trim();
-                        if (message && currentChatUser) {
-                            await sendRealMessage(message);
-                            messageInput.value = '';
-                        }
-                    };
-                    
-                    sendButton.addEventListener('click', sendMessageHandler);
-                    
-                    messageInput.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') {
-                            sendMessageHandler();
-                        }
-                    });
-                }
-                
-                // Clear chat
-                const clearChatButton = document.getElementById('clearChat');
-                if (clearChatButton) {
-                    clearChatButton.addEventListener('click', async () => {
-                        if (currentChatUser && confirm('Clear chat history with this user?')) {
-                            await clearChatHistory(currentChatUser.id);
-                        }
-                    });
-                }
-                
-                // Contact search
-                const contactSearch = document.getElementById('contactSearch');
-                if (contactSearch) {
-                    contactSearch.addEventListener('input', (e) => {
-                        filterContacts(e.target.value);
-                    });
-                }
-            }
-
-            // Send a real message to database
-            async function sendRealMessage(text) {
-                if (!currentChatUser || !text.trim() || !currentUser || !teacherId) return;
-                
-                try {
-                    const messageData = {
-                        sender_id: teacherId,
-                        sender_name: userNameElement.textContent,
-                        recipient_id: currentChatUser.id,
-                        recipient_name: currentChatUser.name,
-                        message_text: text,
-                        is_read: false
-                    };
-                    
-                    // Insert message into database
-                    const { data: newMessage, error } = await supabase
-                        .from('teacher_messages')
-                        .insert([messageData])
-                        .select()
-                        .single();
-                    
-                    if (error) {
-                        console.error('Error sending message:', error);
-                        alert('Failed to send message. Please try again.');
-                        return;
-                    }
-                    
-                    // Add message to local state
-                    const message = {
-                        id: newMessage.id,
-                        sender: userNameElement.textContent,
-                        text: text,
-                        time: new Date(newMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                        date: new Date(newMessage.created_at).toISOString().split('T')[0],
-                        isSent: true,
-                        isRead: false,
-                        timestamp: new Date(newMessage.created_at)
-                    };
-                    
-                    // Add to local chat messages
-                    if (!chatMessages[currentChatUser.id]) {
-                        chatMessages[currentChatUser.id] = [];
-                    }
-                    chatMessages[currentChatUser.id].push(message);
-                    
-                    // Update recipient's unread count
-                    const recipientUser = chatUsers.find(u => u.id === currentChatUser.id);
-                    if (recipientUser) {
-                        recipientUser.unread++;
-                        updateBadgeCounts();
-                        updateContactList();
-                    }
-                    
-                    // Display the message
-                    displayChatMessages(currentChatUser.id);
-                    
-                    console.log('Message sent successfully:', newMessage.id);
-                    
-                } catch (error) {
-                    console.error('Error in sendRealMessage:', error);
-                    alert('Error sending message. Please try again.');
-                }
-            }
-
-            // Clear chat history from database
-            async function clearChatHistory(userId) {
-                try {
-                    if (!currentUser || !teacherId) return;
-                    
-                    // Delete messages between current user and selected user
-                    const { error } = await supabase
-                        .from('teacher_messages')
-                        .delete()
-                        .or(`and(sender_id.eq.${teacherId},recipient_id.eq.${userId}),and(sender_id.eq.${userId},recipient_id.eq.${teacherId})`);
-                    
-                    if (error) {
-                        console.error('Error clearing chat:', error);
-                        alert('Failed to clear chat history.');
-                        return;
-                    }
-                    
-                    // Clear local messages
-                    chatMessages[userId] = [];
-                    displayChatMessages(userId);
-                    
-                    // Reset unread count
-                    const user = chatUsers.find(u => u.id === userId);
-                    if (user) {
-                        user.unread = 0;
-                        updateBadgeCounts();
-                        updateContactList();
-                    }
-                    
-                    console.log('Chat history cleared successfully');
-                    
-                } catch (error) {
-                    console.error('Error in clearChatHistory:', error);
-                }
-            }
-
-            // Filter contacts
-            function filterContacts(searchTerm) {
-                const contactsList = document.getElementById('contactsList');
-                if (!contactsList) return;
-                
-                const contactItems = contactsList.querySelectorAll('.contact-item');
-                contactItems.forEach(item => {
-                    const userName = item.querySelector('h4').textContent.toLowerCase();
-                    const tscNumber = item.querySelector('p').textContent.toLowerCase();
-                    const search = searchTerm.toLowerCase();
-                    
-                    if (userName.includes(search) || tscNumber.includes(search)) {
-                        item.style.display = 'flex';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            }
-
-            // Load initial chat data
-            function loadInitialChatData() {
-                // Select first user by default if available and has unread messages
-                if (chatUsers.length > 0) {
-                    // Find user with unread messages first
-                    const userWithUnread = chatUsers.find(user => user.unread > 0);
-                    if (userWithUnread) {
-                        selectChatUser(userWithUnread);
-                    } else if (chatUsers.length > 0) {
-                        selectChatUser(chatUsers[0]);
-                    }
-                }
             }
 
             // Open stream modal for specific form
@@ -6084,6 +5562,245 @@
                 }
             }
 
+            // Profile Management Functions - FIXED WITH BASE64 SOLUTION
+            function openProfileModal() {
+                // Populate the profile modal with current data
+                if (editFullName) editFullName.value = userNameElement.textContent;
+                if (editTSC) editTSC.value = currentTeacherTSC;
+                if (editEmail) editEmail.value = currentUser?.email || '';
+                
+                // Set current profile image
+                if (profilePreviewImg && currentProfileImage) {
+                    profilePreviewImg.src = currentProfileImage;
+                    profilePreviewImg.style.display = 'block';
+                } else if (profilePreviewImg) {
+                    // Show initials if no image
+                    const initials = getInitials(userNameElement.textContent);
+                    profilePreviewImg.src = '';
+                    profilePreviewImg.alt = initials;
+                    profilePreviewImg.style.display = 'none';
+                }
+                
+                // Show the modal
+                profileModal.classList.add('show');
+            }
+
+            function openPasswordModal() {
+                // Clear password fields
+                if (currentPassword) currentPassword.value = '';
+                if (newPassword) newPassword.value = '';
+                if (confirmPassword) confirmPassword.value = '';
+                
+                // Clear messages
+                if (passwordError) {
+                    passwordError.style.display = 'none';
+                    passwordError.textContent = '';
+                }
+                if (passwordSuccess) {
+                    passwordSuccess.style.display = 'none';
+                    passwordSuccess.textContent = '';
+                }
+                
+                // Show the modal
+                passwordModal.classList.add('show');
+            }
+
+            // Function to upload profile image as base64 - SIMPLIFIED VERSION
+            async function uploadProfileImage(file) {
+                try {
+                    if (!file || !currentUser) return null;
+                    
+                    // Check file size (max 5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('File size must be less than 5MB');
+                        return null;
+                    }
+                    
+                    // Check file type
+                    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                    if (!validTypes.includes(file.type)) {
+                        alert('Please select a valid image file (JPG, PNG, or GIF)');
+                        return null;
+                    }
+                    
+                    // Convert to base64 data URL
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            resolve(e.target.result); // This returns a base64 data URL
+                        };
+                        reader.onerror = function(e) {
+                            reject('Error reading file');
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                    
+                } catch (error) {
+                    console.error('Error in uploadProfileImage:', error);
+                    alert('Error uploading profile image. Please try again.');
+                    return null;
+                }
+            }
+
+            // Function to update teacher profile in database - FIXED VERSION
+            async function updateTeacherProfile(profileData) {
+                try {
+                    if (!currentUser) {
+                        alert('User not authenticated');
+                        return false;
+                    }
+                    
+                    console.log('Updating teacher profile:', profileData);
+                    
+                    // First, check if teacher exists in database
+                    const { data: existingTeacher, error: checkError } = await supabase
+                        .from('teachers')
+                        .select('id')
+                        .eq('id', currentUser.id)
+                        .maybeSingle();
+                    
+                    let updateData;
+                    
+                    if (existingTeacher) {
+                        // Update existing teacher
+                        updateData = {
+                            full_name: profileData.fullName,
+                            tsc_number: profileData.tscNumber,
+                            profile_image_url: profileData.profileImageUrl || null,
+                            updated_at: new Date().toISOString()
+                        };
+                        
+                        const { error } = await supabase
+                            .from('teachers')
+                            .update(updateData)
+                            .eq('id', currentUser.id);
+                        
+                        if (error) throw error;
+                    } else {
+                        // Create new teacher record
+                        updateData = {
+                            id: currentUser.id,
+                            email: currentUser.email,
+                            full_name: profileData.fullName,
+                            tsc_number: profileData.tscNumber,
+                            profile_image_url: profileData.profileImageUrl || null,
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        };
+                        
+                        const { error } = await supabase
+                            .from('teachers')
+                            .insert([updateData]);
+                        
+                        if (error) throw error;
+                    }
+                    
+                    // Try to update teacher assignments if table exists
+                    try {
+                        // Check if teacher_assignments table exists
+                        const { data: assignmentsCheck, error: assignmentsCheckError } = await supabase
+                            .from('teacher_assignments')
+                            .select('teacher_name, teacher_tsc')
+                            .limit(1);
+                        
+                        if (!assignmentsCheckError) {
+                            // Table exists, try to update
+                            const updateAssignmentsData = {};
+                            if (profileData.fullName) updateAssignmentsData.teacher_name = profileData.fullName;
+                            if (profileData.tscNumber) updateAssignmentsData.teacher_tsc = profileData.tscNumber;
+                            
+                            if (Object.keys(updateAssignmentsData).length > 0) {
+                                // Try to update by teacher ID first
+                                await supabase
+                                    .from('teacher_assignments')
+                                    .update(updateAssignmentsData)
+                                    .eq('teacher_id', currentUser.id);
+                                
+                                // Also try to update by old TSC number
+                                if (profileData.tscNumber && currentTeacherTSC !== profileData.tscNumber) {
+                                    await supabase
+                                        .from('teacher_assignments')
+                                        .update(updateAssignmentsData)
+                                        .eq('teacher_tsc', currentTeacherTSC);
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Could not update teacher assignments:', e.message);
+                        // Silently continue - this table might not exist or have different columns
+                    }
+                    
+                    return true;
+                    
+                } catch (error) {
+                    console.error('Error updating teacher profile:', error);
+                    throw error;
+                }
+            }
+
+            // Function to change password
+            async function changePassword(currentPass, newPass, confirmPass) {
+                try {
+                    // Validate inputs
+                    if (!currentPass || !newPass || !confirmPass) {
+                        return { success: false, message: 'All fields are required' };
+                    }
+                    
+                    if (newPass.length < 8) {
+                        return { success: false, message: 'New password must be at least 8 characters' };
+                    }
+                    
+                    if (newPass !== confirmPass) {
+                        return { success: false, message: 'New passwords do not match' };
+                    }
+                    
+                    // Update password using Supabase Auth
+                    const { error } = await supabase.auth.updateUser({
+                        password: newPass
+                    });
+                    
+                    if (error) {
+                        console.error('Error changing password:', error);
+                        return { success: false, message: error.message };
+                    }
+                    
+                    return { success: true, message: 'Password changed successfully!' };
+                    
+                } catch (error) {
+                    console.error('Error in changePassword:', error);
+                    return { success: false, message: 'An unexpected error occurred' };
+                }
+            }
+
+            // Handle profile image selection - FIXED VERSION
+            function handleProfileImageSelect(file) {
+                if (!file) return;
+                
+                // Validate file
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Please select a valid image file (JPG, PNG, or GIF)');
+                    return;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    return;
+                }
+                
+                selectedImageFile = file;
+                
+                // Preview image in modal
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (profilePreviewImg) {
+                        profilePreviewImg.src = e.target.result;
+                        profilePreviewImg.style.display = 'block';
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+
             // Global functions for onclick handlers
             window.openStreamModal = openStreamModal;
             window.openStreamModalForForm = openStreamModalForForm;
@@ -6104,6 +5821,308 @@
             window.calculateAllGrades = calculateAllGrades;
             window.showFormDetails = showFormDetails;
             window.generatePDFReport = generatePDFReport;
+            window.openProfileModal = openProfileModal;
+            window.openPasswordModal = openPasswordModal;
+
+            // Event Listeners for Profile and Password Modals
+            if (editProfileLink) {
+                editProfileLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    userDropdown.classList.remove('show');
+                    dropdownArrow.classList.remove('fa-chevron-up');
+                    dropdownArrow.classList.add('fa-chevron-down');
+                    openProfileModal();
+                });
+            }
+
+            if (changePasswordLink) {
+                changePasswordLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    userDropdown.classList.remove('show');
+                    dropdownArrow.classList.remove('fa-chevron-up');
+                    dropdownArrow.classList.add('fa-chevron-down');
+                    openPasswordModal();
+                });
+            }
+
+            // File upload handling
+            if (fileUploadArea) {
+                fileUploadArea.addEventListener('click', () => {
+                    profileImageInput.click();
+                });
+                
+                // Drag and drop
+                fileUploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    fileUploadArea.style.borderColor = 'var(--accent-green)';
+                    fileUploadArea.style.backgroundColor = 'rgba(155, 174, 48, 0.1)';
+                });
+                
+                fileUploadArea.addEventListener('dragleave', () => {
+                    fileUploadArea.style.borderColor = '';
+                    fileUploadArea.style.backgroundColor = '';
+                });
+                
+                fileUploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    fileUploadArea.style.borderColor = '';
+                    fileUploadArea.style.backgroundColor = '';
+                    
+                    if (e.dataTransfer.files.length > 0) {
+                        const file = e.dataTransfer.files[0];
+                        handleProfileImageSelect(file);
+                    }
+                });
+            }
+
+            if (profileImageInput) {
+                profileImageInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        const file = e.target.files[0];
+                        handleProfileImageSelect(file);
+                    }
+                });
+            }
+
+            // Profile preview click
+            if (profilePreview) {
+                profilePreview.addEventListener('click', () => {
+                    profileImageInput.click();
+                });
+            }
+
+            // Save profile update - FIXED WITH BASE64
+            if (saveProfileUpdate) {
+                saveProfileUpdate.addEventListener('click', async () => {
+                    // Get button reference and original text
+                    const saveButton = saveProfileUpdate;
+                    const originalText = saveButton.innerHTML;
+                    
+                    try {
+                        // Get form values
+                        const fullName = editFullName.value.trim();
+                        const tscNumber = editTSC.value.trim();
+                        
+                        if (!fullName) {
+                            alert('Full name is required');
+                            return;
+                        }
+                        
+                        if (!tscNumber) {
+                            alert('TSC number is required');
+                            return;
+                        }
+                        
+                        // Show loading state
+                        saveButton.disabled = true;
+                        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                        
+                        let profileImageUrl = currentProfileImage;
+                        
+                        // Upload new image if selected (as base64)
+                        if (selectedImageFile) {
+                            const uploadedUrl = await uploadProfileImage(selectedImageFile);
+                            if (uploadedUrl) {
+                                profileImageUrl = uploadedUrl;
+                            } else {
+                                // If upload failed, keep the existing image
+                                console.log('Image upload failed, keeping existing image');
+                            }
+                        }
+                        
+                        // Update profile in database
+                        const profileData = {
+                            fullName: fullName,
+                            tscNumber: tscNumber,
+                            profileImageUrl: profileImageUrl
+                        };
+                        
+                        await updateTeacherProfile(profileData);
+                        
+                        // Update UI
+                        updateUserDisplay(fullName, tscNumber, profileImageUrl, currentUser?.email);
+                        
+                        // Update current teacher TSC
+                        currentTeacherTSC = tscNumber;
+                        
+                        // Update stream modal teacher info
+                        if (currentTeacherName) currentTeacherName.textContent = fullName;
+                        if (currentTeacherTSCElem) currentTeacherTSCElem.textContent = tscNumber;
+                        if (selectedStreamTeacher) selectedStreamTeacher.textContent = fullName;
+                        if (selectedStreamTSC) selectedStreamTSC.textContent = tscNumber;
+                        
+                        // Close modal
+                        profileModal.classList.remove('show');
+                        
+                        // Reset selected file
+                        selectedImageFile = null;
+                        
+                        // Show success message
+                        alert('Profile updated successfully!');
+                        
+                    } catch (error) {
+                        console.error('Error saving profile:', error);
+                        alert(`Error saving profile: ${error.message}`);
+                    } finally {
+                        // Restore button state
+                        saveButton.disabled = false;
+                        saveButton.innerHTML = originalText;
+                    }
+                });
+            }
+
+            // Cancel profile update
+            if (cancelProfileUpdate) {
+                cancelProfileUpdate.addEventListener('click', () => {
+                    profileModal.classList.remove('show');
+                    // Reset selected file
+                    selectedImageFile = null;
+                });
+            }
+
+            // Password toggle visibility
+            document.querySelectorAll('.toggle-password').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const passwordInput = document.getElementById(targetId);
+                    const icon = this.querySelector('i');
+                    
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
+
+            // Save password change
+            if (savePasswordChange) {
+                savePasswordChange.addEventListener('click', async () => {
+                    // Get button reference and original text
+                    const saveButton = savePasswordChange;
+                    const originalText = saveButton.innerHTML;
+                    
+                    try {
+                        // Get password values
+                        const currentPass = currentPassword.value;
+                        const newPass = newPassword.value;
+                        const confirmPass = confirmPassword.value;
+                        
+                        // Clear previous messages
+                        if (passwordError) {
+                            passwordError.style.display = 'none';
+                            passwordError.textContent = '';
+                        }
+                        if (passwordSuccess) {
+                            passwordSuccess.style.display = 'none';
+                            passwordSuccess.textContent = '';
+                        }
+                        
+                        // Show loading state
+                        saveButton.disabled = true;
+                        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Changing...';
+                        
+                        // Change password
+                        const result = await changePassword(currentPass, newPass, confirmPass);
+                        
+                        if (result.success) {
+                            // Show success message
+                            if (passwordSuccess) {
+                                passwordSuccess.textContent = result.message;
+                                passwordSuccess.style.display = 'block';
+                            }
+                            
+                            // Clear password fields
+                            currentPassword.value = '';
+                            newPassword.value = '';
+                            confirmPassword.value = '';
+                            
+                            // Close modal after 2 seconds
+                            setTimeout(() => {
+                                passwordModal.classList.remove('show');
+                            }, 2000);
+                            
+                        } else {
+                            // Show error message
+                            if (passwordError) {
+                                passwordError.textContent = result.message;
+                                passwordError.style.display = 'block';
+                            }
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error changing password:', error);
+                        if (passwordError) {
+                            passwordError.textContent = 'An unexpected error occurred';
+                            passwordError.style.display = 'block';
+                        }
+                    } finally {
+                        // Restore button state
+                        saveButton.disabled = false;
+                        saveButton.innerHTML = originalText;
+                    }
+                });
+            }
+
+            // Cancel password change
+            if (cancelPasswordChange) {
+                cancelPasswordChange.addEventListener('click', () => {
+                    passwordModal.classList.remove('show');
+                    // Clear fields
+                    currentPassword.value = '';
+                    newPassword.value = '';
+                    confirmPassword.value = '';
+                    // Clear messages
+                    if (passwordError) {
+                        passwordError.style.display = 'none';
+                        passwordError.textContent = '';
+                    }
+                    if (passwordSuccess) {
+                        passwordSuccess.style.display = 'none';
+                        passwordSuccess.textContent = '';
+                    }
+                });
+            }
+
+            // Close modals with X buttons
+            if (modalClose) {
+                modalClose.addEventListener('click', () => {
+                    profileModal.classList.remove('show');
+                });
+            }
+
+            if (passwordModalClose) {
+                passwordModalClose.addEventListener('click', () => {
+                    passwordModal.classList.remove('show');
+                });
+            }
+
+            // Close modals when clicking outside
+            document.addEventListener('click', (e) => {
+                if (profileModal && profileModal.classList.contains('show') && 
+                    !profileModal.contains(e.target) && !e.target.closest('#editProfileLink')) {
+                    profileModal.classList.remove('show');
+                }
+                
+                if (passwordModal && passwordModal.classList.contains('show') && 
+                    !passwordModal.contains(e.target) && !e.target.closest('#changePasswordLink')) {
+                    passwordModal.classList.remove('show');
+                }
+                
+                if (streamModal && streamModal.classList.contains('show') && 
+                    !streamModal.contains(e.target) && !e.target.closest('.nav-link[data-section="forms"]')) {
+                    streamModal.classList.remove('show');
+                }
+                
+                if (enterMarksModal && enterMarksModal.classList.contains('show') && 
+                    !enterMarksModal.contains(e.target) && !e.target.closest('[onclick*="openEnterMarksForForm"]')) {
+                    enterMarksModal.classList.remove('show');
+                }
+            });
 
             // Event Listeners for Stream Modal
             if (streamModalClose) {
@@ -6231,22 +6250,14 @@
                 });
             }
 
-            // Close stream modal when clicking outside
-            document.addEventListener('click', (e) => {
-                if (streamModal && streamModal.classList.contains('show') && 
-                    !streamModal.contains(e.target) && !e.target.closest('.nav-link[data-section="forms"]')) {
-                    streamModal.classList.remove('show');
-                }
-                
-                if (enterMarksModal && enterMarksModal.classList.contains('show') && 
-                    !enterMarksModal.contains(e.target) && !e.target.closest('[onclick*="openEnterMarksForForm"]')) {
-                    enterMarksModal.classList.remove('show');
-                }
-            });
-
             // Initialize dashboard
             function initializeDashboard() {
                 console.log('Starting dashboard initialization...');
+                
+                // Set exam date to today
+                if (examDate) {
+                    examDate.value = formattedDate;
+                }
                 
                 // Load user data
                 loadUserData();
@@ -6348,6 +6359,7 @@
                         localStorage.removeItem('teacherName');
                         localStorage.removeItem('teacherTSC');
                         localStorage.removeItem('teacherProfileImage');
+                        localStorage.removeItem('teacherEmail');
                         
                         console.log('Logout successful, redirecting to login...');
                         
