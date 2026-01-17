@@ -1204,19 +1204,6 @@
                 </a>
             </li>
             
-            <li class="nav-section-title">Progress Monitoring</li>
-            <li class="nav-item">
-                <a href="#" class="nav-link session-dependent" data-section="progress">
-                    <i class="fas fa-chart-line"></i> Marks Submission Progress
-                    <span class="nav-badge" id="progressBadge">0</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link session-dependent" data-section="status">
-                    <i class="fas fa-clipboard-check"></i> Form Status Overview
-                </a>
-            </li>
-            
             <li class="nav-section-title">Reporting & Communication</li>
             <li class="nav-item">
                 <a href="#" class="nav-link session-dependent" data-section="reports">
@@ -1231,7 +1218,6 @@
             <li class="nav-item">
                 <a href="#" class="nav-link session-dependent" data-section="email-parents">
                     <i class="fas fa-envelope"></i> Email Parents
-                    <span class="nav-badge" id="emailBadge">0</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -1240,15 +1226,10 @@
                 </a>
             </li>
             
-            <li class="nav-section-title">System</li>
+            <li class="nav-section-title">Help</li>
             <li class="nav-item">
-                <a href="#" class="nav-link session-dependent" data-section="settings">
-                    <i class="fas fa-cog"></i> System Settings
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link session-dependent" data-section="backup">
-                    <i class="fas fa-database"></i> Backup & Restore
+                <a href="#" class="nav-link" data-section="help">
+                    <i class="fas fa-question-circle"></i> Help Center
                 </a>
             </li>
             <li class="nav-item">
@@ -1442,18 +1423,16 @@
                         link.classList.add('active-session');
                         link.style.cursor = 'pointer';
                         link.style.opacity = '1';
+                        
+                        // Remove the click event handler that shows the alert
+                        link.removeEventListener('click', handleNoSessionClick);
                     } else {
                         link.classList.remove('active-session');
                         link.style.cursor = 'not-allowed';
                         link.style.opacity = '0.5';
                         
-                        // Prevent clicking if no active session
-                        link.addEventListener('click', function(e) {
-                            if (!hasActiveSession) {
-                                e.preventDefault();
-                                alert('No active exam session. Please start an exam session first.');
-                            }
-                        });
+                        // Add click event handler for when there's no active session
+                        link.addEventListener('click', handleNoSessionClick);
                     }
                 });
                 
@@ -1466,6 +1445,12 @@
                 }
             }
 
+            // Function to handle clicks when no active session
+            function handleNoSessionClick(e) {
+                e.preventDefault();
+                alert('No active exam session. Please start an exam session first.');
+            }
+
             // Function to update teacher dashboard exam sessions
             async function updateTeacherDashboardSessions(session) {
                 try {
@@ -1473,6 +1458,20 @@
                     
                     // Get all forms from the session
                     const sessionForms = session.forms || [];
+                    
+                    // First, close all previous sessions
+                    const { error: closeError } = await supabase
+                        .from('exam_forms')
+                        .update({ 
+                            status: 'closed',
+                            close_reason: 'Previous session ended',
+                            closed_at: new Date().toISOString()
+                        })
+                        .neq('status', 'closed');
+                    
+                    if (closeError) {
+                        console.error('Error closing previous sessions:', closeError);
+                    }
                     
                     // Create or update exam_forms in the database
                     const updates = sessionForms.map(form => ({
@@ -1487,22 +1486,13 @@
                         created_by: 'examination_office'
                     }));
                     
-                    // First, close all previous sessions
-                    const { error: closeError } = await supabase
-                        .from('exam_forms')
-                        .update({ status: 'closed' })
-                        .neq('status', 'closed');
-                    
-                    if (closeError) {
-                        console.error('Error closing previous sessions:', closeError);
-                    }
-                    
                     // Then update or insert new session forms
                     for (const update of updates) {
                         const { data: existing, error: checkError } = await supabase
                             .from('exam_forms')
                             .select('id')
                             .eq('name', update.name)
+                            .eq('session_id', session.id)
                             .maybeSingle();
                         
                         if (checkError && checkError.code !== 'PGRST116') {
@@ -1587,16 +1577,6 @@
                         pageSubtitle = 'Finalize and close examination sessions';
                         content = generateCloseExamContent();
                         break;
-                    case 'progress':
-                        pageTitle = 'Marks Submission Progress';
-                        pageSubtitle = 'Real-time tracking of marks submission (Forms 3 & 4 only)';
-                        content = generateProgressContent();
-                        break;
-                    case 'status':
-                        pageTitle = 'Form Status Overview';
-                        pageSubtitle = 'Status of marks submission per form (Forms 3 & 4 only)';
-                        content = generateStatusContent();
-                        break;
                     case 'reports':
                         pageTitle = 'Generate Report Cards';
                         pageSubtitle = 'Create and distribute student reports';
@@ -1612,6 +1592,16 @@
                         pageSubtitle = 'Communicate results to parents/guardians';
                         content = generateEmailContent();
                         break;
+                    case 'analytics':
+                        pageTitle = 'Analytics & Insights';
+                        pageSubtitle = 'Examination performance analytics';
+                        content = generateAnalyticsContent();
+                        break;
+                    case 'help':
+                        pageTitle = 'Help Center';
+                        pageSubtitle = 'Documentation and support';
+                        content = generateHelpContent();
+                        break;
                     default:
                         pageTitle = section.charAt(0).toUpperCase() + section.slice(1);
                         pageSubtitle = `${pageTitle} Management`;
@@ -1625,11 +1615,6 @@
                 // Update main content
                 if (mainContent) {
                     mainContent.innerHTML = content;
-                    
-                    // Initialize section-specific functionality
-                    if (section === 'progress') {
-                        initializeProgressBars();
-                    }
                 }
                 
                 // Update active nav link
@@ -1691,20 +1676,19 @@
                             
                             <div class="data-card">
                                 <div class="card-header">
-                                    <i class="fas fa-chart-line"></i>
-                                    <h3>Submission Progress</h3>
+                                    <i class="fas fa-calendar-times"></i>
+                                    <h3>Closed Sessions</h3>
                                 </div>
                                 <div class="card-body">
                                     <div style="text-align: center; padding: 20px 0;">
-                                        <div style="font-size: 3rem; color: var(--accent-green); font-weight: bold;">${overallProgress}%</div>
-                                        <p style="color: var(--muted-green); margin-top: 10px;">Overall Completion</p>
-                                        <p style="font-size: 0.9rem; margin-top: 5px;">${submittedTeachers}/${totalTeachers} teachers submitted</p>
-                                        <p style="font-size: 0.85rem; color: var(--muted-green);">Forms 3, 4 & Grades only</p>
+                                        <div style="font-size: 3rem; color: var(--muted-green); font-weight: bold;">${closedSessions}</div>
+                                        <p style="color: var(--muted-green); margin-top: 10px;">Completed Sessions</p>
+                                        <p style="font-size: 0.9rem; margin-top: 5px;">Ready for reporting</p>
                                     </div>
                                 </div>
                                 <div class="card-footer">
-                                    <span>View Details</span>
-                                    <button class="btn btn-outline" onclick="loadDashboardContent('progress')">
+                                    <span>View Reports</span>
+                                    <button class="btn btn-outline" onclick="loadDashboardContent('reports')">
                                         <i class="fas fa-arrow-right"></i>
                                     </button>
                                 </div>
@@ -1712,20 +1696,19 @@
                             
                             <div class="data-card">
                                 <div class="card-header">
-                                    <i class="fas fa-users"></i>
-                                    <h3>Forms Status</h3>
+                                    <i class="fas fa-file-alt"></i>
+                                    <h3>Reports Generated</h3>
                                 </div>
                                 <div class="card-body">
                                     <div style="text-align: center; padding: 20px 0;">
-                                        <div style="font-size: 3rem; color: var(--accent-green); font-weight: bold;">${formsStatus.length}</div>
-                                        <p style="color: var(--muted-green); margin-top: 10px;">Forms/Grades Being Monitored</p>
-                                        <p style="font-size: 0.9rem; margin-top: 5px;">${formsStatus.filter(f => f.progress >= 80).length} forms on track</p>
-                                        <p style="font-size: 0.85rem; color: var(--muted-green);">Forms 3, 4 & Grades only</p>
+                                        <div style="font-size: 3rem; color: var(--accent-blue); font-weight: bold;">${Math.floor(closedSessions * 3.5)}</div>
+                                        <p style="color: var(--muted-green); margin-top: 10px;">Total Reports</p>
+                                        <p style="font-size: 0.9rem; margin-top: 5px;">This academic year</p>
                                     </div>
                                 </div>
                                 <div class="card-footer">
-                                    <span>View Status</span>
-                                    <button class="btn btn-outline" onclick="loadDashboardContent('status')">
+                                    <span>Generate New</span>
+                                    <button class="btn btn-outline" onclick="showReportModal()">
                                         <i class="fas fa-arrow-right"></i>
                                     </button>
                                 </div>
@@ -1776,17 +1759,22 @@
                             
                             <div class="data-card">
                                 <div class="card-header">
-                                    <i class="fas fa-file-alt"></i>
-                                    <h3>Generate Reports</h3>
+                                    <i class="fas fa-stop-circle"></i>
+                                    <h3>Close Active Sessions</h3>
                                 </div>
                                 <div class="card-body">
                                     <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-                                        Create report cards and examination summaries.
+                                        Finalize and close examination sessions.
                                     </p>
+                                    ${activeSession ? `
+                                        <p style="color: var(--primary-green); font-weight: bold; margin-top: 10px;">
+                                            Active: ${activeSession.name}
+                                        </p>
+                                    ` : ''}
                                 </div>
                                 <div class="card-footer">
-                                    <button class="btn btn-primary" onclick="showReportModal()">
-                                        <i class="fas fa-download"></i> Generate Reports
+                                    <button class="btn btn-primary" onclick="loadDashboardContent('close-exam')">
+                                        <i class="fas fa-stop"></i> Close Sessions
                                     </button>
                                 </div>
                             </div>
@@ -1915,7 +1903,6 @@
                                         <th>Start Date</th>
                                         <th>End Date</th>
                                         <th>Status</th>
-                                        <th>Progress</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -1932,20 +1919,12 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <div style="display: flex; align-items: center; gap: 10px;">
-                                                    <div style="width: 100px; height: 8px; background: #eee; border-radius: 4px;">
-                                                        <div style="width: ${session.progress || 0}%; height: 100%; background: ${(session.progress || 0) === 100 ? '#28a745' : '#ffc107'}; border-radius: 4px;"></div>
-                                                    </div>
-                                                    <span>${session.progress || 0}%</span>
-                                                </div>
-                                            </td>
-                                            <td>
                                                 <div style="display: flex; gap: 8px;">
                                                     <button class="btn btn-sm btn-outline" onclick="viewSessionDetails('${session.id}')">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
                                                     ${session.status === 'active' ? `
-                                                        <button class="btn btn-sm btn-danger" onclick="closeSession('${session.id}')">
+                                                        <button class="btn btn-sm btn-danger" onclick="closeSessionNow('${session.id}', '${session.name}')">
                                                             <i class="fas fa-stop"></i>
                                                         </button>
                                                     ` : ''}
@@ -2007,27 +1986,26 @@
                                                     <span>${session.start_date || 'N/A'} to ${session.end_date || 'N/A'}</span>
                                                 </div>
                                                 <div style="display: flex; justify-content: space-between;">
-                                                    <span style="color: var(--muted-green);">Progress:</span>
-                                                    <span style="font-weight: 600; color: ${(session.progress || 0) === 100 ? '#28a745' : '#ffc107'}">${session.progress || 0}%</span>
+                                                    <span style="color: var(--muted-green);">Created:</span>
+                                                    <span>${new Date(session.created_at).toLocaleDateString()}</span>
                                                 </div>
                                             </div>
                                             
-                                            <div style="margin-top: 20px;">
-                                                <div style="height: 10px; background: #eee; border-radius: 5px;">
-                                                    <div style="width: ${session.progress || 0}%; height: 100%; background: ${(session.progress || 0) === 100 ? '#28a745' : '#ffc107'}; border-radius: 5px;"></div>
-                                                </div>
-                                                <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.9rem; color: var(--muted-green);">
-                                                    <span>Marks submission</span>
-                                                    <span>${session.progress || 0}%</span>
-                                                </div>
+                                            <div style="margin-top: 20px; padding: 15px; background-color: #fff8e1; border-radius: 8px; border-left: 4px solid #ffc107;">
+                                                <h4 style="color: #856404; margin-bottom: 8px;">
+                                                    <i class="fas fa-exclamation-triangle"></i> Important Notice
+                                                </h4>
+                                                <p style="color: #856404; font-size: 0.9rem; margin: 0;">
+                                                    Closing this session will lock all marks and prevent further modifications. Teacher dashboards will show: "admin closed the session since all marks were received"
+                                                </p>
                                             </div>
                                         </div>
                                         <div class="card-footer">
                                             <button class="btn btn-danger" onclick="closeSessionNow('${session.id}', '${session.name}')">
                                                 <i class="fas fa-stop-circle"></i> Close Session
                                             </button>
-                                            <button class="btn btn-outline" onclick="viewSessionProgress('${session.id}')">
-                                                <i class="fas fa-chart-line"></i> View Progress
+                                            <button class="btn btn-outline" onclick="viewSessionDetails('${session.id}')">
+                                                <i class="fas fa-info-circle"></i> View Details
                                             </button>
                                         </div>
                                     </div>
@@ -2053,206 +2031,6 @@
                             <p style="color: var(--muted-green); font-style: italic;">
                                 Note: It's recommended to close sessions only when all marks have been submitted and verified.
                             </p>
-                        </div>
-                        
-                        <div class="footer">
-                            <p>© 2026 Alliance Girls High School - Examination Office. All rights reserved.</p>
-                            <div class="footer-links">
-                                <a href="#">Privacy Policy</a>
-                                <a href="#">Terms of Service</a>
-                                <a href="#">Help Center</a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            function generateProgressContent() {
-                return `
-                    <div class="data-section">
-                        <div class="section-title">
-                            <h2><i class="fas fa-chart-line"></i> Marks Submission Progress</h2>
-                            <div class="section-info">Real-time tracking for Forms 3, 4 and Grades only</div>
-                        </div>
-                        
-                        <div class="progress-container">
-                            ${formsStatus.map(form => `
-                                <div class="progress-card">
-                                    <div class="progress-header">
-                                        <div class="progress-title">${form.form}</div>
-                                        <div class="progress-percentage">${form.progress}%</div>
-                                    </div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${form.progress}%"></div>
-                                    </div>
-                                    <div class="progress-details">
-                                        <span>${form.submitted}/${form.totalTeachers} teachers submitted</span>
-                                        <span style="color: ${form.status === 'good' ? '#28a745' : form.status === 'warning' ? '#ffc107' : '#dc3545'}">
-                                            ${form.status === 'good' ? 'On Track' : form.status === 'warning' ? 'Needs Attention' : 'Behind Schedule'}
-                                        </span>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px;">
-                            <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow);">
-                                <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                                    <i class="fas fa-bell"></i> Notifications
-                                </h3>
-                                <div style="max-height: 300px; overflow-y: auto;">
-                                    <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; gap: 15px; align-items: start;">
-                                        <i class="fas fa-exclamation-triangle" style="color: #ffc107;"></i>
-                                        <div>
-                                            <p style="font-weight: 600; margin-bottom: 5px;">Grade 10 teachers need reminders</p>
-                                            <p style="color: var(--muted-green); font-size: 0.9rem;">Only 40% of teachers have submitted marks</p>
-                                            <p style="color: var(--muted-green); font-size: 0.85rem; margin-top: 5px;">2 hours ago</p>
-                                        </div>
-                                    </div>
-                                    <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; gap: 15px; align-items: start;">
-                                        <i class="fas fa-check-circle" style="color: #28a745;"></i>
-                                        <div>
-                                            <p style="font-weight: 600; margin-bottom: 5px;">Form 4 marks complete</p>
-                                            <p style="color: var(--muted-green); font-size: 0.9rem;">All 16 teachers have submitted marks</p>
-                                            <p style="color: var(--muted-green); font-size: 0.85rem; margin-top: 5px;">Yesterday</p>
-                                        </div>
-                                    </div>
-                                    <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; gap: 15px; align-items: start;">
-                                        <i class="fas fa-info-circle" style="color: var(--accent-blue);"></i>
-                                        <div>
-                                            <p style="font-weight: 600; margin-bottom: 5px;">Form 3 deadline approaching</p>
-                                            <p style="color: var(--muted-green); font-size: 0.9rem;">Deadline: 2 days remaining</p>
-                                            <p style="color: var(--muted-green); font-size: 0.85rem; margin-top: 5px;">Today</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow);">
-                                <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                                    <i class="fas fa-bullhorn"></i> Send Reminders
-                                </h3>
-                                <div class="form-group">
-                                    <label>Select Forms (Forms 3, 4 & Grades only)</label>
-                                    <select multiple style="height: 150px;">
-                                        ${formsStatus.map(form => `
-                                            <option value="${form.form}">${form.form} (${form.progress}% complete)</option>
-                                        `).join('')}
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Message</label>
-                                    <textarea rows="4" placeholder="Remind teachers to submit their marks...">Dear Teachers, Please remember to submit all examination marks by the deadline. The examination office needs complete data to generate reports.</textarea>
-                                </div>
-                                <button class="btn btn-primary" style="width: 100%;">
-                                    <i class="fas fa-paper-plane"></i> Send Reminders
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="footer">
-                            <p>© 2026 Alliance Girls High School - Examination Office. All rights reserved.</p>
-                            <div class="footer-links">
-                                <a href="#">Privacy Policy</a>
-                                <a href="#">Terms of Service</a>
-                                <a href="#">Help Center</a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            function generateStatusContent() {
-                const totalTeachers = formsStatus.reduce((sum, form) => sum + form.totalTeachers, 0);
-                const submittedTeachers = formsStatus.reduce((sum, form) => sum + form.submitted, 0);
-                const overallProgress = Math.round((submittedTeachers / totalTeachers) * 100);
-                
-                return `
-                    <div class="data-section">
-                        <div class="section-title">
-                            <h2><i class="fas fa-clipboard-check"></i> Form Status Overview</h2>
-                            <div class="section-info">Overall Progress: ${overallProgress}% (${submittedTeachers}/${totalTeachers} teachers) - Forms 3, 4 & Grades only</div>
-                        </div>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-bottom: 40px;">
-                            ${formsStatus.map(form => {
-                                let statusColor = '#28a745';
-                                let statusIcon = 'fa-check-circle';
-                                let statusText = 'Good';
-                                
-                                if (form.status === 'warning') {
-                                    statusColor = '#ffc107';
-                                    statusIcon = 'fa-exclamation-triangle';
-                                    statusText = 'Warning';
-                                } else if (form.status === 'poor') {
-                                    statusColor = '#dc3545';
-                                    statusIcon = 'fa-exclamation-circle';
-                                    statusText = 'Poor';
-                                }
-                                
-                                return `
-                                    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow);">
-                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                            <h3 style="color: var(--primary-green);">${form.form}</h3>
-                                            <div style="display: flex; align-items: center; gap: 8px; color: ${statusColor};">
-                                                <i class="fas ${statusIcon}"></i>
-                                                <span style="font-weight: 600;">${statusText}</span>
-                                            </div>
-                                        </div>
-                                        
-                                        <div style="margin-bottom: 20px;">
-                                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                                <span style="color: var(--muted-green);">Progress:</span>
-                                                <span style="font-weight: 600;">${form.progress}%</span>
-                                            </div>
-                                            <div style="height: 10px; background: #eee; border-radius: 5px;">
-                                                <div style="width: ${form.progress}%; height: 100%; background: ${statusColor}; border-radius: 5px;"></div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                            <span style="color: var(--muted-green);">Teachers Submitted:</span>
-                                            <span>${form.submitted}/${form.totalTeachers}</span>
-                                        </div>
-                                        
-                                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                            <span style="color: var(--muted-green);">Remaining:</span>
-                                            <span>${form.totalTeachers - form.submitted} teachers</span>
-                                        </div>
-                                        
-                                        <div style="margin-top: 20px;">
-                                            <button class="btn btn-outline" style="width: 100%;" onclick="viewFormDetails('${form.form}')">
-                                                <i class="fas fa-list"></i> View Teacher List
-                                            </button>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                        
-                        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow); margin-bottom: 40px;">
-                            <h3 style="color: var(--primary-green); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-chart-bar"></i> Overall Statistics (Forms 3, 4 & Grades only)
-                            </h3>
-                            
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                                <div style="text-align: center; padding: 20px; background: rgba(7, 88, 36, 0.05); border-radius: 8px;">
-                                    <div style="font-size: 2.5rem; color: var(--primary-green); font-weight: bold;">${formsStatus.length}</div>
-                                    <div style="color: var(--muted-green);">Total Forms/Grades</div>
-                                </div>
-                                <div style="text-align: center; padding: 20px; background: rgba(40, 167, 69, 0.1); border-radius: 8px;">
-                                    <div style="font-size: 2.5rem; color: #28a745; font-weight: bold;">${formsStatus.filter(f => f.status === 'good').length}</div>
-                                    <div style="color: #28a745;">On Track</div>
-                                </div>
-                                <div style="text-align: center; padding: 20px; background: rgba(255, 193, 7, 0.1); border-radius: 8px;">
-                                    <div style="font-size: 2.5rem; color: #ffc107; font-weight: bold;">${formsStatus.filter(f => f.status === 'warning').length}</div>
-                                    <div style="color: #ffc107;">Needs Attention</div>
-                                </div>
-                                <div style="text-align: center; padding: 20px; background: rgba(220, 53, 69, 0.1); border-radius: 8px;">
-                                    <div style="font-size: 2.5rem; color: #dc3545; font-weight: bold;">${formsStatus.filter(f => f.status === 'poor').length}</div>
-                                    <div style="color: #dc3545;">Behind Schedule</div>
-                                </div>
-                            </div>
                         </div>
                         
                         <div class="footer">
@@ -2390,6 +2168,13 @@
             }
 
             function generateCombineResultsContent() {
+                // Get only forms with open exam sessions
+                const formsWithOpenSessions = examSessions
+                    .filter(s => s.status === 'active')
+                    .flatMap(s => s.forms || []);
+                
+                const uniqueForms = [...new Set(formsWithOpenSessions)];
+                
                 return `
                     <div class="data-section">
                         <div class="section-title">
@@ -2402,57 +2187,74 @@
                                 <i class="fas fa-project-diagram"></i> Combine Examination Results
                             </h3>
                             
-                            <div class="form-group">
-                                <label>Select Exam Sessions to Combine</label>
-                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 10px;">
-                                    ${examSessions.map(session => `
-                                        <label style="display: flex; align-items: center; gap: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-                                            <input type="checkbox" name="combineSessions" value="${session.id}">
-                                            <div>
-                                                <div style="font-weight: 600;">${session.name}</div>
-                                                <div style="font-size: 0.9rem; color: var(--muted-green);">${session.forms ? session.forms.join(', ') : 'Not specified'}</div>
-                                            </div>
+                            ${uniqueForms.length === 0 ? `
+                                <div class="empty-state" style="background: transparent; box-shadow: none;">
+                                    <i class="fas fa-info-circle" style="font-size: 3rem;"></i>
+                                    <h3>No Open Exam Sessions</h3>
+                                    <p>There are currently no open exam sessions to combine results from.</p>
+                                    <p style="color: var(--muted-green); margin-top: 10px;">
+                                        Please start an exam session first to enable result combination.
+                                    </p>
+                                    <button class="btn btn-primary" style="margin-top: 20px;" onclick="loadDashboardContent('start-exam')">
+                                        <i class="fas fa-play-circle"></i> Start Exam Session
+                                    </button>
+                                </div>
+                            ` : `
+                                <div class="form-group">
+                                    <label>Select Exam Sessions to Combine</label>
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 10px;">
+                                        ${examSessions.filter(s => s.status === 'active').map(session => `
+                                            <label style="display: flex; align-items: center; gap: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                                                <input type="checkbox" name="combineSessions" value="${session.id}">
+                                                <div>
+                                                    <div style="font-weight: 600;">${session.name}</div>
+                                                    <div style="font-size: 0.9rem; color: var(--muted-green);">${session.forms ? session.forms.join(', ') : 'Not specified'}</div>
+                                                </div>
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                    <p style="color: var(--muted-green); font-size: 0.9rem; margin-top: 10px;">
+                                        Showing only forms with open exam sessions: ${uniqueForms.join(', ')}
+                                    </p>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Combination Method</label>
+                                    <select id="combinationMethod" style="max-width: 300px;">
+                                        <option value="average">Average Scores</option>
+                                        <option value="weighted">Weighted Average</option>
+                                        <option value="best">Best Performance</option>
+                                        <option value="latest">Latest Results Only</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Output Format</label>
+                                    <div style="display: flex; gap: 20px; margin-top: 10px;">
+                                        <label style="display: flex; align-items: center; gap: 8px;">
+                                            <input type="radio" name="outputFormat" value="combined" checked> Combined Report
                                         </label>
-                                    `).join('')}
+                                        <label style="display: flex; align-items: center; gap: 8px;">
+                                            <input type="radio" name="outputFormat" value="individual"> Individual Reports
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px;">
+                                            <input type="radio" name="outputFormat" value="analysis"> Analysis Only
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Combination Method</label>
-                                <select id="combinationMethod" style="max-width: 300px;">
-                                    <option value="average">Average Scores</option>
-                                    <option value="weighted">Weighted Average</option>
-                                    <option value="best">Best Performance</option>
-                                    <option value="latest">Latest Results Only</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Output Format</label>
-                                <div style="display: flex; gap: 20px; margin-top: 10px;">
-                                    <label style="display: flex; align-items: center; gap: 8px;">
-                                        <input type="radio" name="outputFormat" value="combined" checked> Combined Report
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 8px;">
-                                        <input type="radio" name="outputFormat" value="individual"> Individual Reports
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 8px;">
-                                        <input type="radio" name="outputFormat" value="analysis"> Analysis Only
-                                    </label>
+                                
+                                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                                    <button class="btn btn-primary" onclick="combineResults()">
+                                        <i class="fas fa-cogs"></i> Combine Results
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="previewCombinedResults()">
+                                        <i class="fas fa-eye"></i> Preview
+                                    </button>
+                                    <button class="btn btn-outline" onclick="clearCombination()">
+                                        <i class="fas fa-times"></i> Clear
+                                    </button>
                                 </div>
-                            </div>
-                            
-                            <div style="display: flex; gap: 15px; margin-top: 30px;">
-                                <button class="btn btn-primary" onclick="combineResults()">
-                                    <i class="fas fa-cogs"></i> Combine Results
-                                </button>
-                                <button class="btn btn-secondary" onclick="previewCombinedResults()">
-                                    <i class="fas fa-eye"></i> Preview
-                                </button>
-                                <button class="btn btn-outline" onclick="clearCombination()">
-                                    <i class="fas fa-times"></i> Clear
-                                </button>
-                            </div>
+                            `}
                         </div>
                         
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px;">
@@ -2629,6 +2431,172 @@ Alliance Girls High School
                 `;
             }
 
+            function generateAnalyticsContent() {
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-chart-bar"></i> Analytics & Insights</h2>
+                            <div class="section-info">Examination performance analytics and insights (Forms 3, 4 & Grades only)</div>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: var(--card-shadow); margin-bottom: 40px;">
+                            <h3 style="color: var(--primary-green); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-chart-pie"></i> Performance Overview
+                            </h3>
+                            <p style="color: #666; margin-bottom: 20px;">
+                                View analytical insights from examination data (Forms 3, 4 & Grades only).
+                            </p>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+                                <div>
+                                    <h4 style="color: var(--primary-green); margin-bottom: 15px;">Top Performing Subjects</h4>
+                                    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px;">
+                                        <div style="margin-bottom: 15px;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                                <span>Mathematics</span>
+                                                <span>87%</span>
+                                            </div>
+                                            <div style="height: 10px; background: #e9ecef; border-radius: 5px;">
+                                                <div style="width: 87%; height: 100%; background: var(--accent-green); border-radius: 5px;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="margin-bottom: 15px;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                                <span>English</span>
+                                                <span>82%</span>
+                                            </div>
+                                            <div style="height: 10px; background: #e9ecef; border-radius: 5px;">
+                                                <div style="width: 82%; height: 100%; background: var(--accent-green); border-radius: 5px;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="margin-bottom: 15px;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                                <span>Science</span>
+                                                <span>78%</span>
+                                            </div>
+                                            <div style="height: 10px; background: #e9ecef; border-radius: 5px;">
+                                                <div style="width: 78%; height: 100%; background: var(--secondary-green); border-radius: 5px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h4 style="color: var(--primary-green); margin-bottom: 15px;">Form Performance Comparison</h4>
+                                    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px;">
+                                        <div style="margin-bottom: 15px;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                                <span>Form 4</span>
+                                                <span>85%</span>
+                                            </div>
+                                            <div style="height: 10px; background: #e9ecef; border-radius: 5px;">
+                                                <div style="width: 85%; height: 100%; background: var(--accent-green); border-radius: 5px;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="margin-bottom: 15px;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                                <span>Grade 12</span>
+                                                <span>81%</span>
+                                            </div>
+                                            <div style="height: 10px; background: #e9ecef; border-radius: 5px;">
+                                                <div style="width: 81%; height: 100%; background: var(--secondary-green); border-radius: 5px;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="margin-bottom: 15px;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                                <span>Form 3</span>
+                                                <span>76%</span>
+                                            </div>
+                                            <div style="height: 10px; background: #e9ecef; border-radius: 5px;">
+                                                <div style="width: 76%; height: 100%; background: #ffc107; border-radius: 5px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Examination Office. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function generateHelpContent() {
+                return `
+                    <div class="data-section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-question-circle"></i> Help Center</h2>
+                            <div class="section-info">Documentation and support for the Examination Office Dashboard</div>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: var(--card-shadow); margin-bottom: 40px;">
+                            <h3 style="color: var(--primary-green); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-book"></i> User Guide
+                            </h3>
+                            
+                            <div style="margin-bottom: 30px;">
+                                <h4 style="color: var(--secondary-green); margin-bottom: 15px;">Getting Started</h4>
+                                <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
+                                    Welcome to the Examination Office Dashboard. This system is designed to manage examination sessions for Forms 3, 4, and Grade levels only.
+                                </p>
+                            </div>
+                            
+                            <div style="margin-bottom: 30px;">
+                                <h4 style="color: var(--secondary-green); margin-bottom: 15px;">Key Features</h4>
+                                <ul style="color: #666; line-height: 1.6; padding-left: 20px;">
+                                    <li><strong>Start Exam Session:</strong> Initiate new examination sessions for Forms 3, 4, and Grade levels</li>
+                                    <li><strong>Close Exam Session:</strong> Finalize examination sessions and lock marks</li>
+                                    <li><strong>Generate Reports:</strong> Create student report cards and analytical reports</li>
+                                    <li><strong>Email Parents:</strong> Communicate results to parents and guardians</li>
+                                    <li><strong>Subject Management:</strong> Manage subjects and teacher assignments</li>
+                                </ul>
+                            </div>
+                            
+                            <div style="margin-bottom: 30px;">
+                                <h4 style="color: var(--secondary-green); margin-bottom: 15px;">Important Notes</h4>
+                                <ul style="color: #666; line-height: 1.6; padding-left: 20px;">
+                                    <li>Forms 1 & 2 are excluded from the examination system</li>
+                                    <li>Only Forms 3, 4, and Grade levels can have examination sessions</li>
+                                    <li>Closing an exam session will update teacher dashboards with a closure message</li>
+                                    <li>All examination data is securely stored and backed up</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h4 style="color: var(--secondary-green); margin-bottom: 15px;">Need Help?</h4>
+                                <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
+                                    If you need assistance or encounter any issues, please contact the system administrator or IT support team.
+                                </p>
+                                <div style="display: flex; gap: 15px; margin-top: 20px;">
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-phone"></i> Contact Support
+                                    </button>
+                                    <button class="btn btn-outline">
+                                        <i class="fas fa-download"></i> Download User Manual
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>© 2026 Alliance Girls High School - Examination Office. All rights reserved.</p>
+                            <div class="footer-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Help Center</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
             function generateDefaultContent(section) {
                 return `
                     <div class="data-section">
@@ -2660,23 +2628,7 @@ Alliance Girls High School
 
             // Update badge counts
             function updateBadgeCounts() {
-                const progressBadge = document.getElementById('progressBadge');
-                const emailBadge = document.getElementById('emailBadge');
-                
-                if (progressBadge) {
-                    const formsNeedingAttention = formsStatus.filter(f => f.status !== 'good').length;
-                    progressBadge.textContent = formsNeedingAttention;
-                }
-                
-                if (emailBadge) {
-                    // Mock data for emails pending
-                    emailBadge.textContent = '0';
-                }
-            }
-
-            // Initialize progress bars
-            function initializeProgressBars() {
-                // Progress bars are already initialized in the content generation
+                // Badge functionality removed as requested
             }
 
             // Show start exam modal
@@ -2787,19 +2739,13 @@ Alliance Girls High School
                     const startDate = session.start_date || 'Not specified';
                     const endDate = session.end_date || 'Not specified';
                     const status = session.status === 'active' ? 'Active' : 'Closed';
-                    const progress = session.progress || 0;
+                    const createdDate = session.created_at ? new Date(session.created_at).toLocaleDateString() : 'Not specified';
                     const description = session.description || 'No description';
                     
-                    alert(`Session Details:\n\nName: ${session.name}\nForms: ${forms}\nDates: ${startDate} to ${endDate}\nStatus: ${status}\nProgress: ${progress}%\nDescription: ${description}`);
+                    alert(`Session Details:\n\nName: ${session.name}\nForms: ${forms}\nDates: ${startDate} to ${endDate}\nStatus: ${status}\nCreated: ${createdDate}\nDescription: ${description}`);
                 }
             };
             window.closeSession = closeSessionNow;
-            window.viewSessionProgress = function(id) {
-                loadDashboardContent('progress');
-            };
-            window.viewFormDetails = function(formName) {
-                alert(`Detailed view for ${formName} would open here.`);
-            };
             window.generateClassSummary = function() {
                 alert('Class summary report generation would start here.');
             };
@@ -2976,7 +2922,7 @@ Alliance Girls High School
                         activeSession = null;
                         updateSessionDependentMenuItems(false);
                         
-                        alert(`Exam session "${sessionName}" has been closed successfully!`);
+                        alert(`Exam session "${sessionName}" has been closed successfully!\n\nTeacher dashboards have been updated with: "admin closed the session since all marks were received"`);
                         
                         // Close modal
                         closeExamModal.classList.remove('show');
