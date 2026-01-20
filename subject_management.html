@@ -578,36 +578,6 @@
             font-weight: 500;
         }
 
-        .action-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .edit-btn {
-            background-color: rgba(51, 54, 135, 0.1);
-            color: var(--accent-blue);
-        }
-
-        .remove-btn {
-            background-color: rgba(220, 53, 69, 0.1);
-            color: #dc3545;
-            margin-left: 5px;
-        }
-
-        .edit-btn:hover {
-            background-color: rgba(51, 54, 135, 0.2);
-        }
-
-        .remove-btn:hover {
-            background-color: rgba(220, 53, 69, 0.2);
-        }
-
         .no-results {
             text-align: center;
             padding: 40px;
@@ -747,11 +717,6 @@
             
             .section-title {
                 font-size: 1.1rem;
-            }
-            
-            .action-btn {
-                padding: 4px 8px;
-                font-size: 0.8rem;
             }
         }
 
@@ -969,13 +934,12 @@
                                 <th>Subject</th>
                                 <th>Form/Grade</th>
                                 <th>Streams</th>
-                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="assignments-body">
                             <!-- Assigned teachers will be added here dynamically -->
                             <tr>
-                                <td colspan="6" class="no-results" id="no-results-message">
+                                <td colspan="5" class="no-results" id="no-results-message">
                                     Loading assignments...
                                 </td>
                             </tr>
@@ -1005,40 +969,44 @@
         // All subjects data
         const allSubjects = [
             { code: "ENG", name: "English Language" },
+            {code: "MFT", name: "Maritime & Fisheries Technology" },
+            {code: "ENV", name: "Environmental Science" },
+            {code: "AUT" , name: "Automotive Technology" },
             { code: "KIS", name: "Kiswahili" },
             { code: "KSL", name: "Kenya Sign Language (KSL)" },
             { code: "CMAT", name: "Core Mathematics" },
             { code: "EMAT", name: "Essential Mathematics" },
             { code: "CSL", name: "Community Service Learning (CSL)" },
             { code: "BIO", name: "Biology" },
-            { code: "CHEM", name: "Chemistry" },
+            { code: "CHE", name: "Chemistry" },
             { code: "PHY", name: "Physics" },
             { code: "AMAT", name: "Advanced Mathematics" },
             { code: "AGR", name: "Agriculture" },
-            { code: "COMP", name: "Computer Studies" },
-            { code: "HS", name: "Home Science" },
-            { code: "BS", name: "Business Studies" },
+            { code: "CST", name: "Computer Studies" },
+            { code: "HSC", name: "Home Science" },
+            { code: "BST", name: "Business Studies" },
             { code: "AVT", name: "Aviation Technology" },
-            { code: "BC", name: "Building Construction" },
-            { code: "PM", name: "Power Mechanics" },
-            { code: "ELEC", name: "Electricity" },
-            { code: "MET", name: "Metalwork" },
-            { code: "WOOD", name: "Woodwork" },
+            { code: "BCT", name: "Building Construction" },
+            { code: "PMT", name: "Power Mechanics" },
+            { code: "ELT", name: "Electricity" },
+            { code: "MDT", name: "Metal Technology" },
+            {code: "FTT" , name: "Fashion & Textile Technology" },
+            { code: "WDT", name: "Woodwork Technology (woodwork)" },
             { code: "MFT", name: "Marine & Fisheries Technology" },
-            { code: "HIS", name: "History and Citizenship" },
+            { code: "HCT", name: "History and Citizenship" },
             { code: "GEO", name: "Geography" },
             { code: "CRE", name: "Christian Religious Education (CRE)" },
             { code: "IRE", name: "Islamic Religious Education (IRE)" },
             { code: "HRE", name: "Hindu Religious Education (HRE)" },
             { code: "LIT", name: "Literature in English" },
-            { code: "FK", name: "Fasihi ya Kiswahili" },
+            { code: "FAS", name: "Fasihi ya Kiswahili" },
             { code: "IL", name: "Indigenous Languages" },
             { code: "ARB", name: "Arabic" },
             { code: "FRE", name: "French" },
             { code: "GER", name: "German" },
             { code: "MAN", name: "Mandarin Chinese" },
-            { code: "FA", name: "Fine Arts" },
-            { code: "TF", name: "Theatre and Film" },
+            { code: "FAT", name: "Fine Art" },
+            { code: "TFM", name: "Theatre and Film" },
             { code: "MUS", name: "Music" },
             { code: "DAN", name: "Dance" },
             { code: "SR", name: "Sports and Recreation" }
@@ -1828,7 +1796,7 @@
                 noResultsMessage.style.display = 'table-cell';
                 assignmentsBody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="no-results">
+                        <td colspan="5" class="no-results">
                             ${message}
                         </td>
                     </tr>
@@ -1885,69 +1853,10 @@
                     <td>${highlightText(assignment.subject_display)} (${assignment.subject_code})</td>
                     <td>${highlightText(assignment.form_grade_display)}</td>
                     <td>${streamsHTML}</td>
-                    <td>
-                        <button class="action-btn remove-btn" data-id="${assignment.id}">
-                            <i class="fas fa-trash"></i> Remove
-                        </button>
-                    </td>
                 `;
                 
                 assignmentsBody.appendChild(row);
             });
-            
-            // Add event listeners to action buttons
-            addActionButtonListeners();
-        }
-        
-        // Add event listeners to action buttons
-        function addActionButtonListeners() {
-            // Remove buttons
-            document.querySelectorAll('.remove-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const assignmentId = parseInt(e.target.closest('button').getAttribute('data-id'));
-                    await removeAssignment(assignmentId);
-                });
-            });
-        }
-        
-        // Remove assignment
-        async function removeAssignment(assignmentId) {
-            const assignment = assignedTeachers.find(a => a.id === assignmentId);
-            
-            if (!assignment) return;
-            
-            const teacherName = assignment.teacher?.full_name || 'Unknown Teacher';
-            const subjectDisplay = assignment.subject_display || 'Unknown Subject';
-            
-            if (confirm(`Are you sure you want to remove ${teacherName} from teaching ${subjectDisplay}?`)) {
-                try {
-                    // Delete from database
-                    await deleteAssignmentFromDatabase(assignmentId);
-                    
-                    // Remove from local array
-                    const index = assignedTeachers.findIndex(a => a.id === assignmentId);
-                    if (index !== -1) {
-                        assignedTeachers.splice(index, 1);
-                    }
-                    
-                    // Update search if active
-                    if (currentSearchTerm) {
-                        searchAssignments(currentSearchTerm);
-                    } else {
-                        filteredAssignments = [...assignedTeachers];
-                        renderAssignmentsTable();
-                    }
-                    
-                    showStatus(`Assignment removed successfully.`, 'success');
-                    
-                    // Update counts
-                    updateAssignmentsCount();
-                    
-                } catch (error) {
-                    console.error('Error removing assignment:', error);
-                    showStatus(`Failed to remove assignment: ${error.message}`, 'error');
-                }
-            }
         }
         
         // Show status message

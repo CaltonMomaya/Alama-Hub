@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Combine Results - Alliance Girls High School</title>
+    <title>Combined Results - Alliance Girls High School</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary-green: #075824;
@@ -714,6 +715,271 @@
             line-height: 1.6;
         }
 
+        /* Compute Results Button */
+        .compute-results-btn {
+            background: linear-gradient(135deg, var(--accent-blue), #4a4fc1);
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px auto;
+            box-shadow: 0 5px 15px rgba(51, 54, 135, 0.2);
+        }
+
+        .compute-results-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(51, 54, 135, 0.3);
+            background: linear-gradient(135deg, #2a2c6e, #3d42a8);
+        }
+
+        .compute-results-btn i {
+            font-size: 1.3rem;
+        }
+
+        /* Analytics Cards */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .analytics-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .analytics-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .analytics-card h3 {
+            color: var(--primary-green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+
+        .analytics-card h3 i {
+            color: var(--accent-green);
+        }
+
+        .chart-container {
+            height: 250px;
+            width: 100%;
+            position: relative;
+        }
+
+        .rank-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .rank-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+
+        .rank-item:hover {
+            background-color: rgba(7, 88, 36, 0.05);
+        }
+
+        .rank-position {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: var(--primary-green);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .rank-position.top-3 {
+            background-color: var(--accent-green);
+        }
+
+        .rank-info {
+            flex: 1;
+        }
+
+        .rank-info h4 {
+            color: var(--primary-green);
+            margin-bottom: 3px;
+        }
+
+        .rank-info p {
+            color: var(--muted-green);
+            font-size: 0.9rem;
+        }
+
+        .rank-score {
+            font-weight: bold;
+            color: var(--accent-blue);
+            font-size: 1.1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: var(--primary-green);
+            font-size: 1.1rem;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+
+        .stat-change.positive {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .stat-change.negative {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+        }
+
+        .tabs-header {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 0 20px;
+        }
+
+        .tab-btn {
+            padding: 18px 25px;
+            background: none;
+            border: none;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary-green);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-green);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--primary-green);
+        }
+
+        .tab-content {
+            padding: 30px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Advanced Analytics */
+        .insight-card {
+            background: linear-gradient(135deg, rgba(7, 88, 36, 0.05), rgba(155, 174, 48, 0.05));
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-green);
+        }
+
+        .insight-card h4 {
+            color: var(--primary-green);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .insight-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary-green);
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            color: var(--muted-green);
+            font-size: 0.9rem;
+        }
+
         /* Responsive Design */
         @media (max-width: 1024px) {
             .sidebar {
@@ -743,6 +1009,10 @@
                 align-items: flex-start;
                 gap: 15px;
             }
+
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 768px) {
@@ -765,6 +1035,25 @@
 
             .excel-search input {
                 width: 200px;
+            }
+
+            .tabs-header {
+                flex-direction: column;
+                padding: 0;
+            }
+
+            .tab-btn {
+                padding: 15px 20px;
+                text-align: left;
+                border-bottom: 1px solid #dee2e6;
+            }
+
+            .tab-btn.active::after {
+                height: 100%;
+                width: 3px;
+                bottom: auto;
+                left: 0;
+                top: 0;
             }
         }
 
@@ -791,6 +1080,10 @@
             .filter-select {
                 width: 100%;
             }
+
+            .metric-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
@@ -803,7 +1096,7 @@
     <!-- Top Header with User Profile -->
     <div class="top-header" id="topHeader">
         <div class="page-title">
-            <h1 id="pageTitle">Combine Results</h1>
+            <h1 id="pageTitle">Combined Results</h1>
             <p id="pageSubtitle">Examination Office - Alliance Girls High School</p>
         </div>
         
@@ -820,6 +1113,12 @@
         
         <!-- User Dropdown Menu -->
         <div class="user-dropdown" id="userDropdown">
+            <a href="#" class="dropdown-item" onclick="navigateTo('dashboard')">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="#" class="dropdown-item" onclick="navigateTo('analytics')">
+                <i class="fas fa-chart-bar"></i> Analytics
+            </a>
             <a href="#" class="dropdown-item">
                 <i class="fas fa-user-edit"></i> Edit Profile
             </a>
@@ -853,53 +1152,48 @@
 
         <!-- Navigation Menu -->
         <ul class="sidebar-nav">
-            <li class="nav-section-title">Exam Control</li>
+            <li class="nav-section-title">Exam Management</li>
             <li class="nav-item">
-                <a href="examination_office.html" class="nav-link">
+                <a href="#" class="nav-link" onclick="navigateTo('dashboard')">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
             </li>
             <li class="nav-item">
-                <a href="examination_office.html#start-exam" class="nav-link">
-                    <i class="fas fa-play-circle"></i> Start Exam Session
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="subject_management.html" class="nav-link">
+                <a href="#" class="nav-link" onclick="navigateTo('subjectManagement')">
                     <i class="fas fa-book"></i> Subject Management
                 </a>
             </li>
-            <li class="nav-item">
-                <a href="examination_office.html#close-exam" class="nav-link">
-                    <i class="fas fa-stop-circle"></i> Close Exam Sessions
-                </a>
-            </li>
             
-            <li class="nav-section-title">Reporting & Communication</li>
+            <li class="nav-section-title">Reporting & Analytics</li>
             <li class="nav-item">
-                <a href="examination_office.html#reports" class="nav-link">
+                <a href="#" class="nav-link" onclick="navigateTo('generateReports')">
                     <i class="fas fa-file-alt"></i> Generate Report Cards
                 </a>
             </li>
             <li class="nav-item">
                 <a href="#" class="nav-link active">
-                    <i class="fas fa-cogs"></i> Combine Results
+                    <i class="fas fa-cogs"></i> Combined Results
                 </a>
             </li>
             <li class="nav-item">
-                <a href="examination_office.html#email-parents" class="nav-link">
-                    <i class="fas fa-envelope"></i> Email Parents
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="examination_office.html#analytics" class="nav-link">
+                <a href="#" class="nav-link" onclick="navigateTo('analytics')">
                     <i class="fas fa-chart-bar"></i> Analytics & Insights
                 </a>
             </li>
-            
-            <li class="nav-section-title">Help</li>
             <li class="nav-item">
-                <a href="examination_office.html#help" class="nav-link">
+                <a href="#" class="nav-link" onclick="navigateTo('emailParents')">
+                    <i class="fas fa-envelope"></i> Email Parents
+                </a>
+            </li>
+            
+            <li class="nav-section-title">Administration</li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" onclick="navigateTo('settings')">
+                    <i class="fas fa-cog"></i> System Settings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" onclick="navigateTo('help')">
                     <i class="fas fa-question-circle"></i> Help Center
                 </a>
             </li>
@@ -915,226 +1209,399 @@
     <div class="main-content" id="mainContent">
         <div class="data-section">
             <div class="section-title">
-                <h2><i class="fas fa-cogs"></i> Combine Examination Results</h2>
-                <div class="section-info">View and combine student performance data from all forms</div>
+                <h2><i class="fas fa-cogs"></i> Combine & Compute Examination Results</h2>
+                <div class="section-info">View, combine, and analyze student performance data from all forms</div>
             </div>
 
-            <!-- Filter Controls -->
-            <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow); margin-bottom: 30px;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                    <div class="form-group">
-                        <label>Form/Grade</label>
-                        <select id="filterForm" class="filter-select">
-                            <option value="">All Forms</option>
-                            <option value="Form 3">Form 3</option>
-                            <option value="Form 4">Form 4</option>
-                            <option value="Grade 10">Grade 10</option>
-                            <option value="Grade 11">Grade 11</option>
-                            <option value="Grade 12">Grade 12</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Stream</label>
-                        <select id="filterStream" class="filter-select">
-                            <option value="">All Streams</option>
-                            <option value="North">North</option>
-                            <option value="South">South</option>
-                            <option value="East">East</option>
-                            <option value="West">West</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Subject</label>
-                        <select id="filterSubject" class="filter-select">
-                            <option value="">All Subjects</option>
-                            <!-- Options will be loaded dynamically -->
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Exam Type</label>
-                        <select id="filterExamType" class="filter-select">
-                            <option value="">All Exam Types</option>
-                            <option value="Term 1">Term 1</option>
-                            <option value="Term 2">Term 2</option>
-                            <option value="Term 3">Term 3</option>
-                            <option value="Mock">Mock</option>
-                            <option value="Final">Final</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div style="display: flex; gap: 15px; margin-top: 20px;">
-                    <button class="btn btn-primary" id="applyFilters">
-                        <i class="fas fa-filter"></i> Apply Filters
-                    </button>
-                    <button class="btn btn-outline" id="clearFilters">
-                        <i class="fas fa-times"></i> Clear Filters
-                    </button>
-                    <button class="btn btn-secondary" id="fetchData">
-                        <i class="fas fa-sync-alt"></i> Refresh Data
-                    </button>
-                </div>
-            </div>
+            <!-- Compute Results Button -->
+            <button class="compute-results-btn" id="computeResultsBtn">
+                <i class="fas fa-brain"></i> Compute Results & Generate Analytics
+            </button>
 
-            <!-- Excel-like Spreadsheet -->
-            <div class="excel-container" id="excelContainer">
-                <!-- Toolbar -->
-                <div class="excel-toolbar">
-                    <div class="excel-search">
-                        <input type="text" id="searchInput" placeholder="Search in all columns...">
-                        <button class="btn btn-sm btn-outline" id="searchBtn">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="excel-stats">
-                        <span id="rowCount">Loading...</span>
-                        <span id="filteredCount"></span>
-                    </div>
-                    
-                    <div class="excel-filters">
-                        <select id="sortColumn" class="filter-select">
-                            <option value="">Sort by...</option>
-                        </select>
-                        <select id="sortDirection" class="filter-select">
-                            <option value="asc">Ascending</option>
-                            <option value="desc">Descending</option>
-                        </select>
-                    </div>
+            <!-- Tabs Container -->
+            <div class="tabs-container">
+                <div class="tabs-header">
+                    <button class="tab-btn active" data-tab="data-view">Data View</button>
+                    <button class="tab-btn" data-tab="analytics">Analytics</button>
+                    <button class="tab-btn" data-tab="rankings">Rankings</button>
+                    <button class="tab-btn" data-tab="insights">Insights</button>
                 </div>
 
-                <!-- Loading State -->
-                <div class="loading-spinner" id="loadingSpinner">
-                    <div class="spinner"></div>
-                    <div style="margin-left: 15px; color: var(--primary-green);">Loading student performance data...</div>
-                </div>
-
-                <!-- No Data State -->
-                <div class="no-data" id="noDataMessage" style="display: none;">
-                    <i class="fas fa-database"></i>
-                    <h3>No Performance Data Found</h3>
-                    <p>No student performance records found in the database. Please ensure marks have been submitted.</p>
-                    <button class="btn btn-primary" onclick="fetchStudentPerformance()" style="margin-top: 20px;">
-                        <i class="fas fa-sync-alt"></i> Try Again
-                    </button>
-                </div>
-
-                <!-- Setup Database Message -->
-                <div class="setup-database" id="setupDatabaseMessage" style="display: none;">
-                    <i class="fas fa-tools"></i>
-                    <h3>Database Table Not Found</h3>
-                    <p>The <code>student_performance</code> table doesn't exist in your database. Click the button below to create the table automatically.</p>
-                    <p style="font-size: 0.9rem; color: var(--muted-green); margin-bottom: 25px;">
-                        The table will be created with the correct structure for storing student performance data.
-                    </p>
-                    <button class="btn btn-primary" id="createTableBtn" style="margin-top: 20px;">
-                        <i class="fas fa-plus-circle"></i> Create Performance Table
-                    </button>
-                    <button class="btn btn-outline" onclick="checkTableExists()" style="margin-top: 10px;">
-                        <i class="fas fa-redo"></i> Check Again
-                    </button>
-                </div>
-
-                <!-- Excel Table -->
-                <div class="excel-table-container" id="tableContainer" style="display: none;">
-                    <table class="excel-table" id="excelTable">
-                        <thead id="tableHeader">
-                            <!-- Header will be populated by JavaScript -->
-                        </thead>
-                        <tbody id="tableBody">
-                            <!-- Data will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div class="excel-pagination" id="paginationContainer" style="display: none;">
-                    <div class="pagination-controls">
-                        <button class="page-btn" id="firstPage">
-                            <i class="fas fa-angle-double-left"></i>
-                        </button>
-                        <button class="page-btn" id="prevPage">
-                            <i class="fas fa-angle-left"></i>
-                        </button>
-                        <span class="page-info" id="pageInfo">Page 1 of 1</span>
-                        <button class="page-btn" id="nextPage">
-                            <i class="fas fa-angle-right"></i>
-                        </button>
-                        <button class="page-btn" id="lastPage">
-                            <i class="fas fa-angle-double-right"></i>
-                        </button>
-                    </div>
-                    
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="color: var(--muted-green); font-size: 0.9rem;">Rows per page:</span>
-                        <select id="rowsPerPage" class="filter-select">
-                            <option value="20">20</option>
-                            <option value="50" selected>50</option>
-                            <option value="100">100</option>
-                            <option value="200">200</option>
-                            <option value="500">500</option>
-                        </select>
+                <!-- Data View Tab -->
+                <div class="tab-content active" id="data-view">
+                    <!-- Filter Controls -->
+                    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow); margin-bottom: 30px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div class="form-group">
+                                <label>Form/Grade</label>
+                                <select id="filterForm" class="filter-select">
+                                    <option value="">All Forms</option>
+                                    <option value="Form_3">Form_3</option>
+                                    <option value="Form 4">Form 4</option>
+                                    <option value="Grade 10">Grade 10</option>
+                                    <option value="Grade 11">Grade 11</option>
+                                    <option value="Grade 12">Grade 12</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Stream</label>
+                                <select id="filterStream" class="filter-select">
+                                    <option value="">All Streams</option>
+                                    <option value="North">North</option>
+                                    <option value="South">South</option>
+                                    <option value="East">East</option>
+                                    <option value="West">West</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Subject</label>
+                                <select id="filterSubject" class="filter-select">
+                                    <option value="">All Subjects</option>
+                                    <!-- Options will be loaded dynamically -->
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Exam Type</label>
+                                <select id="filterExamType" class="filter-select">
+                                    <option value="">All Exam Types</option>
+                                </select>
+                            </div>
+                        </div>
                         
-                        <button class="btn btn-success" id="exportCsv">
-                            <i class="fas fa-file-csv"></i> Export to CSV
-                        </button>
-                        <button class="btn btn-primary" id="exportSummary">
-                            <i class="fas fa-chart-bar"></i> Export Summary
-                        </button>
+                        <div style="display: flex; gap: 15px; margin-top: 20px;">
+                            <button class="btn btn-primary" id="applyFilters">
+                                <i class="fas fa-filter"></i> Apply Filters
+                            </button>
+                            <button class="btn btn-outline" id="clearFilters">
+                                <i class="fas fa-times"></i> Clear Filters
+                            </button>
+                            <button class="btn btn-secondary" id="fetchData">
+                                <i class="fas fa-sync-alt"></i> Refresh Data
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Data Summary -->
-            <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow); margin-bottom: 40px;">
-                <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-chart-bar"></i> Data Summary
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
-                    <div style="text-align: center; padding: 20px; background: rgba(7, 88, 36, 0.05); border-radius: 8px;">
-                        <div style="font-size: 2.5rem; color: var(--primary-green); font-weight: bold;" id="totalStudents">0</div>
-                        <div style="color: var(--muted-green); margin-top: 5px;">Total Students</div>
+                    <!-- Excel-like Spreadsheet -->
+                    <div class="excel-container" id="excelContainer">
+                        <!-- Toolbar -->
+                        <div class="excel-toolbar">
+                            <div class="excel-search">
+                                <input type="text" id="searchInput" placeholder="Search in all columns...">
+                                <button class="btn btn-sm btn-outline" id="searchBtn">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="excel-stats">
+                                <span id="rowCount">Loading...</span>
+                                <span id="filteredCount"></span>
+                            </div>
+                            
+                            <div class="excel-filters">
+                                <select id="sortColumn" class="filter-select">
+                                    <option value="">Sort by...</option>
+                                </select>
+                                <select id="sortDirection" class="filter-select">
+                                    <option value="asc">Ascending</option>
+                                    <option value="desc">Descending</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div class="loading-spinner" id="loadingSpinner">
+                            <div class="spinner"></div>
+                            <div style="margin-left: 15px; color: var(--primary-green);">Loading student performance data...</div>
+                        </div>
+
+                        <!-- No Data State -->
+                        <div class="no-data" id="noDataMessage" style="display: none;">
+                            <i class="fas fa-database"></i>
+                            <h3>No Performance Data Found</h3>
+                            <p>No student performance records found in the database. Please ensure marks have been submitted.</p>
+                            <button class="btn btn-primary" onclick="fetchStudentPerformance()" style="margin-top: 20px;">
+                                <i class="fas fa-sync-alt"></i> Try Again
+                            </button>
+                        </div>
+
+                        <!-- Setup Database Message -->
+                        <div class="setup-database" id="setupDatabaseMessage" style="display: none;">
+                            <i class="fas fa-tools"></i>
+                            <h3>Database Table Not Found</h3>
+                            <p>The <code>student_performance</code> table doesn't exist in your database. Click the button below to create the table automatically.</p>
+                            <p style="font-size: 0.9rem; color: var(--muted-green); margin-bottom: 25px;">
+                                The table will be created with the correct structure for storing student performance data.
+                            </p>
+                            <button class="btn btn-primary" id="createTableBtn" style="margin-top: 20px;">
+                                <i class="fas fa-plus-circle"></i> Create Performance Table
+                            </button>
+                            <button class="btn btn-outline" onclick="checkTableExists()" style="margin-top: 10px;">
+                                <i class="fas fa-redo"></i> Check Again
+                            </button>
+                        </div>
+
+                        <!-- Excel Table -->
+                        <div class="excel-table-container" id="tableContainer" style="display: none;">
+                            <table class="excel-table" id="excelTable">
+                                <thead id="tableHeader">
+                                    <!-- Header will be populated by JavaScript -->
+                                </thead>
+                                <tbody id="tableBody">
+                                    <!-- Data will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="excel-pagination" id="paginationContainer" style="display: none;">
+                            <div class="pagination-controls">
+                                <button class="page-btn" id="firstPage">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </button>
+                                <button class="page-btn" id="prevPage">
+                                    <i class="fas fa-angle-left"></i>
+                                </button>
+                                <span class="page-info" id="pageInfo">Page 1 of 1</span>
+                                <button class="page-btn" id="nextPage">
+                                    <i class="fas fa-angle-right"></i>
+                                </button>
+                                <button class="page-btn" id="lastPage">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </button>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="color: var(--muted-green); font-size: 0.9rem;">Rows per page:</span>
+                                <select id="rowsPerPage" class="filter-select">
+                                    <option value="20">20</option>
+                                    <option value="50" selected>50</option>
+                                    <option value="100">100</option>
+                                    <option value="200">200</option>
+                                    <option value="500">500</option>
+                                </select>
+                                
+                                <button class="btn btn-success" id="exportCsv">
+                                    <i class="fas fa-file-csv"></i> Export to CSV
+                                </button>
+                                <button class="btn btn-primary" id="exportSummary">
+                                    <i class="fas fa-chart-bar"></i> Export Summary
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div style="text-align: center; padding: 20px; background: rgba(7, 88, 36, 0.05); border-radius: 8px;">
-                        <div style="font-size: 2.5rem; color: var(--primary-green); font-weight: bold;" id="totalSubjects">0</div>
-                        <div style="color: var(--muted-green); margin-top: 5px;">Subjects</div>
-                    </div>
-                    <div style="text-align: center; padding: 20px; background: rgba(7, 88, 36, 0.05); border-radius: 8px;">
-                        <div style="font-size: 2.5rem; color: var(--primary-green); font-weight: bold;" id="avgScore">0%</div>
-                        <div style="color: var(--muted-green); margin-top: 5px;">Avg Percentage</div>
-                    </div>
-                    <div style="text-align: center; padding: 20px; background: rgba(7, 88, 36, 0.05); border-radius: 8px;">
-                        <div style="font-size: 2.5rem; color: var(--primary-green); font-weight: bold;" id="dataUpdated">-</div>
-                        <div style="color: var(--muted-green); margin-top: 5px;">Last Updated</div>
+
+                    <!-- Data Summary -->
+                    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow); margin-bottom: 40px;">
+                        <h3 style="color: var(--primary-green); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-chart-bar"></i> Data Summary
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+                            <div style="text-align: center; padding: 20px; background: rgba(7, 88, 36, 0.05); border-radius: 8px;">
+                                <div style="font-size: 2.5rem; color: var(--primary-green); font-weight: bold;" id="totalStudents">0</div>
+                                <div style="color: var(--muted-green); margin-top: 5px;">Total Students</div>
+                            </div>
+                            <div style="text-align: center; padding: 20px; background: rgba(7, 88, 36, 0.05); border-radius: 8px;">
+                                <div style="font-size: 2.5rem; color: var(--primary-green); font-weight: bold;" id="totalSubjects">0</div>
+                                <div style="color: var(--muted-green); margin-top: 5px;">Subjects</div>
+                            </div>
+                            <div style="text-align: center; padding: 20px; background: rgba(7, 88, 36, 0.05); border-radius: 8px;">
+                                <div style="font-size: 2.5rem; color: var(--primary-green); font-weight: bold;" id="avgScore">0%</div>
+                                <div style="color: var(--muted-green); margin-top: 5px;">Avg Percentage</div>
+                            </div>
+                            <div style="text-align: center; padding: 20px; background: rgba(7, 88, 36, 0.05); border-radius: 8px;">
+                                <div style="font-size: 2.5rem; color: var(--primary-green); font-weight: bold;" id="dataUpdated">-</div>
+                                <div style="color: var(--muted-green); margin-top: 5px;">Last Updated</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Grade Distribution -->
+                        <div style="margin-top: 30px;">
+                            <h4 style="color: var(--secondary-green); margin-bottom: 15px;">Grade Distribution</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                                <div style="text-align: center; padding: 15px; background: rgba(220, 53, 69, 0.1); border-radius: 8px;">
+                                    <div style="font-size: 1.8rem; color: #dc3545; font-weight: bold;" id="gradeA">0</div>
+                                    <div style="color: #666; margin-top: 5px;">Grade A</div>
+                                </div>
+                                <div style="text-align: center; padding: 15px; background: rgba(255, 193, 7, 0.1); border-radius: 8px;">
+                                    <div style="font-size: 1.8rem; color: #ffc107; font-weight: bold;" id="gradeB">0</div>
+                                    <div style="color: #666; margin-top: 5px;">Grade B</div>
+                                </div>
+                                <div style="text-align: center; padding: 15px; background: rgba(40, 167, 69, 0.1); border-radius: 8px;">
+                                    <div style="font-size: 1.8rem; color: #28a745; font-weight: bold;" id="gradeC">0</div>
+                                    <div style="color: #666; margin-top: 5px;">Grade C</div>
+                                </div>
+                                <div style="text-align: center; padding: 15px; background: rgba(108, 117, 125, 0.1); border-radius: 8px;">
+                                    <div style="font-size: 1.8rem; color: #6c757d; font-weight: bold;" id="gradeD">0</div>
+                                    <div style="color: #666; margin-top: 5px;">Grade D</div>
+                                </div>
+                                <div style="text-align: center; padding: 15px; background: rgba(23, 162, 184, 0.1); border-radius: 8px;">
+                                    <div style="font-size: 1.8rem; color: #17a2b8; font-weight: bold;" id="gradeE">0</div>
+                                    <div style="color: #666; margin-top: 5px;">Grade E</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- Grade Distribution -->
-                <div style="margin-top: 30px;">
-                    <h4 style="color: var(--secondary-green); margin-bottom: 15px;">Grade Distribution</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-                        <div style="text-align: center; padding: 15px; background: rgba(220, 53, 69, 0.1); border-radius: 8px;">
-                            <div style="font-size: 1.8rem; color: #dc3545; font-weight: bold;" id="gradeA">0</div>
-                            <div style="color: #666; margin-top: 5px;">Grade A</div>
+
+                <!-- Analytics Tab -->
+                <div class="tab-content" id="analytics">
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <h3><i class="fas fa-chart-line"></i> Overall Performance</h3>
+                            <div class="chart-container">
+                                <canvas id="performanceChart"></canvas>
+                            </div>
                         </div>
-                        <div style="text-align: center; padding: 15px; background: rgba(255, 193, 7, 0.1); border-radius: 8px;">
-                            <div style="font-size: 1.8rem; color: #ffc107; font-weight: bold;" id="gradeB">0</div>
-                            <div style="color: #666; margin-top: 5px;">Grade B</div>
+                        
+                        <div class="analytics-card">
+                            <h3><i class="fas fa-balance-scale"></i> Subject Comparison</h3>
+                            <div class="chart-container">
+                                <canvas id="subjectChart"></canvas>
+                            </div>
                         </div>
-                        <div style="text-align: center; padding: 15px; background: rgba(40, 167, 69, 0.1); border-radius: 8px;">
-                            <div style="font-size: 1.8rem; color: #28a745; font-weight: bold;" id="gradeC">0</div>
-                            <div style="color: #666; margin-top: 5px;">Grade C</div>
+                        
+                        <div class="analytics-card">
+                            <h3><i class="fas fa-users"></i> Stream Performance</h3>
+                            <div class="chart-container">
+                                <canvas id="streamChart"></canvas>
+                            </div>
                         </div>
-                        <div style="text-align: center; padding: 15px; background: rgba(108, 117, 125, 0.1); border-radius: 8px;">
-                            <div style="font-size: 1.8rem; color: #6c757d; font-weight: bold;" id="gradeD">0</div>
-                            <div style="color: #666; margin-top: 5px;">Grade D</div>
+                        
+                        <div class="analytics-card">
+                            <h3><i class="fas fa-chart-pie"></i> Grade Distribution</h3>
+                            <div class="chart-container">
+                                <canvas id="gradeChart"></canvas>
+                            </div>
                         </div>
-                        <div style="text-align: center; padding: 15px; background: rgba(23, 162, 184, 0.1); border-radius: 8px;">
-                            <div style="font-size: 1.8rem; color: #17a2b8; font-weight: bold;" id="gradeE">0</div>
-                            <div style="color: #666; margin-top: 5px;">Grade E</div>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px;">
+                        <div class="analytics-card">
+                            <h3><i class="fas fa-trophy"></i> Top Performers</h3>
+                            <div class="stat-item">
+                                <span class="stat-label">Best Student</span>
+                                <span class="stat-value" id="bestStudent">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Best Subject</span>
+                                <span class="stat-value" id="bestSubject">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Best Stream</span>
+                                <span class="stat-value" id="bestStream">-</span>
+                            </div>
+                        </div>
+                        
+                        <div class="analytics-card">
+                            <h3><i class="fas fa-chart-bar"></i> Performance Metrics</h3>
+                            <div class="stat-item">
+                                <span class="stat-label">Mean Score</span>
+                                <span class="stat-value" id="meanScore">0%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Median Score</span>
+                                <span class="stat-value" id="medianScore">0%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Standard Deviation</span>
+                                <span class="stat-value" id="stdDev">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="analytics-card">
+                            <h3><i class="fas fa-calendar-alt"></i> Exam Analysis</h3>
+                            <div class="stat-item">
+                                <span class="stat-label">Best Exam Type</span>
+                                <span class="stat-value" id="bestExamType">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Total Exams</span>
+                                <span class="stat-value" id="totalExams">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Pass Rate</span>
+                                <span class="stat-value" id="passRate">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rankings Tab -->
+                <div class="tab-content" id="rankings">
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <h3><i class="fas fa-crown"></i> Overall Rankings</h3>
+                            <div class="rank-list" id="overallRankings">
+                                <!-- Rankings will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="analytics-card">
+                            <h3><i class="fas fa-book"></i> Subject Rankings</h3>
+                            <div class="rank-list" id="subjectRankings">
+                                <!-- Subject rankings will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="analytics-card">
+                            <h3><i class="fas fa-users"></i> Stream Rankings</h3>
+                            <div class="rank-list" id="streamRankings">
+                                <!-- Stream rankings will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="analytics-card">
+                            <h3><i class="fas fa-graduation-cap"></i> Form Rankings</h3>
+                            <div class="rank-list" id="formRankings">
+                                <!-- Form rankings will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insights Tab -->
+                <div class="tab-content" id="insights">
+                    <div class="insight-card">
+                        <h4><i class="fas fa-lightbulb"></i> Key Insights</h4>
+                        <div id="keyInsights">
+                            <!-- Insights will be generated dynamically -->
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Areas Needing Improvement</h4>
+                        <div id="improvementAreas">
+                            <!-- Improvement areas will be generated dynamically -->
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card">
+                        <h4><i class="fas fa-chart-line"></i> Performance Trends</h4>
+                        <div id="performanceTrends">
+                            <!-- Trends will be generated dynamically -->
+                        </div>
+                    </div>
+                    
+                    <div class="metric-grid" style="margin-top: 30px;">
+                        <div class="metric-item">
+                            <div class="metric-value" id="avgFormScore">0%</div>
+                            <div class="metric-label">Avg Form Score</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="improvementRate">0%</div>
+                            <div class="metric-label">Improvement Rate</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="consistencyScore">0</div>
+                            <div class="metric-label">Consistency Score</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="excellenceRate">0%</div>
+                            <div class="metric-label">Excellence Rate</div>
                         </div>
                     </div>
                 </div>
@@ -1159,7 +1626,7 @@
             if (window.combineResultsInitialized) return;
             window.combineResultsInitialized = true;
             
-            console.log('Initializing Combine Results Page...');
+            console.log('Initializing Enhanced Combine Results Page...');
             
             // Initialize Supabase client
             let supabase;
@@ -1171,6 +1638,22 @@
             let rowsPerPage = 50;
             let totalPages = 1;
             let sortConfig = { column: '', direction: 'asc' };
+            
+            // Analytics data
+            let analyticsData = {
+                overallPerformance: {},
+                subjectPerformance: {},
+                streamPerformance: {},
+                rankings: {},
+                insights: {},
+                trends: {}
+            };
+            
+            // Chart instances
+            let performanceChart = null;
+            let subjectChart = null;
+            let streamChart = null;
+            let gradeChart = null;
             
             try {
                 const supabaseUrl = 'https://eloqizcahwxavsbalxii.supabase.co';
@@ -1201,6 +1684,13 @@
             const applyFilters = document.getElementById('applyFilters');
             const clearFilters = document.getElementById('clearFilters');
             const fetchData = document.getElementById('fetchData');
+            
+            // Compute results button
+            const computeResultsBtn = document.getElementById('computeResultsBtn');
+            
+            // Tab elements
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
             
             // Excel spreadsheet elements
             const searchInput = document.getElementById('searchInput');
@@ -1236,6 +1726,113 @@
             const gradeC = document.getElementById('gradeC');
             const gradeD = document.getElementById('gradeD');
             const gradeE = document.getElementById('gradeE');
+            
+            // Analytics elements
+            const bestStudent = document.getElementById('bestStudent');
+            const bestSubject = document.getElementById('bestSubject');
+            const bestStream = document.getElementById('bestStream');
+            const meanScore = document.getElementById('meanScore');
+            const medianScore = document.getElementById('medianScore');
+            const stdDev = document.getElementById('stdDev');
+            const bestExamType = document.getElementById('bestExamType');
+            const totalExams = document.getElementById('totalExams');
+            const passRate = document.getElementById('passRate');
+            
+            // Rankings elements
+            const overallRankings = document.getElementById('overallRankings');
+            const subjectRankings = document.getElementById('subjectRankings');
+            const streamRankings = document.getElementById('streamRankings');
+            const formRankings = document.getElementById('formRankings');
+            
+            // Insights elements
+            const keyInsights = document.getElementById('keyInsights');
+            const improvementAreas = document.getElementById('improvementAreas');
+            const performanceTrends = document.getElementById('performanceTrends');
+            const avgFormScore = document.getElementById('avgFormScore');
+            const improvementRate = document.getElementById('improvementRate');
+            const consistencyScore = document.getElementById('consistencyScore');
+            const excellenceRate = document.getElementById('excellenceRate');
+
+            // Navigation function to prevent routing errors
+            function navigateTo(page) {
+                switch(page) {
+                    case 'dashboard':
+                        // If dashboard.html doesn't exist, show dashboard content inline
+                        showDashboardContent();
+                        break;
+                    case 'subjectManagement':
+                        // If subject_management.html doesn't exist, redirect to combined results
+                        window.location.href = 'combined_results.html';
+                        break;
+                    case 'generateReports':
+                        // Show report generation interface
+                        showReportGeneration();
+                        break;
+                    case 'analytics':
+                        // Switch to analytics tab
+                        switchTab('analytics');
+                        break;
+                    case 'emailParents':
+                        // Show email interface
+                        showEmailInterface();
+                        break;
+                    case 'settings':
+                        // Show settings interface
+                        showSettings();
+                        break;
+                    case 'help':
+                        // Show help content
+                        showHelp();
+                        break;
+                    default:
+                        console.log(`Navigation to ${page} requested`);
+                }
+            }
+
+            // Function to show dashboard content
+            function showDashboardContent() {
+                alert('Dashboard functionality would be displayed here. For now, you can use the Combined Results page.');
+                // You could also dynamically load dashboard content
+            }
+
+            // Function to switch tabs
+            function switchTab(tabName) {
+                // Update active tab button
+                tabBtns.forEach(btn => {
+                    if (btn.dataset.tab === tabName) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+                
+                // Show active tab content
+                tabContents.forEach(content => {
+                    if (content.id === tabName) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+                
+                // If switching to analytics tab and data exists, compute analytics
+                if (tabName === 'analytics' && studentPerformanceData.length > 0) {
+                    computeAnalytics();
+                    renderAnalytics();
+                }
+                
+                // If switching to rankings tab, compute rankings
+                if (tabName === 'rankings' && studentPerformanceData.length > 0) {
+                    computeRankings();
+                    renderRankings();
+                }
+                
+                // If switching to insights tab, generate insights
+                if (tabName === 'insights' && studentPerformanceData.length > 0) {
+                    generateInsights();
+                    renderInsights();
+                }
+            }
 
             // Function to load user data
             async function loadUserData() {
@@ -1660,6 +2257,748 @@ CREATE INDEX idx_student_performance_stream ON student_performance(stream);
                 gradeE.textContent = grades.filter(g => g === 'E').length;
             }
 
+            // Function to compute comprehensive analytics
+            function computeAnalytics() {
+                if (studentPerformanceData.length === 0) return;
+                
+                console.log('Computing comprehensive analytics...');
+                
+                // Reset analytics data
+                analyticsData = {
+                    overallPerformance: {},
+                    subjectPerformance: {},
+                    streamPerformance: {},
+                    rankings: {},
+                    insights: {},
+                    trends: {}
+                };
+                
+                // 1. Compute overall performance
+                computeOverallPerformance();
+                
+                // 2. Compute subject performance
+                computeSubjectPerformance();
+                
+                // 3. Compute stream performance
+                computeStreamPerformance();
+                
+                // 4. Compute rankings
+                computeRankings();
+                
+                // 5. Generate insights
+                generateInsights();
+                
+                console.log('Analytics computation complete');
+            }
+
+            // Function to compute overall performance
+            function computeOverallPerformance() {
+                const percentages = studentPerformanceData
+                    .filter(item => item.percentage && !isNaN(item.percentage))
+                    .map(item => parseFloat(item.percentage));
+                
+                if (percentages.length === 0) return;
+                
+                // Calculate statistics
+                const sum = percentages.reduce((a, b) => a + b, 0);
+                const mean = sum / percentages.length;
+                const sorted = [...percentages].sort((a, b) => a - b);
+                const median = sorted.length % 2 === 0 
+                    ? (sorted[sorted.length/2 - 1] + sorted[sorted.length/2]) / 2
+                    : sorted[Math.floor(sorted.length/2)];
+                
+                // Calculate standard deviation
+                const squaredDiffs = percentages.map(x => Math.pow(x - mean, 2));
+                const avgSquaredDiff = squaredDiffs.reduce((a, b) => a + b, 0) / percentages.length;
+                const stdDev = Math.sqrt(avgSquaredDiff);
+                
+                // Calculate pass rate (assuming 40% is passing)
+                const passCount = percentages.filter(p => p >= 40).length;
+                const passRate = (passCount / percentages.length) * 100;
+                
+                analyticsData.overallPerformance = {
+                    mean,
+                    median,
+                    stdDev,
+                    passRate,
+                    totalExams: studentPerformanceData.length,
+                    uniqueStudents: new Set(studentPerformanceData.map(item => item.admission_no)).size
+                };
+            }
+
+            // Function to compute subject performance
+            function computeSubjectPerformance() {
+                // Group by subject
+                const subjectGroups = {};
+                
+                studentPerformanceData.forEach(item => {
+                    if (!item.subject_code) return;
+                    
+                    if (!subjectGroups[item.subject_code]) {
+                        subjectGroups[item.subject_code] = {
+                            scores: [],
+                            count: 0,
+                            sum: 0
+                        };
+                    }
+                    
+                    if (item.percentage && !isNaN(item.percentage)) {
+                        const score = parseFloat(item.percentage);
+                        subjectGroups[item.subject_code].scores.push(score);
+                        subjectGroups[item.subject_code].sum += score;
+                        subjectGroups[item.subject_code].count++;
+                    }
+                });
+                
+                // Calculate averages for each subject
+                for (const subject in subjectGroups) {
+                    const group = subjectGroups[subject];
+                    group.average = group.count > 0 ? group.sum / group.count : 0;
+                }
+                
+                analyticsData.subjectPerformance = subjectGroups;
+            }
+
+            // Function to compute stream performance
+            function computeStreamPerformance() {
+                // Group by stream
+                const streamGroups = {};
+                
+                studentPerformanceData.forEach(item => {
+                    if (!item.stream) return;
+                    
+                    if (!streamGroups[item.stream]) {
+                        streamGroups[item.stream] = {
+                            scores: [],
+                            count: 0,
+                            sum: 0
+                        };
+                    }
+                    
+                    if (item.percentage && !isNaN(item.percentage)) {
+                        const score = parseFloat(item.percentage);
+                        streamGroups[item.stream].scores.push(score);
+                        streamGroups[item.stream].sum += score;
+                        streamGroups[item.stream].count++;
+                    }
+                });
+                
+                // Calculate averages for each stream
+                for (const stream in streamGroups) {
+                    const group = streamGroups[stream];
+                    group.average = group.count > 0 ? group.sum / group.count : 0;
+                }
+                
+                analyticsData.streamPerformance = streamGroups;
+            }
+
+            // Function to compute rankings
+            function computeRankings() {
+                // 1. Overall student rankings (by average percentage)
+                const studentScores = {};
+                
+                studentPerformanceData.forEach(item => {
+                    if (!item.admission_no || !item.percentage || isNaN(item.percentage)) return;
+                    
+                    const studentId = item.admission_no;
+                    const studentName = item.student_name || 'Unknown';
+                    const score = parseFloat(item.percentage);
+                    
+                    if (!studentScores[studentId]) {
+                        studentScores[studentId] = {
+                            name: studentName,
+                            scores: [],
+                            count: 0,
+                            sum: 0
+                        };
+                    }
+                    
+                    studentScores[studentId].scores.push(score);
+                    studentScores[studentId].sum += score;
+                    studentScores[studentId].count++;
+                });
+                
+                // Calculate averages and prepare for ranking
+                const studentRankings = Object.keys(studentScores).map(studentId => {
+                    const student = studentScores[studentId];
+                    return {
+                        id: studentId,
+                        name: student.name,
+                        average: student.count > 0 ? student.sum / student.count : 0,
+                        count: student.count
+                    };
+                });
+                
+                // Sort by average (descending)
+                studentRankings.sort((a, b) => b.average - a.average);
+                
+                // 2. Subject rankings
+                const subjectRankings = Object.keys(analyticsData.subjectPerformance).map(subject => {
+                    const perf = analyticsData.subjectPerformance[subject];
+                    return {
+                        subject,
+                        average: perf.average || 0,
+                        count: perf.count || 0
+                    };
+                }).sort((a, b) => b.average - a.average);
+                
+                // 3. Stream rankings
+                const streamRankings = Object.keys(analyticsData.streamPerformance).map(stream => {
+                    const perf = analyticsData.streamPerformance[stream];
+                    return {
+                        stream,
+                        average: perf.average || 0,
+                        count: perf.count || 0
+                    };
+                }).sort((a, b) => b.average - a.average);
+                
+                // 4. Form rankings
+                const formGroups = {};
+                
+                studentPerformanceData.forEach(item => {
+                    if (!item.form_grade || !item.percentage || isNaN(item.percentage)) return;
+                    
+                    const form = item.form_grade;
+                    const score = parseFloat(item.percentage);
+                    
+                    if (!formGroups[form]) {
+                        formGroups[form] = {
+                            scores: [],
+                            count: 0,
+                            sum: 0
+                        };
+                    }
+                    
+                    formGroups[form].scores.push(score);
+                    formGroups[form].sum += score;
+                    formGroups[form].count++;
+                });
+                
+                const formRankings = Object.keys(formGroups).map(form => {
+                    const group = formGroups[form];
+                    return {
+                        form,
+                        average: group.count > 0 ? group.sum / group.count : 0,
+                        count: group.count
+                    };
+                }).sort((a, b) => b.average - a.average);
+                
+                analyticsData.rankings = {
+                    students: studentRankings.slice(0, 20), // Top 20 students
+                    subjects: subjectRankings.slice(0, 10), // Top 10 subjects
+                    streams: streamRankings,
+                    forms: formRankings
+                };
+            }
+
+            // Function to generate insights
+            function generateInsights() {
+                const insights = [];
+                const improvementAreas = [];
+                const trends = [];
+                
+                // 1. Find best performing student
+                if (analyticsData.rankings.students.length > 0) {
+                    const topStudent = analyticsData.rankings.students[0];
+                    insights.push(`Top performing student: ${topStudent.name} with an average of ${topStudent.average.toFixed(1)}%`);
+                    
+                    // Update best student element
+                    bestStudent.textContent = `${topStudent.name} (${topStudent.average.toFixed(1)}%)`;
+                }
+                
+                // 2. Find best performing subject
+                if (analyticsData.rankings.subjects.length > 0) {
+                    const topSubject = analyticsData.rankings.subjects[0];
+                    insights.push(`Best performing subject: ${topSubject.subject} with an average of ${topSubject.average.toFixed(1)}%`);
+                    
+                    // Update best subject element
+                    bestSubject.textContent = `${topSubject.subject} (${topSubject.average.toFixed(1)}%)`;
+                }
+                
+                // 3. Find best performing stream
+                if (analyticsData.rankings.streams.length > 0) {
+                    const topStream = analyticsData.rankings.streams[0];
+                    insights.push(`Best performing stream: ${topStream.stream} with an average of ${topStream.average.toFixed(1)}%`);
+                    
+                    // Update best stream element
+                    bestStream.textContent = `${topStream.stream} (${topStream.average.toFixed(1)}%)`;
+                }
+                
+                // 4. Find best exam type
+                const examTypeGroups = {};
+                
+                studentPerformanceData.forEach(item => {
+                    if (!item.exam_type || !item.percentage || isNaN(item.percentage)) return;
+                    
+                    const examType = item.exam_type;
+                    const score = parseFloat(item.percentage);
+                    
+                    if (!examTypeGroups[examType]) {
+                        examTypeGroups[examType] = {
+                            scores: [],
+                            count: 0,
+                            sum: 0
+                        };
+                    }
+                    
+                    examTypeGroups[examType].scores.push(score);
+                    examTypeGroups[examType].sum += score;
+                    examTypeGroups[examType].count++;
+                });
+                
+                const examTypeRankings = Object.keys(examTypeGroups).map(examType => {
+                    const group = examTypeGroups[examType];
+                    return {
+                        examType,
+                        average: group.count > 0 ? group.sum / group.count : 0,
+                        count: group.count
+                    };
+                }).sort((a, b) => b.average - a.average);
+                
+                if (examTypeRankings.length > 0) {
+                    const bestExam = examTypeRankings[0];
+                    insights.push(`Best exam type: ${bestExam.examType} with an average of ${bestExam.average.toFixed(1)}%`);
+                    
+                    // Update best exam type element
+                    bestExamType.textContent = `${bestExam.examType} (${bestExam.average.toFixed(1)}%)`;
+                    totalExams.textContent = studentPerformanceData.length;
+                }
+                
+                // 5. Identify subjects needing improvement
+                if (analyticsData.rankings.subjects.length > 0) {
+                    const bottomSubjects = analyticsData.rankings.subjects.slice(-3).reverse();
+                    bottomSubjects.forEach(subject => {
+                        improvementAreas.push(`${subject.subject}: Average score of ${subject.average.toFixed(1)}% needs improvement`);
+                    });
+                }
+                
+                // 6. Calculate pass rate
+                const percentages = studentPerformanceData
+                    .filter(item => item.percentage && !isNaN(item.percentage))
+                    .map(item => parseFloat(item.percentage));
+                
+                if (percentages.length > 0) {
+                    const passCount = percentages.filter(p => p >= 40).length;
+                    const passRateValue = (passCount / percentages.length) * 100;
+                    
+                    insights.push(`Overall pass rate: ${passRateValue.toFixed(1)}% (${passCount} out of ${percentages.length} exams passed)`);
+                    passRate.textContent = `${passRateValue.toFixed(1)}%`;
+                    
+                    if (passRateValue < 70) {
+                        improvementAreas.push(`Overall pass rate of ${passRateValue.toFixed(1)}% is below the 70% target`);
+                    }
+                }
+                
+                // 7. Calculate mean and median
+                if (analyticsData.overallPerformance.mean) {
+                    const mean = analyticsData.overallPerformance.mean;
+                    const median = analyticsData.overallPerformance.median;
+                    const stdDev = analyticsData.overallPerformance.stdDev;
+                    
+                    meanScore.textContent = `${mean.toFixed(1)}%`;
+                    medianScore.textContent = `${median.toFixed(1)}%`;
+                    stdDev.textContent = stdDev.toFixed(1);
+                    
+                    insights.push(`Mean score: ${mean.toFixed(1)}%, Median: ${median.toFixed(1)}%, Standard Deviation: ${stdDev.toFixed(1)}`);
+                    
+                    // Insight based on standard deviation
+                    if (stdDev > 15) {
+                        trends.push(`High score variability (std dev: ${stdDev.toFixed(1)}) indicates inconsistent performance across students`);
+                    } else {
+                        trends.push(`Consistent performance across students (std dev: ${stdDev.toFixed(1)})`);
+                    }
+                }
+                
+                // 8. Form performance insights
+                if (analyticsData.rankings.forms.length > 0) {
+                    const topForm = analyticsData.rankings.forms[0];
+                    const bottomForm = analyticsData.rankings.forms[analyticsData.rankings.forms.length - 1];
+                    
+                    insights.push(`Leading form: ${topForm.form} (${topForm.average.toFixed(1)}%), Needs attention: ${bottomForm.form} (${bottomForm.average.toFixed(1)}%)`);
+                    
+                    avgFormScore.textContent = `${topForm.average.toFixed(1)}%`;
+                    
+                    // Calculate improvement rate (difference between top and bottom forms)
+                    const improvement = topForm.average - bottomForm.average;
+                    improvementRate.textContent = `${improvement.toFixed(1)}%`;
+                }
+                
+                // 9. Calculate consistency score
+                const consistencyScoreValue = analyticsData.overallPerformance.stdDev ? 
+                    100 - Math.min(analyticsData.overallPerformance.stdDev, 30) * 2 : 0;
+                consistencyScore.textContent = Math.round(consistencyScoreValue);
+                
+                // 10. Calculate excellence rate (percentage of A grades)
+                const totalGrades = studentPerformanceData.filter(item => item.grade).length;
+                const aGrades = studentPerformanceData.filter(item => 
+                    item.grade && item.grade.toUpperCase() === 'A').length;
+                
+                const excellenceRateValue = totalGrades > 0 ? (aGrades / totalGrades) * 100 : 0;
+                excellenceRate.textContent = `${excellenceRateValue.toFixed(1)}%`;
+                
+                if (excellenceRateValue > 20) {
+                    insights.push(`Excellent performance: ${excellenceRateValue.toFixed(1)}% of exams received A grade`);
+                }
+                
+                // Store insights
+                analyticsData.insights = {
+                    keyInsights: insights,
+                    improvementAreas: improvementAreas,
+                    trends: trends
+                };
+            }
+
+            // Function to render analytics
+            function renderAnalytics() {
+                // Update metrics
+                if (analyticsData.overallPerformance.mean) {
+                    meanScore.textContent = `${analyticsData.overallPerformance.mean.toFixed(1)}%`;
+                    medianScore.textContent = `${analyticsData.overallPerformance.median.toFixed(1)}%`;
+                    stdDev.textContent = analyticsData.overallPerformance.stdDev.toFixed(1);
+                    passRate.textContent = `${analyticsData.overallPerformance.passRate.toFixed(1)}%`;
+                }
+                
+                // Render charts
+                renderCharts();
+            }
+
+            // Function to render charts
+            function renderCharts() {
+                // Destroy existing charts if they exist
+                if (performanceChart) performanceChart.destroy();
+                if (subjectChart) subjectChart.destroy();
+                if (streamChart) streamChart.destroy();
+                if (gradeChart) gradeChart.destroy();
+                
+                // 1. Overall Performance Chart (Line chart showing performance over time)
+                const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+                
+                // Group by date for performance over time
+                const dateGroups = {};
+                studentPerformanceData.forEach(item => {
+                    if (!item.exam_date || !item.percentage || isNaN(item.percentage)) return;
+                    
+                    const date = new Date(item.exam_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    if (!dateGroups[date]) {
+                        dateGroups[date] = {
+                            scores: [],
+                            sum: 0,
+                            count: 0
+                        };
+                    }
+                    
+                    const score = parseFloat(item.percentage);
+                    dateGroups[date].scores.push(score);
+                    dateGroups[date].sum += score;
+                    dateGroups[date].count++;
+                });
+                
+                // Get sorted dates and calculate averages
+                const sortedDates = Object.keys(dateGroups).sort((a, b) => {
+                    return new Date(a) - new Date(b);
+                });
+                
+                const dateLabels = sortedDates.slice(-10); // Last 10 dates
+                const dateAverages = dateLabels.map(date => {
+                    const group = dateGroups[date];
+                    return group.count > 0 ? group.sum / group.count : 0;
+                });
+                
+                performanceChart = new Chart(performanceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: dateLabels,
+                        datasets: [{
+                            label: 'Average Percentage',
+                            data: dateAverages,
+                            borderColor: 'rgba(7, 88, 36, 1)',
+                            backgroundColor: 'rgba(7, 88, 36, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // 2. Subject Comparison Chart (Bar chart)
+                const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+                
+                // Get top 5 subjects by average
+                const topSubjects = analyticsData.rankings.subjects.slice(0, 5);
+                const subjectLabels = topSubjects.map(s => s.subject);
+                const subjectAverages = topSubjects.map(s => s.average);
+                
+                subjectChart = new Chart(subjectCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: subjectLabels,
+                        datasets: [{
+                            label: 'Average Percentage',
+                            data: subjectAverages,
+                            backgroundColor: [
+                                'rgba(7, 88, 36, 0.7)',
+                                'rgba(55, 116, 55, 0.7)',
+                                'rgba(155, 174, 48, 0.7)',
+                                'rgba(93, 139, 112, 0.7)',
+                                'rgba(51, 54, 135, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(7, 88, 36, 1)',
+                                'rgba(55, 116, 55, 1)',
+                                'rgba(155, 174, 48, 1)',
+                                'rgba(93, 139, 112, 1)',
+                                'rgba(51, 54, 135, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // 3. Stream Performance Chart (Bar chart)
+                const streamCtx = document.getElementById('streamChart').getContext('2d');
+                
+                const streamLabels = analyticsData.rankings.streams.map(s => s.stream);
+                const streamAverages = analyticsData.rankings.streams.map(s => s.average);
+                
+                streamChart = new Chart(streamCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: streamLabels,
+                        datasets: [{
+                            label: 'Average Percentage',
+                            data: streamAverages,
+                            backgroundColor: 'rgba(155, 174, 48, 0.7)',
+                            borderColor: 'rgba(155, 174, 48, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // 4. Grade Distribution Chart (Pie chart)
+                const gradeCtx = document.getElementById('gradeChart').getContext('2d');
+                
+                // Count grades
+                const gradeCounts = {
+                    'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0, 'F': 0
+                };
+                
+                studentPerformanceData.forEach(item => {
+                    if (item.grade) {
+                        const grade = item.grade.toUpperCase();
+                        if (gradeCounts.hasOwnProperty(grade)) {
+                            gradeCounts[grade]++;
+                        }
+                    }
+                });
+                
+                // Filter out grades with zero count
+                const gradeLabels = Object.keys(gradeCounts).filter(grade => gradeCounts[grade] > 0);
+                const gradeData = gradeLabels.map(grade => gradeCounts[grade]);
+                
+                gradeChart = new Chart(gradeCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: gradeLabels,
+                        datasets: [{
+                            data: gradeData,
+                            backgroundColor: [
+                                'rgba(40, 167, 69, 0.7)',    // Green for A
+                                'rgba(255, 193, 7, 0.7)',    // Yellow for B
+                                'rgba(23, 162, 184, 0.7)',   // Cyan for C
+                                'rgba(108, 117, 125, 0.7)',  // Gray for D
+                                'rgba(220, 53, 69, 0.7)',    // Red for E
+                                'rgba(111, 66, 193, 0.7)'    // Purple for F
+                            ],
+                            borderColor: [
+                                'rgba(40, 167, 69, 1)',
+                                'rgba(255, 193, 7, 1)',
+                                'rgba(23, 162, 184, 1)',
+                                'rgba(108, 117, 125, 1)',
+                                'rgba(220, 53, 69, 1)',
+                                'rgba(111, 66, 193, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Function to render rankings
+            function renderRankings() {
+                // 1. Overall student rankings
+                let overallHTML = '';
+                analyticsData.rankings.students.slice(0, 10).forEach((student, index) => {
+                    const positionClass = index < 3 ? 'top-3' : '';
+                    overallHTML += `
+                        <div class="rank-item">
+                            <div class="rank-position ${positionClass}">${index + 1}</div>
+                            <div class="rank-info">
+                                <h4>${student.name}</h4>
+                                <p>${student.id} • ${student.count} exams</p>
+                            </div>
+                            <div class="rank-score">${student.average.toFixed(1)}%</div>
+                        </div>
+                    `;
+                });
+                overallRankings.innerHTML = overallHTML;
+                
+                // 2. Subject rankings
+                let subjectHTML = '';
+                analyticsData.rankings.subjects.slice(0, 10).forEach((subject, index) => {
+                    subjectHTML += `
+                        <div class="rank-item">
+                            <div class="rank-position">${index + 1}</div>
+                            <div class="rank-info">
+                                <h4>${subject.subject}</h4>
+                                <p>${subject.count} exams</p>
+                            </div>
+                            <div class="rank-score">${subject.average.toFixed(1)}%</div>
+                        </div>
+                    `;
+                });
+                subjectRankings.innerHTML = subjectHTML;
+                
+                // 3. Stream rankings
+                let streamHTML = '';
+                analyticsData.rankings.streams.forEach((stream, index) => {
+                    streamHTML += `
+                        <div class="rank-item">
+                            <div class="rank-position">${index + 1}</div>
+                            <div class="rank-info">
+                                <h4>${stream.stream} Stream</h4>
+                                <p>${stream.count} exams</p>
+                            </div>
+                            <div class="rank-score">${stream.average.toFixed(1)}%</div>
+                        </div>
+                    `;
+                });
+                streamRankings.innerHTML = streamHTML;
+                
+                // 4. Form rankings
+                let formHTML = '';
+                analyticsData.rankings.forms.forEach((form, index) => {
+                    formHTML += `
+                        <div class="rank-item">
+                            <div class="rank-position">${index + 1}</div>
+                            <div class="rank-info">
+                                <h4>${form.form}</h4>
+                                <p>${form.count} exams</p>
+                            </div>
+                            <div class="rank-score">${form.average.toFixed(1)}%</div>
+                        </div>
+                    `;
+                });
+                formRankings.innerHTML = formHTML;
+            }
+
+            // Function to render insights
+            function renderInsights() {
+                // 1. Key insights
+                let insightsHTML = '';
+                analyticsData.insights.keyInsights.forEach((insight, index) => {
+                    insightsHTML += `
+                        <div class="stat-item">
+                            <span class="stat-label">${insight}</span>
+                            <span class="stat-change positive">New</span>
+                        </div>
+                    `;
+                });
+                keyInsights.innerHTML = insightsHTML;
+                
+                // 2. Improvement areas
+                let improvementHTML = '';
+                analyticsData.insights.improvementAreas.forEach((area, index) => {
+                    improvementHTML += `
+                        <div class="stat-item">
+                            <span class="stat-label">${area}</span>
+                            <span class="stat-change negative">Needs Attention</span>
+                        </div>
+                    `;
+                });
+                improvementAreas.innerHTML = improvementHTML;
+                
+                // 3. Performance trends
+                let trendsHTML = '';
+                analyticsData.insights.trends.forEach((trend, index) => {
+                    trendsHTML += `
+                        <div class="stat-item">
+                            <span class="stat-label">${trend}</span>
+                        </div>
+                    `;
+                });
+                performanceTrends.innerHTML = trendsHTML;
+            }
+
             // Function to render Excel-like table
             function renderExcelTable() {
                 // Hide loading, show table
@@ -2066,6 +3405,9 @@ CREATE INDEX idx_student_performance_stream ON student_performance(stream);
                     }
                 });
 
+                // Navigation function for dropdown
+                window.navigateTo = navigateTo;
+
                 // Logout handlers
                 if (logoutLink) {
                     logoutLink.addEventListener('click', (e) => {
@@ -2080,6 +3422,46 @@ CREATE INDEX idx_student_performance_stream ON student_performance(stream);
                             e.preventDefault();
                             handleLogout();
                         });
+                    });
+                }
+
+                // Tab switching
+                tabBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const tabName = btn.dataset.tab;
+                        switchTab(tabName);
+                    });
+                });
+
+                // Compute results button
+                if (computeResultsBtn) {
+                    computeResultsBtn.addEventListener('click', () => {
+                        if (studentPerformanceData.length === 0) {
+                            alert('No data to compute. Please fetch data first.');
+                            return;
+                        }
+                        
+                        // Show loading
+                        computeResultsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Computing Results...';
+                        computeResultsBtn.disabled = true;
+                        
+                        // Compute analytics
+                        computeAnalytics();
+                        renderAnalytics();
+                        computeRankings();
+                        renderRankings();
+                        generateInsights();
+                        renderInsights();
+                        
+                        // Switch to analytics tab
+                        switchTab('analytics');
+                        
+                        // Restore button
+                        setTimeout(() => {
+                            computeResultsBtn.innerHTML = '<i class="fas fa-brain"></i> Compute Results & Generate Analytics';
+                            computeResultsBtn.disabled = false;
+                            alert('Results computed successfully! Advanced analytics are now available.');
+                        }, 500);
                     });
                 }
 
@@ -2237,6 +3619,27 @@ CREATE INDEX idx_student_performance_stream ON student_performance(stream);
                         alert('Error during logout. Please try again.');
                     }
                 }
+            }
+
+            // Placeholder functions for other pages
+            function showReportGeneration() {
+                alert('Report generation functionality would be displayed here.');
+                // In a real implementation, this would load report generation UI
+            }
+
+            function showEmailInterface() {
+                alert('Email parents functionality would be displayed here.');
+                // In a real implementation, this would load email interface
+            }
+
+            function showSettings() {
+                alert('System settings would be displayed here.');
+                // In a real implementation, this would load settings interface
+            }
+
+            function showHelp() {
+                alert('Help center would be displayed here.');
+                // In a real implementation, this would load help content
             }
 
             // Make functions available globally
