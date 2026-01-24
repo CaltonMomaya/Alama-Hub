@@ -2301,7 +2301,6 @@
             }
 
             // Function to load all subject components from database
-            // Function to load all subject components from database - UPDATED
             async function loadAllSubjectComponents() {
                 try {
                     console.log('Loading subject components...');
@@ -2381,7 +2380,7 @@
                 }
             }
 
-            // Function to get subject components for a specific subject - UPDATED - UPDATED
+            // Function to get subject components for a specific subject
             function getComponentsForSubject(subjectCode) {
                 if (!subjectCode || !allSubjectComponents || allSubjectComponents.length === 0) {
                     console.log('No subject code or empty components array');
@@ -2389,7 +2388,6 @@
                 }
                 
                 console.log(`Looking for components for subject: ${subjectCode}`);
-                console.log(`Total components loaded: ${allSubjectComponents.length}`);
                 
                 // Filter components for this subject
                 const filteredComponents = allSubjectComponents.filter(component => {
@@ -2397,15 +2395,10 @@
                     const matches = component.subject_code && 
                                    component.subject_code.toString().toUpperCase() === subjectCode.toUpperCase();
                     
-                    if (matches) {
-                        console.log(`Found component: ${component.subject_code} (${component.component_name})`);
-                    }
-                    
                     return matches;
                 });
                 
-                console.log(`Found ${filteredComponents.length} components for ${subjectCode}:`, 
-                            filteredComponents.map(c => c.subject_code));
+                console.log(`Found ${filteredComponents.length} components for ${subjectCode}`);
                 
                 return filteredComponents;
             }
@@ -3918,7 +3911,6 @@
             }
 
             // Function to populate subject components
-            // Function to populate subject components - UPDATED
             function populateSubjectComponents(components) {
                 subjectComponentsList.innerHTML = '';
                 selectedComponents = [];
@@ -4414,7 +4406,7 @@
                     headerHTML += `
                         <th style="min-width: 120px;">
                             ${component.component_code}<br>
-                            <small style="font-size: 0.8rem; opacity: 0.7;">${component.component_name}</small>
+                            <small style="font-size: 0.8rem; opacity: 0.7;">${component.component_name} (Max: ${component.max_score || 100})</small>
                         </th>
                     `;
                 });
@@ -4425,32 +4417,44 @@
                 marksTableHeader.innerHTML = headerHTML;
             }
 
-            // Function to load existing marks for students
+            // Function to load existing marks for students - FIXED VERSION
             async function loadExistingMarksForStudents(streamName) {
                 try {
                     const examTypeValue = examType.value;
-                    const subjectCode = currentMarksSubjectCode;
                     const academicYearValue = academicYearSelect.value;
                     const termValue = termSelect.value;
                     
-                    if (!subjectCode) {
-                        console.error('No subject selected');
+                    if (selectedComponents.length === 0) {
+                        console.log('No components selected');
                         return;
                     }
                     
-                    // Load existing marks for this stream, subject, exam type, academic year and term
+                    console.log(`Loading existing marks for ${studentsForMarks.length} students, ${selectedComponents.length} components`);
+                    
+                    // Get all student IDs
+                    const studentIds = studentsForMarks.map(student => student.id);
+                    
+                    if (studentIds.length === 0) {
+                        console.log('No student IDs to load marks for');
+                        return;
+                    }
+                    
+                    // Load existing marks for these students and components
                     const { data: existingMarks, error } = await supabase
-                        .from('student_performance_view')
+                        .from('student_scores')
                         .select('*')
-                        .eq('subject_code', subjectCode)
-                        .in('component_code', selectedComponents.map(c => c.component_code))
+                        .in('student_id', studentIds)
+                        .in('subject_component_id', selectedComponents.map(c => c.id))
                         .eq('academic_year', academicYearValue)
                         .eq('term', termValue);
                     
-                    if (error && !error.message.includes('does not exist')) {
+                    if (error) {
                         console.error('Error loading existing marks:', error);
                         // Continue without existing marks
+                        console.log('Continuing without existing marks data');
                     }
+                    
+                    console.log(`Found ${existingMarks?.length || 0} existing marks records`);
                     
                     // Create marks rows for each student
                     studentsForMarks.forEach((student, index) => {
@@ -4459,6 +4463,7 @@
                     
                 } catch (error) {
                     console.error('Error in loadExistingMarksForStudents:', error);
+                    console.error('Error details:', error.message);
                     // Create rows without existing marks
                     studentsForMarks.forEach((student, index) => {
                         addMarksRowForStudent(student, index + 1, []);
@@ -4547,7 +4552,7 @@
                 studentsTableBody.insertAdjacentHTML('beforeend', rowHTML);
             }
 
-            // Function to add a marks row for a student
+            // Function to add a marks row for a student - FIXED VERSION
             function addMarksRowForStudent(student, rowNumber, existingMarks) {
                 const rowId = `marks-row-${marksCounter++}`;
                 
@@ -4566,8 +4571,7 @@
                     // Find existing marks for this student and component
                     const existingMark = existingMarks?.find(mark => 
                         mark.student_id === student.id && 
-                        mark.subject_code === component.subject_code &&
-                        mark.component_code === component.component_code
+                        mark.subject_component_id === component.id
                     );
                     
                     row.componentScores[component.id] = existingMark ? existingMark.score : '';
@@ -4587,6 +4591,7 @@
                 // Add input cells for each component
                 selectedComponents.forEach(component => {
                     const score = row.componentScores[component.id] || '';
+                    const maxScore = component.max_score || 100;
                     rowHTML += `
                         <td>
                             <input type="number" class="editable-cell marks-input" 
@@ -4595,11 +4600,14 @@
                                    value="${score}" 
                                    placeholder="Enter marks" 
                                    min="0" 
-                                   max="${component.max_score || 100}"
+                                   max="${maxScore}"
                                    step="0.5"
                                    oninput="updateComponentScore('${rowId}', '${component.id}', this.value)"
                                    onkeydown="handleMarksNavigation(event, '${rowId}', '${component.id}')"
                                    style="width: 100%; text-align: center;">
+                            <div style="font-size: 0.7rem; color: var(--muted-green); margin-top: 2px; text-align: center;">
+                                Max: ${maxScore}
+                            </div>
                         </td>
                     `;
                 });
@@ -5058,7 +5066,7 @@
                 }
             }
 
-            // Function to save a student's marks for all components
+            // Function to save a student's marks for all components - FIXED VERSION
             async function saveStudentMarks(rowId) {
                 try {
                     const rowIndex = marksRows.findIndex(row => row.id === rowId);
@@ -5103,7 +5111,8 @@
                                 term: termValue,
                                 academic_year: academicYearValue,
                                 exam_date: examDateValue,
-                                remarks: `Exam: ${examTypeValue} | Subject: ${currentMarksSubject} | Stream: ${currentMarksStream}`
+                                exam_type: examTypeValue,
+                                remarks: `Subject: ${currentMarksSubject} | Stream: ${currentMarksStream}`
                             };
                             
                             if (dbId) {
@@ -5121,7 +5130,7 @@
                     
                     console.log(`Saving ${marksToSave.length} component scores for student ${row.admissionNo}`);
                     
-                    // Use upsert to save all marks
+                    // Use upsert to save all marks - FIXED: Insert into student_scores table
                     const { error } = await supabase
                         .from('student_scores')
                         .upsert(marksToSave, {
@@ -5448,9 +5457,8 @@
                 }
             }
 
-            // Function to save all marks for all students
+            // Function to save all marks for all students - COMPLETE FIXED VERSION
             async function saveAllMarksToDatabase() {
-                // Save button reference for later
                 const saveButton = saveAllMarks;
                 
                 try {
@@ -5502,37 +5510,36 @@
                             if (score !== undefined && score !== '' && score !== null) {
                                 const numericScore = parseFloat(score);
                                 if (isNaN(numericScore)) {
-                                    validationErrors.push(`Row ${rowIndex + 1} (${row.admissionNo}): Invalid score for ${component.component_code}`);
+                                    validationErrors.push(`Row ${rowIndex + 1} (${row.admissionNo}): Invalid score for ${component.component_name}`);
                                     return;
                                 }
                                 
                                 if (numericScore < 0) {
-                                    validationErrors.push(`Row ${rowIndex + 1} (${row.admissionNo}): Score cannot be negative for ${component.component_code}`);
+                                    validationErrors.push(`Row ${rowIndex + 1} (${row.admissionNo}): Score cannot be negative for ${component.component_name}`);
                                     return;
                                 }
                                 
                                 const maxScore = component.max_score || 100;
                                 if (numericScore > maxScore) {
-                                    validationErrors.push(`Row ${rowIndex + 1} (${row.admissionNo}): Score exceeds maximum of ${maxScore} for ${component.component_code}`);
+                                    validationErrors.push(`Row ${rowIndex + 1} (${row.admissionNo}): Score exceeds maximum of ${maxScore} for ${component.component_name}`);
                                     return;
                                 }
                                 
                                 const marksData = {
                                     student_id: row.studentId,
-                                    subject_code: component.subject_code,
-                                    component_code: component.component_code,
+                                    subject_component_id: component.id,
                                     score: numericScore,
                                     max_score: maxScore,
-                                    recorded_by: currentTeacherTSC || 'Unknown',
+                                    recorded_by: teacherId,
                                     term: termValue,
                                     academic_year: academicYearValue,
-                                    exam_date: examDateValue || null,
+                                    exam_date: examDateValue,
                                     exam_type: examTypeValue,
                                     remarks: `Subject: ${currentMarksSubject} | Stream: ${currentMarksStream}`
                                 };
                                 
-                                const dbId = row.dbIds[`${component.subject_code}_${component.component_code}`];
-                                if (dbId) {
+                                const dbId = row.dbIds[component.id];
+                                if (dbId && dbId !== 'saved') {
                                     marksData.id = dbId;
                                 }
                                 
@@ -5556,57 +5563,97 @@
                     const originalButtonHTML = saveButton.innerHTML;
                     saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
                     
-                    console.log(`Saving ${allMarksToSave.length} marks records`);
+                    console.log(`Saving ${allMarksToSave.length} marks records to student_scores table`);
                     
-                    // Use upsert to save all marks in batches
-                    const batchSize = 50;
+                    // Save marks in batches
+                    const batchSize = 20; // Smaller batch size for better error handling
                     let savedCount = 0;
                     let errorCount = 0;
+                    const errorMessages = [];
                     
                     for (let i = 0; i < allMarksToSave.length; i += batchSize) {
                         const batch = allMarksToSave.slice(i, i + batchSize);
                         
                         try {
-                            const { error } = await supabase
-                                .from('student_performance_view')
+                            // Insert/update the batch
+                            const { data, error } = await supabase
+                                .from('student_scores')
                                 .upsert(batch, {
-                                    onConflict: 'student_id,subject_code,component_code,term,academic_year'
-                                });
+                                    onConflict: 'student_id,subject_component_id,term,academic_year',
+                                    ignoreDuplicates: false
+                                })
+                                .select();
                             
-                            if (error) throw error;
+                            if (error) {
+                                console.error('Error saving batch:', error);
+                                errorMessages.push(`Batch ${Math.floor(i/batchSize) + 1}: ${error.message}`);
+                                
+                                // Try individual inserts for debugging
+                                for (const markData of batch) {
+                                    try {
+                                        const { data: singleData, error: singleError } = await supabase
+                                            .from('student_scores')
+                                            .upsert([markData], {
+                                                onConflict: 'student_id,subject_component_id,term,academic_year'
+                                            });
+                                        
+                                        if (singleError) {
+                                            console.error(`Individual insert failed for student ${markData.student_id}, component ${markData.subject_component_id}:`, singleError);
+                                            errorCount++;
+                                        } else {
+                                            savedCount++;
+                                        }
+                                    } catch (singleError) {
+                                        console.error('Individual insert error:', singleError);
+                                        errorCount++;
+                                    }
+                                }
+                            } else {
+                                savedCount += batch.length;
+                                console.log(`Batch ${Math.floor(i/batchSize) + 1} saved successfully`);
+                            }
                             
-                            savedCount += batch.length;
-                            
-                        } catch (error) {
-                            console.error('Error saving batch:', error);
-                            console.error('Batch data:', batch);
+                        } catch (batchError) {
+                            console.error('Batch processing error:', batchError);
+                            errorMessages.push(`Batch ${Math.floor(i/batchSize) + 1}: ${batchError.message}`);
                             errorCount += batch.length;
                         }
                     }
                     
                     // Update database IDs for saved records
                     allMarksToSave.forEach(markData => {
-                        if (markData.id) {
-                            const rowIndex = marksRows.findIndex(row => row.studentId === markData.student_id);
-                            if (rowIndex !== -1) {
-                                const component = selectedComponents.find(c => c.subject_code === markData.subject_code && c.component_code === markData.component_code);
-                                if (component) {
-                                    marksRows[rowIndex].dbIds[component.id] = markData.id;
-                                }
-                            }
+                        const rowIndex = marksRows.findIndex(row => row.studentId === markData.student_id);
+                        if (rowIndex !== -1) {
+                            marksRows[rowIndex].dbIds[markData.subject_component_id] = 'saved';
                         }
                     });
                     
                     // Show success message
-                    if (errorCount === 0) {
-                        alert(`${savedCount} marks saved successfully for ${rowsToSave.length} students!`);
-                    } else {
-                        alert(`${savedCount} marks saved successfully, ${errorCount} marks had errors.`);
+                    let message = '';
+                    if (savedCount > 0) {
+                        message = `${savedCount} marks saved successfully for ${rowsToSave.length} students!\n\nAll marks have been sent to the exam office.`;
+                        
+                        // Update button text to show success
+                        saveButton.innerHTML = '<i class="fas fa-check"></i> Sent to exam office';
+                        saveButton.style.backgroundColor = '#28a745';
+                        
+                        setTimeout(() => {
+                            saveButton.innerHTML = originalButtonHTML;
+                            saveButton.style.backgroundColor = '';
+                        }, 3000);
+                    }
+                    
+                    if (errorCount > 0) {
+                        message = `${savedCount} marks saved successfully, ${errorCount} marks had errors.\n\n${errorMessages.length > 0 ? 'Errors: ' + errorMessages.slice(0, 3).join(', ') : ''}`;
+                    }
+                    
+                    if (message) {
+                        alert(message);
                     }
                     
                 } catch (error) {
                     console.error('Error in saveAllMarksToDatabase:', error);
-                    alert(`Error saving marks: ${error.message}`);
+                    alert(`Error saving marks: ${error.message}\n\nPlease ensure:\n1. All students are registered\n2. Subject components exist in the database\n3. Database connection is working`);
                 } finally {
                     // Restore button state
                     saveButton.disabled = false;
