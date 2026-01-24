@@ -4153,7 +4153,7 @@ Alliance Girls High School
                 toggleFilterForm();
             }
 
-            // Function to compute aggregates
+            // Enhanced Function to compute aggregates with comprehensive ranking
             function computeAggregates() {
                 if (!compiledResults || compiledResults.length === 0) {
                     alert('No data available for computation. Please load data first.');
@@ -4164,135 +4164,250 @@ Alliance Girls High School
                 filterFormSection.style.display = 'none';
                 computationResultsSection.style.display = 'block';
                 
-                // Calculate aggregates
+                // Calculate aggregates with comprehensive ranking
                 const aggregates = calculateAggregates(compiledResults);
                 
-                // Display aggregates
+                // Display aggregates with ranking
                 displayComputationResults(aggregates);
             }
 
-            // Function to calculate various aggregates
+            // Enhanced Function to calculate various aggregates with comprehensive ranking
             function calculateAggregates(data) {
                 if (!data || data.length === 0) {
                     return {};
                 }
                 
+                // Group data by student (admission_no)
+                const studentGroups = {};
+                const teacherGroups = {}; // Changed to use recorded_by instead of subject_teacher
+                const subjectGroups = {};
+                const streamGroups = {};
+                const gradeGroups = {};
+                
+                // Process all data records
+                data.forEach(item => {
+                    const studentId = item.admission_no || item.student_id;
+                    const teacherId = item.recorded_by || 'Unknown'; // Using recorded_by for teacher ranking
+                    const subject = item.subject_code || 'Unknown';
+                    const stream = item.stream || 'Unknown';
+                    const grade = item.grade || 'Unknown';
+                    const percentage = parseFloat(item.percentage) || 0;
+                    
+                    // Group by student
+                    if (!studentGroups[studentId]) {
+                        studentGroups[studentId] = {
+                            name: item.student_name || 'Unknown',
+                            totalScore: 0,
+                            count: 0,
+                            subjects: new Set(),
+                            stream: stream,
+                            grade: grade,
+                            scores: [],
+                            teacherCount: new Set() // Count unique teachers
+                        };
+                    }
+                    studentGroups[studentId].totalScore += percentage;
+                    studentGroups[studentId].count += 1;
+                    studentGroups[studentId].scores.push(percentage);
+                    studentGroups[studentId].subjects.add(subject);
+                    studentGroups[studentId].teacherCount.add(teacherId);
+                    
+                    // Group by teacher (using recorded_by)
+                    if (!teacherGroups[teacherId]) {
+                        teacherGroups[teacherId] = {
+                            name: teacherId, // Using recorded_by as teacher identifier
+                            totalScore: 0,
+                            count: 0,
+                            students: new Set(),
+                            subjects: new Set()
+                        };
+                    }
+                    teacherGroups[teacherId].totalScore += percentage;
+                    teacherGroups[teacherId].count += 1;
+                    teacherGroups[teacherId].students.add(studentId);
+                    teacherGroups[teacherId].subjects.add(subject);
+                    
+                    // Group by subject
+                    if (!subjectGroups[subject]) {
+                        subjectGroups[subject] = {
+                            totalScore: 0,
+                            count: 0,
+                            students: new Set(),
+                            teachers: new Set()
+                        };
+                    }
+                    subjectGroups[subject].totalScore += percentage;
+                    subjectGroups[subject].count += 1;
+                    subjectGroups[subject].students.add(studentId);
+                    subjectGroups[subject].teachers.add(teacherId);
+                    
+                    // Group by stream
+                    if (!streamGroups[stream]) {
+                        streamGroups[stream] = {
+                            totalScore: 0,
+                            count: 0,
+                            students: new Set(),
+                            subjects: new Set()
+                        };
+                    }
+                    streamGroups[stream].totalScore += percentage;
+                    streamGroups[stream].count += 1;
+                    streamGroups[stream].students.add(studentId);
+                    streamGroups[stream].subjects.add(subject);
+                    
+                    // Group by grade
+                    if (!gradeGroups[grade]) {
+                        gradeGroups[grade] = {
+                            totalScore: 0,
+                            count: 0,
+                            students: new Set(),
+                            streams: new Set()
+                        };
+                    }
+                    gradeGroups[grade].totalScore += percentage;
+                    gradeGroups[grade].count += 1;
+                    gradeGroups[grade].students.add(studentId);
+                    gradeGroups[grade].streams.add(stream);
+                });
+                
+                // Calculate averages and prepare rankings
+                
+                // 1. Student ranking
+                const studentRanking = Object.entries(studentGroups).map(([studentId, data]) => ({
+                    id: studentId,
+                    name: data.name,
+                    average: data.count > 0 ? data.totalScore / data.count : 0,
+                    totalScore: data.totalScore,
+                    count: data.count,
+                    stream: data.stream,
+                    grade: data.grade,
+                    subjectCount: data.subjects.size,
+                    teacherCount: data.teacherCount.size,
+                    scores: data.scores
+                })).sort((a, b) => b.average - a.average);
+                
+                // Add rank positions
+                studentRanking.forEach((student, index) => {
+                    student.rank = index + 1;
+                    student.position = getOrdinal(index + 1);
+                });
+                
+                // 2. Teacher ranking (using recorded_by)
+                const teacherRanking = Object.entries(teacherGroups).map(([teacherId, data]) => ({
+                    id: teacherId,
+                    name: data.name,
+                    average: data.count > 0 ? data.totalScore / data.count : 0,
+                    totalScore: data.totalScore,
+                    count: data.count,
+                    studentCount: data.students.size,
+                    subjectCount: data.subjects.size
+                })).sort((a, b) => b.average - a.average);
+                
+                // Add rank positions
+                teacherRanking.forEach((teacher, index) => {
+                    teacher.rank = index + 1;
+                    teacher.position = getOrdinal(index + 1);
+                });
+                
+                // 3. Subject ranking
+                const subjectRanking = Object.entries(subjectGroups).map(([subject, data]) => ({
+                    name: subject,
+                    average: data.count > 0 ? data.totalScore / data.count : 0,
+                    totalScore: data.totalScore,
+                    count: data.count,
+                    studentCount: data.students.size,
+                    teacherCount: data.teachers.size
+                })).sort((a, b) => b.average - a.average);
+                
+                // Add rank positions
+                subjectRanking.forEach((subject, index) => {
+                    subject.rank = index + 1;
+                    subject.position = getOrdinal(index + 1);
+                });
+                
+                // 4. Stream ranking
+                const streamRanking = Object.entries(streamGroups).map(([stream, data]) => ({
+                    name: stream,
+                    average: data.count > 0 ? data.totalScore / data.count : 0,
+                    totalScore: data.totalScore,
+                    count: data.count,
+                    studentCount: data.students.size,
+                    subjectCount: data.subjects.size
+                })).sort((a, b) => b.average - a.average);
+                
+                // Add rank positions
+                streamRanking.forEach((stream, index) => {
+                    stream.rank = index + 1;
+                    stream.position = getOrdinal(index + 1);
+                });
+                
+                // 5. Grade ranking
+                const gradeRanking = Object.entries(gradeGroups).map(([grade, data]) => ({
+                    name: grade,
+                    average: data.count > 0 ? data.totalScore / data.count : 0,
+                    totalScore: data.totalScore,
+                    count: data.count,
+                    studentCount: data.students.size,
+                    streamCount: data.streams.size
+                })).sort((a, b) => b.average - a.average);
+                
+                // Add rank positions
+                gradeRanking.forEach((grade, index) => {
+                    grade.rank = index + 1;
+                    grade.position = getOrdinal(index + 1);
+                });
+                
+                // Calculate overall statistics
+                const allScores = data.map(item => parseFloat(item.percentage)).filter(score => !isNaN(score));
+                
                 const aggregates = {
                     totalRecords: data.length,
-                    uniqueStudents: new Set(data.map(d => d.student_id)).size,
-                    uniqueSubjects: new Set(data.map(d => d.subject_code)).size,
-                    uniqueTeachers: new Set(data.map(d => d.subject_teacher)).size,
+                    uniqueStudents: studentRanking.length,
+                    uniqueTeachers: teacherRanking.length,
+                    uniqueSubjects: subjectRanking.length,
+                    uniqueStreams: streamRanking.length,
+                    uniqueGrades: gradeRanking.length,
                     
-                    // Score statistics
-                    scores: data.map(d => parseFloat(d.percentage)).filter(s => !isNaN(s)),
+                    // Rankings
+                    studentRanking: studentRanking,
+                    teacherRanking: teacherRanking,
+                    subjectRanking: subjectRanking,
+                    streamRanking: streamRanking,
+                    gradeRanking: gradeRanking,
+                    
+                    // Top performers
+                    topStudents: studentRanking.slice(0, 10),
+                    topTeachers: teacherRanking.slice(0, 10),
+                    topSubjects: subjectRanking.slice(0, 10),
+                    topStreams: streamRanking.slice(0, 5),
+                    
+                    // Overall statistics
+                    scores: allScores,
+                    overallMean: allScores.length > 0 ? allScores.reduce((a, b) => a + b, 0) / allScores.length : 0,
+                    highestScore: allScores.length > 0 ? Math.max(...allScores) : 0,
+                    lowestScore: allScores.length > 0 ? Math.min(...allScores) : 0,
                     
                     // Grade distribution
                     gradeDistribution: {},
                     
-                    // Subject performance
-                    subjectPerformance: {},
-                    
-                    // Teacher performance
-                    teacherPerformance: {},
-                    
-                    // Stream performance
-                    streamPerformance: {},
-                    
-                    // Grade level performance
-                    gradePerformance: {}
+                    // Additional insights
+                    insights: {
+                        strongestSubject: subjectRanking.length > 0 ? subjectRanking[0] : null,
+                        strongestTeacher: teacherRanking.length > 0 ? teacherRanking[0] : null,
+                        strongestStream: streamRanking.length > 0 ? streamRanking[0] : null,
+                        strongestGrade: gradeRanking.length > 0 ? gradeRanking[0] : null,
+                        topStudent: studentRanking.length > 0 ? studentRanking[0] : null
+                    }
                 };
                 
-                // Calculate grade distribution
-                data.forEach(item => {
-                    const grade = item.grade_letter || 'N/A';
-                    aggregates.gradeDistribution[grade] = (aggregates.gradeDistribution[grade] || 0) + 1;
-                });
-                
-                // Calculate subject performance
-                data.forEach(item => {
-                    const subject = item.subject_code || 'Unknown';
-                    const percentage = parseFloat(item.percentage) || 0;
-                    
-                    if (!aggregates.subjectPerformance[subject]) {
-                        aggregates.subjectPerformance[subject] = {
-                            total: 0,
-                            count: 0,
-                            grades: {}
-                        };
-                    }
-                    
-                    aggregates.subjectPerformance[subject].total += percentage;
-                    aggregates.subjectPerformance[subject].count += 1;
-                    
-                    // Track grade distribution per subject
-                    const grade = item.grade_letter || 'N/A';
-                    aggregates.subjectPerformance[subject].grades[grade] = 
-                        (aggregates.subjectPerformance[subject].grades[grade] || 0) + 1;
-                });
-                
-                // Calculate teacher performance
-                data.forEach(item => {
-                    const teacher = item.subject_teacher || 'Unknown';
-                    const percentage = parseFloat(item.percentage) || 0;
-                    
-                    if (!aggregates.teacherPerformance[teacher]) {
-                        aggregates.teacherPerformance[teacher] = {
-                            total: 0,
-                            count: 0,
-                            students: new Set()
-                        };
-                    }
-                    
-                    aggregates.teacherPerformance[teacher].total += percentage;
-                    aggregates.teacherPerformance[teacher].count += 1;
-                    aggregates.teacherPerformance[teacher].students.add(item.student_id);
-                });
-                
-                // Calculate stream performance
-                data.forEach(item => {
-                    const stream = item.stream || 'Unknown';
-                    const percentage = parseFloat(item.percentage) || 0;
-                    
-                    if (!aggregates.streamPerformance[stream]) {
-                        aggregates.streamPerformance[stream] = {
-                            total: 0,
-                            count: 0
-                        };
-                    }
-                    
-                    aggregates.streamPerformance[stream].total += percentage;
-                    aggregates.streamPerformance[stream].count += 1;
-                });
-                
-                // Calculate grade level performance
-                data.forEach(item => {
-                    const grade = item.grade || 'Unknown';
-                    const percentage = parseFloat(item.percentage) || 0;
-                    
-                    if (!aggregates.gradePerformance[grade]) {
-                        aggregates.gradePerformance[grade] = {
-                            total: 0,
-                            count: 0
-                        };
-                    }
-                    
-                    aggregates.gradePerformance[grade].total += percentage;
-                    aggregates.gradePerformance[grade].count += 1;
-                });
-                
-                // Calculate overall statistics
-                if (aggregates.scores.length > 0) {
-                    aggregates.overallMean = aggregates.scores.reduce((a, b) => a + b, 0) / aggregates.scores.length;
-                    aggregates.highestScore = Math.max(...aggregates.scores);
-                    aggregates.lowestScore = Math.min(...aggregates.scores);
-                    
-                    // Calculate standard deviation
-                    const squareDiffs = aggregates.scores.map(score => Math.pow(score - aggregates.overallMean, 2));
-                    const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / aggregates.scores.length;
+                // Calculate standard deviation if we have scores
+                if (allScores.length > 0) {
+                    const squareDiffs = allScores.map(score => Math.pow(score - aggregates.overallMean, 2));
+                    const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / allScores.length;
                     aggregates.standardDeviation = Math.sqrt(avgSquareDiff);
                     
                     // Calculate median
-                    const sortedScores = [...aggregates.scores].sort((a, b) => a - b);
+                    const sortedScores = [...allScores].sort((a, b) => a - b);
                     const mid = Math.floor(sortedScores.length / 2);
                     aggregates.median = sortedScores.length % 2 !== 0 ? 
                         sortedScores[mid] : 
@@ -4301,12 +4416,33 @@ Alliance Girls High School
                     // Calculate quartiles
                     aggregates.firstQuartile = sortedScores[Math.floor(sortedScores.length * 0.25)];
                     aggregates.thirdQuartile = sortedScores[Math.floor(sortedScores.length * 0.75)];
+                    
+                    // Top 10% and bottom 10%
+                    const top10Count = Math.ceil(allScores.length * 0.1);
+                    const top10Scores = sortedScores.slice(-top10Count);
+                    aggregates.top10Avg = top10Scores.reduce((a, b) => a + b, 0) / top10Scores.length;
+                    
+                    const bottom10Scores = sortedScores.slice(0, top10Count);
+                    aggregates.bottom10Avg = bottom10Scores.reduce((a, b) => a + b, 0) / bottom10Scores.length;
                 }
+                
+                // Calculate grade distribution
+                data.forEach(item => {
+                    const grade = item.grade_letter || 'N/A';
+                    aggregates.gradeDistribution[grade] = (aggregates.gradeDistribution[grade] || 0) + 1;
+                });
                 
                 return aggregates;
             }
 
-            // Function to display computation results
+            // Helper function to get ordinal position (1st, 2nd, 3rd, etc.)
+            function getOrdinal(n) {
+                const s = ["th", "st", "nd", "rd"];
+                const v = n % 100;
+                return n + (s[(v - 20) % 10] || s[v] || s[0]);
+            }
+
+            // Enhanced Function to display computation results with comprehensive ranking
             function displayComputationResults(aggregates) {
                 const resultsGrid = document.getElementById('computationResultsGrid');
                 if (!resultsGrid) return;
@@ -4319,7 +4455,7 @@ Alliance Girls High School
                         <div class="stat-label">Total Records</div>
                         <div class="stat-value">${aggregates.totalRecords}</div>
                         <div style="font-size: 0.8rem; color: var(--muted-green);">
-                            ${aggregates.uniqueStudents} unique students
+                            ${aggregates.uniqueStudents} students | ${aggregates.uniqueTeachers} teachers
                         </div>
                     </div>
                     
@@ -4343,70 +4479,494 @@ Alliance Girls High School
                         <div class="stat-label">Std Deviation</div>
                         <div class="stat-value">${aggregates.standardDeviation ? aggregates.standardDeviation.toFixed(2) : 'N/A'}</div>
                         <div style="font-size: 0.8rem; color: var(--muted-green);">
-                            IQR: ${aggregates.firstQuartile && aggregates.thirdQuartile ? 
-                                (aggregates.thirdQuartile - aggregates.firstQuartile).toFixed(2) : 'N/A'}
+                            ${aggregates.top10Avg ? 'Top 10%: ' + aggregates.top10Avg.toFixed(2) + '%' : ''}
                         </div>
                     </div>
                 `;
                 
-                // Top performing subjects
-                const subjectAverages = Object.entries(aggregates.subjectPerformance || {})
-                    .map(([subject, data]) => ({
-                        subject,
-                        average: data.count > 0 ? data.total / data.count : 0,
-                        count: data.count
-                    }))
-                    .sort((a, b) => b.average - a.average)
-                    .slice(0, 3);
-                
-                if (subjectAverages.length > 0) {
+                // Top Student
+                if (aggregates.topStudents && aggregates.topStudents.length > 0) {
+                    const topStudent = aggregates.topStudents[0];
                     resultsGrid.innerHTML += `
                         <div class="stat-card">
-                            <div class="stat-label">Top Subject</div>
-                            <div class="stat-value">${subjectAverages[0].subject}</div>
+                            <div class="stat-label">Top Student (#${topStudent.rank})</div>
+                            <div class="stat-value">${topStudent.name}</div>
                             <div style="font-size: 0.8rem; color: var(--muted-green);">
-                                Avg: ${subjectAverages[0].average.toFixed(2)}%
+                                Avg: ${topStudent.average.toFixed(2)}% | Stream: ${topStudent.stream}
                             </div>
                         </div>
                     `;
                 }
                 
-                // Top performing teachers
-                const teacherAverages = Object.entries(aggregates.teacherPerformance || {})
-                    .map(([teacher, data]) => ({
-                        teacher: teacher.length > 15 ? teacher.substring(0, 12) + '...' : teacher,
-                        average: data.count > 0 ? data.total / data.count : 0,
-                        students: data.students.size
-                    }))
-                    .sort((a, b) => b.average - a.average)
-                    .slice(0, 3);
-                
-                if (teacherAverages.length > 0) {
+                // Top Teacher (using recorded_by)
+                if (aggregates.topTeachers && aggregates.topTeachers.length > 0) {
+                    const topTeacher = aggregates.topTeachers[0];
                     resultsGrid.innerHTML += `
                         <div class="stat-card">
-                            <div class="stat-label">Top Teacher</div>
-                            <div class="stat-value">${teacherAverages[0].teacher}</div>
+                            <div class="stat-label">Top Teacher (#${topTeacher.rank})</div>
+                            <div class="stat-value">${topTeacher.name.length > 15 ? topTeacher.name.substring(0, 12) + '...' : topTeacher.name}</div>
                             <div style="font-size: 0.8rem; color: var(--muted-green);">
-                                ${teacherAverages[0].students} students
+                                Avg: ${topTeacher.average.toFixed(2)}% | Students: ${topTeacher.studentCount}
                             </div>
                         </div>
                     `;
                 }
                 
-                // Grade distribution summary
-                const topGrade = Object.entries(aggregates.gradeDistribution || {})
-                    .sort((a, b) => b[1] - a[1])[0];
-                
-                if (topGrade) {
+                // Top Subject
+                if (aggregates.topSubjects && aggregates.topSubjects.length > 0) {
+                    const topSubject = aggregates.topSubjects[0];
                     resultsGrid.innerHTML += `
                         <div class="stat-card">
-                            <div class="stat-label">Most Common Grade</div>
-                            <div class="stat-value">${topGrade[0]}</div>
+                            <div class="stat-label">Top Subject (#${topSubject.rank})</div>
+                            <div class="stat-value">${topSubject.name}</div>
                             <div style="font-size: 0.8rem; color: var(--muted-green);">
-                                ${topGrade[1]} records (${((topGrade[1] / aggregates.totalRecords) * 100).toFixed(1)}%)
+                                Avg: ${topSubject.average.toFixed(2)}% | Students: ${topSubject.studentCount}
                             </div>
                         </div>
                     `;
+                }
+                
+                // Top Stream
+                if (aggregates.topStreams && aggregates.topStreams.length > 0) {
+                    const topStream = aggregates.topStreams[0];
+                    resultsGrid.innerHTML += `
+                        <div class="stat-card">
+                            <div class="stat-label">Top Stream (#${topStream.rank})</div>
+                            <div class="stat-value">${topStream.name}</div>
+                            <div style="font-size: 0.8rem; color: var(--muted-green);">
+                                Avg: ${topStream.average.toFixed(2)}% | Students: ${topStream.studentCount}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Add detailed rankings table after the stats cards
+                resultsGrid.innerHTML += `
+                    <div style="grid-column: 1 / -1; margin-top: 20px;">
+                        <div class="view-toggle" style="margin-bottom: 15px;">
+                            <button class="view-btn active" onclick="showRankingTable('students')">Students</button>
+                            <button class="view-btn" onclick="showRankingTable('teachers')">Teachers</button>
+                            <button class="view-btn" onclick="showRankingTable('subjects')">Subjects</button>
+                            <button class="view-btn" onclick="showRankingTable('streams')">Streams</button>
+                            <button class="view-btn" onclick="showRankingTable('grades')">Grades</button>
+                        </div>
+                        
+                        <div id="rankingTableContainer" style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <!-- Ranking tables will be dynamically loaded here -->
+                        </div>
+                    </div>
+                `;
+                
+                // Store aggregates globally for ranking tables
+                window.currentAggregates = aggregates;
+                
+                // Show student ranking table by default
+                showRankingTable('students');
+            }
+
+            // Function to display ranking tables
+            function showRankingTable(type) {
+                const container = document.getElementById('rankingTableContainer');
+                if (!container || !window.currentAggregates) return;
+                
+                // Update active button
+                const viewToggle = container.parentElement.querySelector('.view-toggle');
+                if (viewToggle) {
+                    const buttons = viewToggle.querySelectorAll('.view-btn');
+                    buttons.forEach(btn => btn.classList.remove('active'));
+                    event.target.classList.add('active');
+                }
+                
+                let tableHTML = '';
+                let rankingData = [];
+                let columns = [];
+                
+                switch(type) {
+                    case 'students':
+                        rankingData = window.currentAggregates.studentRanking;
+                        columns = [
+                            { key: 'rank', label: 'Rank', width: '80px' },
+                            { key: 'name', label: 'Student Name', width: '200px' },
+                            { key: 'id', label: 'Admission', width: '120px' },
+                            { key: 'average', label: 'Average %', width: '100px', format: 'percent' },
+                            { key: 'grade', label: 'Grade', width: '80px' },
+                            { key: 'stream', label: 'Stream', width: '100px' },
+                            { key: 'subjectCount', label: 'Subjects', width: '80px' }
+                        ];
+                        break;
+                        
+                    case 'teachers':
+                        rankingData = window.currentAggregates.teacherRanking;
+                        columns = [
+                            { key: 'rank', label: 'Rank', width: '80px' },
+                            { key: 'name', label: 'Teacher Name', width: '200px' },
+                            { key: 'average', label: 'Avg Score %', width: '100px', format: 'percent' },
+                            { key: 'studentCount', label: 'Students', width: '80px' },
+                            { key: 'subjectCount', label: 'Subjects', width: '80px' },
+                            { key: 'count', label: 'Records', width: '80px' }
+                        ];
+                        break;
+                        
+                    case 'subjects':
+                        rankingData = window.currentAggregates.subjectRanking;
+                        columns = [
+                            { key: 'rank', label: 'Rank', width: '80px' },
+                            { key: 'name', label: 'Subject', width: '150px' },
+                            { key: 'average', label: 'Avg Score %', width: '100px', format: 'percent' },
+                            { key: 'studentCount', label: 'Students', width: '80px' },
+                            { key: 'teacherCount', label: 'Teachers', width: '80px' },
+                            { key: 'count', label: 'Records', width: '80px' }
+                        ];
+                        break;
+                        
+                    case 'streams':
+                        rankingData = window.currentAggregates.streamRanking;
+                        columns = [
+                            { key: 'rank', label: 'Rank', width: '80px' },
+                            { key: 'name', label: 'Stream', width: '120px' },
+                            { key: 'average', label: 'Avg Score %', width: '100px', format: 'percent' },
+                            { key: 'studentCount', label: 'Students', width: '80px' },
+                            { key: 'subjectCount', label: 'Subjects', width: '80px' },
+                            { key: 'count', label: 'Records', width: '80px' }
+                        ];
+                        break;
+                        
+                    case 'grades':
+                        rankingData = window.currentAggregates.gradeRanking;
+                        columns = [
+                            { key: 'rank', label: 'Rank', width: '80px' },
+                            { key: 'name', label: 'Grade', width: '100px' },
+                            { key: 'average', label: 'Avg Score %', width: '100px', format: 'percent' },
+                            { key: 'studentCount', label: 'Students', width: '80px' },
+                            { key: 'streamCount', label: 'Streams', width: '80px' },
+                            { key: 'count', label: 'Records', width: '80px' }
+                        ];
+                        break;
+                }
+                
+                if (rankingData.length === 0) {
+                    tableHTML = `<p style="text-align: center; color: #666; padding: 40px;">No ${type} data available</p>`;
+                } else {
+                    // Limit to top 20 for display
+                    const displayData = rankingData.slice(0, 20);
+                    
+                    tableHTML = `
+                        <div style="overflow-x: auto; max-height: 400px; border: 1px solid #ddd; border-radius: 8px;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                                <thead style="background-color: var(--exam-office-purple); color: white; position: sticky; top: 0;">
+                                    <tr>
+                                        ${columns.map(col => `<th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; min-width: ${col.width};">${col.label}</th>`).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${displayData.map((item, index) => {
+                                        const rowColor = index < 3 ? 
+                                            index === 0 ? '#e8f5e9' : // Gold
+                                            index === 1 ? '#f1f8e9' : // Silver
+                                            '#f9fbe7' : // Bronze
+                                            index % 2 === 0 ? '#f9f9f9' : 'white';
+                                        
+                                        return `
+                                            <tr style="background-color: ${rowColor};">
+                                                ${columns.map(col => {
+                                                    let cellValue = item[col.key] || '';
+                                                    if (col.format === 'percent' && typeof cellValue === 'number') {
+                                                        cellValue = cellValue.toFixed(2) + '%';
+                                                    }
+                                                    if (col.key === 'rank') {
+                                                        // Add medal emojis for top 3
+                                                        if (item.rank === 1) cellValue = '🥇 ' + cellValue;
+                                                        else if (item.rank === 2) cellValue = '🥈 ' + cellValue;
+                                                        else if (item.rank === 3) cellValue = '🥉 ' + cellValue;
+                                                    }
+                                                    return `<td style="padding: 8px 10px; border-bottom: 1px solid #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cellValue}">${cellValue}</td>`;
+                                                }).join('')}
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        ${rankingData.length > 20 ? `<p style="text-align: center; color: #666; margin-top: 10px;">Showing top 20 of ${rankingData.length} ${type}</p>` : ''}
+                    `;
+                }
+                
+                container.innerHTML = `
+                    <h4 style="color: var(--exam-office-purple); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-trophy"></i> ${type.charAt(0).toUpperCase() + type.slice(1)} Ranking
+                    </h4>
+                    ${tableHTML}
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <button class="btn btn-outline" onclick="exportRankingToExcel('${type}')" style="font-size: 0.9rem; padding: 5px 10px;">
+                            <i class="fas fa-file-excel"></i> Export ${type}
+                        </button>
+                        <button class="btn btn-outline" onclick="exportRankingToPDF('${type}')" style="font-size: 0.9rem; padding: 5px 10px;">
+                            <i class="fas fa-file-pdf"></i> Export ${type}
+                        </button>
+                    </div>
+                `;
+            }
+
+            // Function to export ranking to Excel
+            function exportRankingToExcel(type) {
+                if (!window.currentAggregates) return;
+                
+                let rankingData = [];
+                let fileName = '';
+                
+                switch(type) {
+                    case 'students':
+                        rankingData = window.currentAggregates.studentRanking;
+                        fileName = 'Student_Ranking';
+                        break;
+                    case 'teachers':
+                        rankingData = window.currentAggregates.teacherRanking;
+                        fileName = 'Teacher_Ranking';
+                        break;
+                    case 'subjects':
+                        rankingData = window.currentAggregates.subjectRanking;
+                        fileName = 'Subject_Ranking';
+                        break;
+                    case 'streams':
+                        rankingData = window.currentAggregates.streamRanking;
+                        fileName = 'Stream_Ranking';
+                        break;
+                    case 'grades':
+                        rankingData = window.currentAggregates.gradeRanking;
+                        fileName = 'Grade_Ranking';
+                        break;
+                }
+                
+                if (rankingData.length === 0) {
+                    alert(`No ${type} data to export.`);
+                    return;
+                }
+                
+                try {
+                    const exportData = rankingData.map((item, index) => {
+                        const exportItem = {
+                            Rank: item.rank,
+                            Position: item.position || ''
+                        };
+                        
+                        switch(type) {
+                            case 'students':
+                                Object.assign(exportItem, {
+                                    'Student Name': item.name,
+                                    'Admission Number': item.id,
+                                    'Average Score %': item.average.toFixed(2),
+                                    'Grade': item.grade,
+                                    'Stream': item.stream,
+                                    'Number of Subjects': item.subjectCount,
+                                    'Number of Teachers': item.teacherCount,
+                                    'Total Records': item.count
+                                });
+                                break;
+                            case 'teachers':
+                                Object.assign(exportItem, {
+                                    'Teacher Name': item.name,
+                                    'Average Score %': item.average.toFixed(2),
+                                    'Number of Students': item.studentCount,
+                                    'Number of Subjects': item.subjectCount,
+                                    'Total Records': item.count
+                                });
+                                break;
+                            case 'subjects':
+                                Object.assign(exportItem, {
+                                    'Subject': item.name,
+                                    'Average Score %': item.average.toFixed(2),
+                                    'Number of Students': item.studentCount,
+                                    'Number of Teachers': item.teacherCount,
+                                    'Total Records': item.count
+                                });
+                                break;
+                            case 'streams':
+                                Object.assign(exportItem, {
+                                    'Stream': item.name,
+                                    'Average Score %': item.average.toFixed(2),
+                                    'Number of Students': item.studentCount,
+                                    'Number of Subjects': item.subjectCount,
+                                    'Total Records': item.count
+                                });
+                                break;
+                            case 'grades':
+                                Object.assign(exportItem, {
+                                    'Grade': item.name,
+                                    'Average Score %': item.average.toFixed(2),
+                                    'Number of Students': item.studentCount,
+                                    'Number of Streams': item.streamCount,
+                                    'Total Records': item.count
+                                });
+                                break;
+                        }
+                        
+                        return exportItem;
+                    });
+                    
+                    const ws = XLSX.utils.json_to_sheet(exportData);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, `${type} Ranking`);
+                    
+                    const filename = `${fileName}_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    XLSX.writeFile(wb, filename);
+                    
+                    console.log(`Ranking exported to Excel: ${filename}`);
+                    
+                } catch (error) {
+                    console.error(`Error exporting ${type} ranking to Excel:`, error);
+                    alert(`Error exporting ${type} ranking. Please try again.`);
+                }
+            }
+
+            // Function to export ranking to PDF
+            function exportRankingToPDF(type) {
+                if (!window.currentAggregates) return;
+                
+                let rankingData = [];
+                let title = '';
+                
+                switch(type) {
+                    case 'students':
+                        rankingData = window.currentAggregates.studentRanking;
+                        title = 'Student Ranking';
+                        break;
+                    case 'teachers':
+                        rankingData = window.currentAggregates.teacherRanking;
+                        title = 'Teacher Ranking';
+                        break;
+                    case 'subjects':
+                        rankingData = window.currentAggregates.subjectRanking;
+                        title = 'Subject Ranking';
+                        break;
+                    case 'streams':
+                        rankingData = window.currentAggregates.streamRanking;
+                        title = 'Stream Ranking';
+                        break;
+                    case 'grades':
+                        rankingData = window.currentAggregates.gradeRanking;
+                        title = 'Grade Ranking';
+                        break;
+                }
+                
+                if (rankingData.length === 0) {
+                    alert(`No ${type} data to export.`);
+                    return;
+                }
+                
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF('p', 'mm', 'a4');
+                    
+                    // Add title
+                    doc.setFontSize(16);
+                    doc.text('ALLIANCE GIRLS HIGH SCHOOL', 20, 20);
+                    doc.setFontSize(14);
+                    doc.text(title, 20, 30);
+                    
+                    // Add information
+                    doc.setFontSize(10);
+                    doc.text(`Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, 20, 40);
+                    doc.text(`Total ${type}: ${rankingData.length}`, 20, 45);
+                    
+                    // Prepare table data (limit to first 50 for PDF)
+                    const tableData = rankingData.slice(0, 50).map(item => {
+                        const row = [item.rank.toString()];
+                        
+                        switch(type) {
+                            case 'students':
+                                row.push(
+                                    item.name.substring(0, 20),
+                                    item.average.toFixed(2) + '%',
+                                    item.grade || '',
+                                    item.stream || '',
+                                    item.subjectCount.toString()
+                                );
+                                break;
+                            case 'teachers':
+                                row.push(
+                                    item.name.substring(0, 20),
+                                    item.average.toFixed(2) + '%',
+                                    item.studentCount.toString(),
+                                    item.subjectCount.toString()
+                                );
+                                break;
+                            case 'subjects':
+                                row.push(
+                                    item.name.substring(0, 20),
+                                    item.average.toFixed(2) + '%',
+                                    item.studentCount.toString(),
+                                    item.teacherCount.toString()
+                                );
+                                break;
+                            case 'streams':
+                                row.push(
+                                    item.name.substring(0, 15),
+                                    item.average.toFixed(2) + '%',
+                                    item.studentCount.toString(),
+                                    item.subjectCount.toString()
+                                );
+                                break;
+                            case 'grades':
+                                row.push(
+                                    item.name.substring(0, 10),
+                                    item.average.toFixed(2) + '%',
+                                    item.studentCount.toString(),
+                                    item.streamCount.toString()
+                                );
+                                break;
+                        }
+                        
+                        return row;
+                    });
+                    
+                    // Add table headers
+                    const headers = ['Rank'];
+                    switch(type) {
+                        case 'students':
+                            headers.push('Student Name', 'Average %', 'Grade', 'Stream', 'Subjects');
+                            break;
+                        case 'teachers':
+                            headers.push('Teacher Name', 'Average %', 'Students', 'Subjects');
+                            break;
+                        case 'subjects':
+                            headers.push('Subject', 'Average %', 'Students', 'Teachers');
+                            break;
+                        case 'streams':
+                            headers.push('Stream', 'Average %', 'Students', 'Subjects');
+                            break;
+                        case 'grades':
+                            headers.push('Grade', 'Average %', 'Students', 'Streams');
+                            break;
+                    }
+                    
+                    // Generate table
+                    doc.autoTable({
+                        head: [headers],
+                        body: tableData,
+                        startY: 55,
+                        styles: {
+                            fontSize: 8,
+                            cellPadding: 2
+                        },
+                        headStyles: {
+                            fillColor: [41, 128, 185],
+                            textColor: 255,
+                            fontSize: 9,
+                            fontStyle: 'bold'
+                        },
+                        alternateRowStyles: {
+                            fillColor: [245, 245, 245]
+                        }
+                    });
+                    
+                    const filename = `${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+                    doc.save(filename);
+                    
+                    console.log(`Ranking exported to PDF: ${filename}`);
+                    
+                } catch (error) {
+                    console.error(`Error exporting ${type} ranking to PDF:`, error);
+                    alert(`Error exporting ${type} ranking. Please try again.`);
                 }
             }
 
@@ -5664,6 +6224,12 @@ Alliance Girls High School
             window.changePage = changePage;
             window.changePageSize = changePageSize;
             window.goToPage = goToPage;
+
+            // NEW: Ranking functions
+            window.computeAggregates = computeAggregates;
+            window.showRankingTable = showRankingTable;
+            window.exportRankingToExcel = exportRankingToExcel;
+            window.exportRankingToPDF = exportRankingToPDF;
 
             // Start initialization when DOM is ready
             if (document.readyState === 'loading') {
