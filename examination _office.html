@@ -17,6 +17,11 @@
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <!-- Add QR Code generator -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <!-- Add jQuery (REQUIRED for Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Add Select2 for multi-select dropdowns -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <style>
         :root {
             --primary-green: #075824;
@@ -790,6 +795,29 @@
             box-shadow: 0 0 0 3px rgba(51, 54, 135, 0.1);
         }
 
+        /* Academic year input style for xxxx-yyyy format */
+        .academic-year-input-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .academic-year-input-container input {
+            text-align: center;
+            letter-spacing: 1px;
+            font-weight: bold;
+            font-size: 1rem;
+            flex: 1;
+            max-width: 70px;
+        }
+
+        .academic-year-input-container span {
+            font-size: 1.2rem;
+            color: var(--exam-office-purple);
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
         /* Manual year input style */
         .year-input-container {
             display: flex;
@@ -1079,6 +1107,41 @@
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
 
+        /* Select2 Customization */
+        .select2-container {
+            width: 100% !important;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            min-height: 46px;
+            padding: 5px;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(51, 54, 135, 0.1);
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: var(--exam-office-purple);
+            border: 1px solid var(--exam-office-purple);
+            color: white;
+            border-radius: 4px;
+            padding: 2px 8px;
+            margin: 3px;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white;
+            margin-right: 5px;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+            color: #ffcccc;
+        }
+
         /* Responsive Design */
         @media (max-width: 1024px) {
             .sidebar {
@@ -1187,6 +1250,17 @@
                 width: 100%;
                 text-align: center;
             }
+            
+            .academic-year-input-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .academic-year-input-container input {
+                max-width: 100%;
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -1270,14 +1344,14 @@
                                 <div style="display: flex; flex-wrap: wrap; gap: 15px;">
                                     <div><strong>Academic Year:</strong> <span id="previewAcademicYear">All Years</span></div>
                                     <div><strong>Exam Type:</strong> <span id="previewExamType">All</span></div>
-                                    <div><strong>Grade:</strong> <span id="previewForm">All</span></div>
-                                    <div><strong>Stream:</strong> <span id="previewStream">All</span></div>
+                                    <div><strong>Term:</strong> <span id="previewTerm">All</span></div>
+                                    <div><strong>Grade:</strong> <span id="previewForm">All Grades</span></div>
+                                    <div><strong>Stream:</strong> <span id="previewStream">All Streams</span></div>
                                     <div><strong>Records:</strong> <span id="previewRecordCount">0</span></div>
                                 </div>
                             </div>
                         </div>
                         <div class="action-buttons" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <!-- NEW FILTER & COMPUTE BUTTON ADDED HERE -->
                             <button class="btn btn-warning" id="filterComputeBtn">
                                 <i class="fas fa-filter"></i> Filter & Compute
                             </button>
@@ -1296,7 +1370,6 @@
                         </div>
                     </div>
                     
-                    <!-- NEW FILTER FORM SECTION ADDED HERE -->
                     <div id="filterFormSection" style="display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: var(--card-shadow); margin-bottom: 20px;">
                         <h3 style="color: var(--exam-office-purple); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                             <i class="fas fa-filter"></i> Filter & Compute Data
@@ -1323,25 +1396,22 @@
                             
                             <div class="form-group">
                                 <label><i class="fas fa-file-alt"></i> Exam Type</label>
-                                <select id="filterExamType" class="form-control">
-                                    <option value="">All Exam Types</option>
+                                <select id="filterExamType" class="form-control" multiple="multiple">
                                     <option value="Opener Term 1">Opener Term 1</option>
                                     <option value="Mid Term 1">Mid Term 1</option>
                                     <option value="End Term 1">End Term 1</option>
-                                       <option value="Opener Term 2">Opener Term 2</option>
+                                    <option value="Opener Term 2">Opener Term 2</option>
                                     <option value="Mid Term 2">Mid Term 2</option>
                                     <option value="End Term 2">End Term 2</option>
-                                       <option value="Opener Term 3">Opener Term 3</option>
+                                    <option value="Opener Term 3">Opener Term 3</option>
                                     <option value="Mid Term 3">Mid Term 3</option>
                                     <option value="End Term 3">End Term 3</option>
-                                  
                                 </select>
                             </div>
                             
                             <div class="form-group">
                                 <label><i class="fas fa-calendar"></i> Term</label>
-                                <select id="filterTerm" class="form-control">
-                                    <option value="">All Terms</option>
+                                <select id="filterTerm" class="form-control" multiple="multiple">
                                     <option value="Term 1">Term 1</option>
                                     <option value="Term 2">Term 2</option>
                                     <option value="Term 3">Term 3</option>
@@ -1350,10 +1420,12 @@
                             
                             <div class="form-group">
                                 <label><i class="fas fa-calendar-alt"></i> Academic Year</label>
-                                <select id="filterYear" class="form-control">
-                                    <option value="">All Years</option>
-                                    <!-- Years will be dynamically populated -->
-                                </select>
+                                <div class="academic-year-input-container">
+                                    <input type="text" id="filterYearStart" class="form-control" maxlength="4" placeholder="YYYY" oninput="formatYearInput('filterYearStart', 'filterYearEnd')" style="width: 80px; text-align: center;">
+                                    <span>-</span>
+                                    <input type="text" id="filterYearEnd" class="form-control" maxlength="4" placeholder="YYYY" oninput="formatYearInput('filterYearEnd', null, 'filterYearStart')" style="width: 80px; text-align: center;">
+                                    <button type="button" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; margin-left: 10px;" onclick="useCurrentYear()">Use Current</button>
+                                </div>
                             </div>
                             
                             <div class="form-group">
@@ -1378,7 +1450,6 @@
                         </div>
                     </div>
                     
-                    <!-- NEW COMPUTATION RESULTS SECTION ADDED HERE -->
                     <div id="computationResultsSection" style="display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: var(--card-shadow); margin-bottom: 20px;">
                         <h3 style="color: var(--exam-office-purple); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                             <i class="fas fa-calculator"></i> Computation Results
@@ -1509,10 +1580,11 @@
                 <div id="reportCardsSelectionSection">
                     <div class="form-group">
                         <label><i class="fas fa-calendar"></i> Academic Year</label>
-                        <div class="year-input-container">
-                            <input type="text" id="reportAcademicYear1" class="form-control" maxlength="4" placeholder="YYYY" style="width: 100px; text-align: center;">
-                            <span class="year-separator">-</span>
-                            <input type="text" id="reportAcademicYear2" class="form-control" maxlength="4" placeholder="YYYY" style="width: 100px; text-align: center;">
+                        <div class="academic-year-input-container">
+                            <input type="text" id="reportAcademicYear1" class="form-control" maxlength="4" placeholder="YYYY" oninput="formatYearInput('reportAcademicYear1', 'reportAcademicYear2')" style="width: 80px; text-align: center;">
+                            <span>-</span>
+                            <input type="text" id="reportAcademicYear2" class="form-control" maxlength="4" placeholder="YYYY" oninput="formatYearInput('reportAcademicYear2', null, 'reportAcademicYear1')" style="width: 80px; text-align: center;">
+                            <button type="button" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; margin-left: 10px;" onclick="useCurrentYearReport()">Use Current</button>
                         </div>
                     </div>
                     
@@ -2185,7 +2257,7 @@ Alliance Girls High School
             // NEW: Filter state
             let currentFilters = {};
 
-            // Table column configuration - UPDATED with subject teacher and recorded_by fields
+            // Table column configuration - FIXED: Removed duplicate achievement level field
             const tableColumns = [
                 { key: 'id', header: '#', width: '50px' },
                 { key: 'admission_no', header: 'Admission', width: '100px' },
@@ -2200,7 +2272,6 @@ Alliance Girls High School
                 { key: 'percentage', header: 'Percentage', width: '100px' },
                 { key: 'grade_letter', header: 'Grade', width: '80px' },
                 { key: 'achievement_level', header: 'Achievement Level', width: '120px' },
-                { key: 'achievement_description', header: 'Description', width: '150px' },
                 { key: 'exam_type', header: 'Exam Type', width: '120px' },
                 { key: 'term', header: 'Term', width: '100px' },
                 { key: 'academic_year', header: 'Year', width: '100px' }
@@ -2259,8 +2330,11 @@ Alliance Girls High School
                 window.location.href = 'index.html';
             }
 
-            // Function to format year input (xxxx-xxxx format)
-            function formatYearInput(input, nextInputId, prevInputId) {
+            // Function to format year input (xxxx format) for academic year
+            function formatYearInput(inputId, nextInputId, prevInputId) {
+                const input = document.getElementById(inputId);
+                if (!input) return;
+                
                 // Remove any non-numeric characters
                 input.value = input.value.replace(/\D/g, '');
                 
@@ -2281,18 +2355,36 @@ Alliance Girls High School
             }
 
             // Function to get the full academic year from the split inputs
-            function getFullAcademicYear(year1Id, year2Id) {
-                const year1 = document.getElementById(year1Id)?.value || '';
-                const year2 = document.getElementById(year2Id)?.value || '';
+            function getFullAcademicYear(startId, endId) {
+                const startYear = document.getElementById(startId)?.value || '';
+                const endYear = document.getElementById(endId)?.value || '';
                 
-                if (year1 && year2) {
-                    return `${year1}-${year2}`;
-                } else if (year1) {
-                    return `${year1}-${parseInt(year1) + 1}`;
-                } else if (year2) {
-                    return `${parseInt(year2) - 1}-${year2}`;
+                if (startYear && endYear) {
+                    return `${startYear}-${endYear}`;
+                } else if (startYear) {
+                    return `${startYear}-${parseInt(startYear) + 1}`;
+                } else if (endYear) {
+                    return `${parseInt(endYear) - 1}-${endYear}`;
                 }
                 return '';
+            }
+
+            // Function to set current year in filter form
+            function useCurrentYear() {
+                const currentYear = new Date().getFullYear();
+                const nextYear = currentYear + 1;
+                
+                document.getElementById('filterYearStart').value = currentYear;
+                document.getElementById('filterYearEnd').value = nextYear;
+            }
+
+            // Function to set current year in report form
+            function useCurrentYearReport() {
+                const currentYear = new Date().getFullYear();
+                const nextYear = currentYear + 1;
+                
+                document.getElementById('reportAcademicYear1').value = currentYear;
+                document.getElementById('reportAcademicYear2').value = nextYear;
             }
 
             // Function to populate streams dropdown
@@ -2368,9 +2460,21 @@ Alliance Girls High School
                     gradingSystem = data || [];
                     console.log('Grading system loaded:', gradingSystem.length, 'grades');
                     
+                    // Log the grading system for debugging
+                    console.log('Grading system details:', gradingSystem);
+                    
                 } catch (error) {
                     console.error('Error loading grading system:', error);
                     gradingSystem = [];
+                    
+                    // Use fallback grading system if database fails
+                    gradingSystem = [
+                        { grade: 'A', min_score: 80, max_score: 100, achievement_level: 'Exceeding Expectations', achievement_code: 'EE', description: 'Excellent performance', sort_order: 1 },
+                        { grade: 'B', min_score: 70, max_score: 79, achievement_level: 'Meeting Expectations', achievement_code: 'ME', description: 'Good performance', sort_order: 2 },
+                        { grade: 'C', min_score: 60, max_score: 69, achievement_level: 'Approaching Expectations', achievement_code: 'AE', description: 'Satisfactory performance', sort_order: 3 },
+                        { grade: 'D', min_score: 50, max_score: 59, achievement_level: 'Developing', achievement_code: 'D', description: 'Below expectations', sort_order: 4 },
+                        { grade: 'E', min_score: 0, max_score: 49, achievement_level: 'Beginning', achievement_code: 'B', description: 'Needs improvement', sort_order: 5 }
+                    ];
                 }
             }
 
@@ -3165,30 +3269,32 @@ Alliance Girls High School
                 return 'N/A';
             }
 
-            // Function to get achievement level and description
-            function getAchievementLevelAndDescription(score) {
+            // Function to get achievement level - FIXED: Return only achievement_level, not description
+            function getAchievementLevel(score) {
                 if (!gradingSystem || gradingSystem.length === 0) {
-                    return { level: 'N/A', description: 'N/A' };
+                    return 'N/A';
                 }
                 
                 const numericScore = parseFloat(score);
                 if (isNaN(numericScore)) {
-                    return { level: 'N/A', description: 'N/A' };
+                    return 'N/A';
                 }
                 
                 // Sort grading system by sort_order
-                const sortedGrades = [...gradingSystem].sort((a, b) => b.sort_order - a.sort_order);
+                const sortedGrades = [...gradingSystem].sort((a, b) => a.sort_order - b.sort_order);
                 
                 for (const grade of sortedGrades) {
-                    if (numericScore >= grade.min_score && numericScore <= grade.max_score) {
-                        return {
-                            level: grade.achievement_level || 'N/A',
-                            description: grade.description || 'N/A'
-                        };
+                    const minScore = parseFloat(grade.min_score);
+                    const maxScore = parseFloat(grade.max_score);
+                    
+                    if (!isNaN(minScore) && !isNaN(maxScore)) {
+                        if (numericScore >= minScore && numericScore <= maxScore) {
+                            return grade.achievement_level || 'N/A';
+                        }
                     }
                 }
                 
-                return { level: 'Not Achieved', description: 'Did not meet minimum requirements' };
+                return 'Not Achieved';
             }
 
             function findTopPerformer() {
@@ -3403,6 +3509,28 @@ Alliance Girls High School
             function openCompileResultsModal() {
                 compileResultsModal.classList.add('show');
                 switchCompileView('cloud');
+                
+                // Initialize Select2 for multi-select dropdowns - FIXED: Use window.jQuery instead of $
+                setTimeout(() => {
+                    if (window.jQuery && window.jQuery.fn.select2) {
+                        window.jQuery('#filterExamType').select2({
+                            placeholder: "Select Exam Types",
+                            allowClear: true,
+                            width: '100%'
+                        });
+                        
+                        window.jQuery('#filterTerm').select2({
+                            placeholder: "Select Terms",
+                            allowClear: true,
+                            width: '100%'
+                        });
+                    } else {
+                        console.error('jQuery or Select2 not loaded');
+                    }
+                    
+                    // Set current year as default
+                    useCurrentYear();
+                }, 100);
             }
 
             function openReportCardsModal() {
@@ -3410,9 +3538,7 @@ Alliance Girls High School
                 switchReportCardsView('selection');
                 
                 // Set current year as default in the manual input
-                const currentYear = new Date().getFullYear();
-                document.getElementById('reportAcademicYear1').value = currentYear;
-                document.getElementById('reportAcademicYear2').value = currentYear + 1;
+                useCurrentYearReport();
             }
 
             function openEmailParentsModal() {
@@ -3502,12 +3628,13 @@ Alliance Girls High School
                 }, 100);
             }
 
-            // Function to access cloud data and display ALL data - UPDATED with subject teacher and recorded_by fields
+            // Function to access cloud data and display ALL data
             async function accessCloudData() {
                 try {
                     // Update preview info
                     document.getElementById('previewAcademicYear').textContent = 'All Years';
                     document.getElementById('previewExamType').textContent = 'All';
+                    document.getElementById('previewTerm').textContent = 'All';
                     document.getElementById('previewForm').textContent = 'All Grades';
                     document.getElementById('previewStream').textContent = 'All Streams';
                     
@@ -3605,7 +3732,7 @@ Alliance Girls High School
                         }
                     }
                     
-                    // STEP 6: Get teacher information - NEW SECTION
+                    // STEP 6: Get teacher information
                     let teachersMap = {};
                     // Extract teacher IDs from components and scores
                     const teacherIdsFromComponents = [...new Set(Object.values(componentsMap)
@@ -3632,7 +3759,7 @@ Alliance Girls High School
                         }
                     }
                     
-                    // STEP 7: Prepare table data with achievement level and description - UPDATED with new fields
+                    // STEP 7: Prepare table data with achievement level - FIXED: Use getAchievementLevel instead of getAchievementLevelAndDescription
                     const tableData = [];
                     
                     scoresData.forEach((item, index) => {
@@ -3645,8 +3772,8 @@ Alliance Girls High School
                             percentageScore = (item.score / item.max_score) * 100;
                         }
                         
-                        // Get achievement level and description
-                        const achievementInfo = getAchievementLevelAndDescription(percentageScore);
+                        // Get achievement level - FIXED: Single function call
+                        const achievementLevel = getAchievementLevel(percentageScore);
                         
                         // Get subject details from component
                         let subjectCode = 'N/A';
@@ -3657,7 +3784,7 @@ Alliance Girls High School
                             subjectCode = component.subject_code || 'N/A';
                             componentName = component.component_name || 'N/A';
                             
-                            // Get subject teacher from component - NEW
+                            // Get subject teacher from component
                             if (component.teacher_id && teachersMap[component.teacher_id]) {
                                 subjectTeacher = teachersMap[component.teacher_id].full_name || 'N/A';
                             } else if (component.teacher_id) {
@@ -3668,7 +3795,7 @@ Alliance Girls High School
                             subjectCode = item.subject_code;
                         }
                         
-                        // Get recorded by information - NEW
+                        // Get recorded by information
                         let recordedBy = 'N/A';
                         if (item.recorded_by) {
                             if (teachersMap[item.recorded_by]) {
@@ -3680,6 +3807,7 @@ Alliance Girls High School
                         
                         // Use exam_type if available, otherwise use term
                         const examType = item.exam_type || item.term || 'N/A';
+                        const term = item.term || 'N/A';
                         
                         tableData.push({
                             id: index + 1,
@@ -3690,16 +3818,15 @@ Alliance Girls High School
                             stream: student?.stream || 'N/A',
                             subject_code: subjectCode,
                             component_name: componentName,
-                            subject_teacher: subjectTeacher, // NEW FIELD
-                            recorded_by: recordedBy, // NEW FIELD
+                            subject_teacher: subjectTeacher,
+                            recorded_by: recordedBy,
                             score: item.score || 0,
                             max_score: item.max_score || component?.max_score || 0,
                             percentage: parseFloat(percentageScore.toFixed(2)),
                             grade_letter: calculateGradeFromScore(percentageScore),
-                            achievement_level: achievementInfo.level,
-                            achievement_description: achievementInfo.description,
+                            achievement_level: achievementLevel, // FIXED: Single field
                             exam_type: examType,
-                            term: item.term || 'N/A',
+                            term: term,
                             academic_year: item.academic_year || 'N/A',
                             assessment_type: item.assessment_type || 'N/A',
                             remarks: item.remarks || '',
@@ -3757,6 +3884,8 @@ Alliance Girls High School
                 const years = [...new Set(allScores.map(score => score.academic_year).filter(Boolean))];
                 const filterYearSelect = document.getElementById('filterYear');
                 if (filterYearSelect) {
+                    // Note: This is now just a hidden input for compatibility
+                    // We use filterYearStart and filterYearEnd for the actual input
                     filterYearSelect.innerHTML = '<option value="">All Years</option>';
                     years.forEach(year => {
                         const option = document.createElement('option');
@@ -3822,13 +3951,41 @@ Alliance Girls High School
                 }
             }
 
-            // Function to apply filters to the data
+            // Function to apply filters to the data - FIXED: Use window.jQuery instead of $
             async function applyFilters() {
+                // Get values from multi-select dropdowns
                 const filterGrade = document.getElementById('filterGrade')?.value || '';
                 const filterStream = document.getElementById('filterStream')?.value || '';
-                const filterExamType = document.getElementById('filterExamType')?.value || '';
-                const filterTerm = document.getElementById('filterTerm')?.value || '';
-                const filterYear = document.getElementById('filterYear')?.value || '';
+                
+                // Get multiple exam types - FIXED: Use window.jQuery
+                let filterExamTypes = [];
+                if (window.jQuery && window.jQuery.fn.select2) {
+                    const filterExamTypeSelect = window.jQuery('#filterExamType');
+                    filterExamTypes = filterExamTypeSelect.val() || [];
+                } else {
+                    // Fallback if Select2 not available
+                    const examTypeSelect = document.getElementById('filterExamType');
+                    if (examTypeSelect) {
+                        filterExamTypes = Array.from(examTypeSelect.selectedOptions).map(option => option.value);
+                    }
+                }
+                
+                // Get multiple terms - FIXED: Use window.jQuery
+                let filterTerms = [];
+                if (window.jQuery && window.jQuery.fn.select2) {
+                    const filterTermSelect = window.jQuery('#filterTerm');
+                    filterTerms = filterTermSelect.val() || [];
+                } else {
+                    // Fallback if Select2 not available
+                    const termSelect = document.getElementById('filterTerm');
+                    if (termSelect) {
+                        filterTerms = Array.from(termSelect.selectedOptions).map(option => option.value);
+                    }
+                }
+                
+                // Get academic year from the split inputs
+                const filterYear = getFullAcademicYear('filterYearStart', 'filterYearEnd') || '';
+                
                 const filterRecordedBy = document.getElementById('filterRecordedBy')?.value || '';
 
                 // Show human-friendly Grade label in preview
@@ -3841,8 +3998,25 @@ Alliance Girls High School
                         previewGradeLabel = filterGrade;
                     }
                 }
+                
+                // Show selected exam types
+                let previewExamTypeLabel = 'All';
+                if (filterExamTypes.length > 0) {
+                    previewExamTypeLabel = filterExamTypes.join(', ');
+                    if (previewExamTypeLabel.length > 30) {
+                        previewExamTypeLabel = previewExamTypeLabel.substring(0, 30) + '...';
+                    }
+                }
+                
+                // Show selected terms
+                let previewTermLabel = 'All';
+                if (filterTerms.length > 0) {
+                    previewTermLabel = filterTerms.join(', ');
+                }
+                
                 document.getElementById('previewAcademicYear').textContent = filterYear || 'All Years';
-                document.getElementById('previewExamType').textContent = filterExamType || 'All';
+                document.getElementById('previewExamType').textContent = previewExamTypeLabel;
+                document.getElementById('previewTerm').textContent = previewTermLabel;
                 document.getElementById('previewForm').textContent = previewGradeLabel;
                 document.getElementById('previewStream').textContent = filterStream || 'All Streams';
 
@@ -3853,8 +4027,8 @@ Alliance Girls High School
                 currentFilters = {
                     grade: filterGrade,
                     stream: filterStream,
-                    examType: filterExamType,
-                    term: filterTerm,
+                    examTypes: filterExamTypes,
+                    terms: filterTerms,
                     year: filterYear,
                     recordedBy: filterRecordedBy
                 };
@@ -3898,12 +4072,12 @@ Alliance Girls High School
                         query = query.eq('academic_year', currentFilters.year);
                     }
                     
-                    if (currentFilters.examType) {
-                        query = query.eq('exam_type', currentFilters.examType);
+                    if (currentFilters.examTypes && currentFilters.examTypes.length > 0) {
+                        query = query.in('exam_type', currentFilters.examTypes);
                     }
                     
-                    if (currentFilters.term) {
-                        query = query.eq('term', currentFilters.term);
+                    if (currentFilters.terms && currentFilters.terms.length > 0) {
+                        query = query.in('term', currentFilters.terms);
                     }
                     
                     if (currentFilters.recordedBy) {
@@ -4044,8 +4218,8 @@ Alliance Girls High School
                             percentageScore = (item.score / item.max_score) * 100;
                         }
                         
-                        // Get achievement level and description
-                        const achievementInfo = getAchievementLevelAndDescription(percentageScore);
+                        // Get achievement level - FIXED: Single function call
+                        const achievementLevel = getAchievementLevel(percentageScore);
                         
                         // Get subject details from component
                         let subjectCode = 'N/A';
@@ -4079,6 +4253,7 @@ Alliance Girls High School
                         
                         // Use exam_type if available, otherwise use term
                         const examType = item.exam_type || item.term || 'N/A';
+                        const term = item.term || 'N/A';
                         
                         tableData.push({
                             id: index + 1,
@@ -4095,10 +4270,9 @@ Alliance Girls High School
                             max_score: item.max_score || component?.max_score || 0,
                             percentage: parseFloat(percentageScore.toFixed(2)),
                             grade_letter: calculateGradeFromScore(percentageScore),
-                            achievement_level: achievementInfo.level,
-                            achievement_description: achievementInfo.description,
+                            achievement_level: achievementLevel, // FIXED: Single field
                             exam_type: examType,
-                            term: item.term || 'N/A',
+                            term: term,
                             academic_year: item.academic_year || 'N/A',
                             assessment_type: item.assessment_type || 'N/A',
                             remarks: item.remarks || '',
@@ -4132,14 +4306,28 @@ Alliance Girls High School
                 }
             }
 
-            // Function to clear all filters
+            // Function to clear all filters - FIXED: Use window.jQuery instead of $
             function clearFilters() {
                 // Reset all filter dropdowns
                 document.getElementById('filterGrade').value = '';
                 document.getElementById('filterStream').value = '';
-                document.getElementById('filterExamType').value = '';
-                document.getElementById('filterTerm').value = '';
-                document.getElementById('filterYear').value = '';
+                
+                // Clear Select2 multi-selects - FIXED: Use window.jQuery
+                if (window.jQuery && window.jQuery.fn.select2) {
+                    window.jQuery('#filterExamType').val(null).trigger('change');
+                    window.jQuery('#filterTerm').val(null).trigger('change');
+                } else {
+                    // Fallback if Select2 not available
+                    const examTypeSelect = document.getElementById('filterExamType');
+                    const termSelect = document.getElementById('filterTerm');
+                    if (examTypeSelect) examTypeSelect.selectedIndex = -1;
+                    if (termSelect) termSelect.selectedIndex = -1;
+                }
+                
+                // Clear academic year inputs
+                document.getElementById('filterYearStart').value = '';
+                document.getElementById('filterYearEnd').value = '';
+                
                 document.getElementById('filterRecordedBy').value = '';
                 
                 // Clear filter data
@@ -4151,6 +4339,7 @@ Alliance Girls High School
                 // Update preview info
                 document.getElementById('previewAcademicYear').textContent = 'All Years';
                 document.getElementById('previewExamType').textContent = 'All';
+                document.getElementById('previewTerm').textContent = 'All';
                 document.getElementById('previewForm').textContent = 'All Grades';
                 document.getElementById('previewStream').textContent = 'All Streams';
                 
@@ -4278,18 +4467,24 @@ Alliance Girls High School
                 // Calculate averages and prepare rankings
                 
                 // 1. Student ranking
-                const studentRanking = Object.entries(studentGroups).map(([studentId, data]) => ({
-                    id: studentId,
-                    name: data.name,
-                    average: data.count > 0 ? data.totalScore / data.count : 0,
-                    totalScore: data.totalScore,
-                    count: data.count,
-                    stream: data.stream,
-                    grade: data.grade,
-                    subjectCount: data.subjects.size,
-                    teacherCount: data.teacherCount.size,
-                    scores: data.scores
-                })).sort((a, b) => b.average - a.average);
+                const studentRanking = Object.entries(studentGroups).map(([studentId, data]) => {
+                    const average = data.count > 0 ? data.totalScore / data.count : 0;
+                    const achievementLevel = getAchievementLevel(average);
+                    
+                    return {
+                        id: studentId,
+                        name: data.name,
+                        average: average,
+                        totalScore: data.totalScore,
+                        count: data.count,
+                        stream: data.stream,
+                        grade: data.grade,
+                        achievement_level: achievementLevel,
+                        subjectCount: data.subjects.size,
+                        teacherCount: data.teacherCount.size,
+                        scores: data.scores
+                    };
+                }).sort((a, b) => b.average - a.average);
                 
                 // Add rank positions
                 studentRanking.forEach((student, index) => {
@@ -4497,7 +4692,7 @@ Alliance Girls High School
                             <div class="stat-label">Top Student (#${topStudent.rank})</div>
                             <div class="stat-value">${topStudent.name}</div>
                             <div style="font-size: 0.8rem; color: var(--muted-green);">
-                                Avg: ${topStudent.average.toFixed(2)}% | Stream: ${topStudent.stream}
+                                Avg: ${topStudent.average.toFixed(2)}% | Achievement: ${topStudent.achievement_level}
                             </div>
                         </div>
                     `;
@@ -4579,7 +4774,11 @@ Alliance Girls High School
                 if (viewToggle) {
                     const buttons = viewToggle.querySelectorAll('.view-btn');
                     buttons.forEach(btn => btn.classList.remove('active'));
-                    event.target.classList.add('active');
+                    // Get the button that was clicked
+                    const activeButton = event ? event.target : viewToggle.querySelector('.view-btn.active');
+                    if (activeButton) {
+                        activeButton.classList.add('active');
+                    }
                 }
                 
                 let tableHTML = '';
@@ -4594,6 +4793,7 @@ Alliance Girls High School
                             { key: 'name', label: 'Student Name', width: '200px' },
                             { key: 'id', label: 'Admission', width: '120px' },
                             { key: 'average', label: 'Average %', width: '100px', format: 'percent' },
+                            { key: 'achievement_level', label: 'Achievement Level', width: '150px' },
                             { key: 'grade', label: 'Grade', width: '80px' },
                             { key: 'stream', label: 'Stream', width: '100px' },
                             { key: 'subjectCount', label: 'Subjects', width: '80px' }
@@ -4684,6 +4884,14 @@ Alliance Girls High School
                                                         else if (item.rank === 2) cellValue = '🥈 ' + cellValue;
                                                         else if (item.rank === 3) cellValue = '🥉 ' + cellValue;
                                                     }
+                                                    // Color code achievement levels
+                                                    if (col.key === 'achievement_level') {
+                                                        if (cellValue === 'Exceeding Expectations') cellValue = `<span style="color: #075824; font-weight: bold;">${cellValue}</span>`;
+                                                        else if (cellValue === 'Meeting Expectations') cellValue = `<span style="color: #333687; font-weight: bold;">${cellValue}</span>`;
+                                                        else if (cellValue === 'Approaching Expectations') cellValue = `<span style="color: #ff9800; font-weight: bold;">${cellValue}</span>`;
+                                                        else if (cellValue === 'Developing') cellValue = `<span style="color: #C62828; font-weight: bold;">${cellValue}</span>`;
+                                                        else if (cellValue === 'Beginning') cellValue = `<span style="color: #C62828; font-weight: bold;">${cellValue}</span>`;
+                                                    }
                                                     return `<td style="padding: 8px 10px; border-bottom: 1px solid #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cellValue}">${cellValue}</td>`;
                                                 }).join('')}
                                             </tr>
@@ -4760,6 +4968,7 @@ Alliance Girls High School
                                     'Student Name': item.name,
                                     'Admission Number': item.id,
                                     'Average Score %': item.average.toFixed(2),
+                                    'Achievement Level': item.achievement_level || '',
                                     'Grade': item.grade,
                                     'Stream': item.stream,
                                     'Number of Subjects': item.subjectCount,
@@ -4882,6 +5091,7 @@ Alliance Girls High School
                                 row.push(
                                     item.name.substring(0, 20),
                                     item.average.toFixed(2) + '%',
+                                    item.achievement_level ? item.achievement_level.substring(0, 15) : '',
                                     item.grade || '',
                                     item.stream || '',
                                     item.subjectCount.toString()
@@ -4928,7 +5138,7 @@ Alliance Girls High School
                     const headers = ['Rank'];
                     switch(type) {
                         case 'students':
-                            headers.push('Student Name', 'Average %', 'Grade', 'Stream', 'Subjects');
+                            headers.push('Student Name', 'Average %', 'Achievement Level', 'Grade', 'Stream', 'Subjects');
                             break;
                         case 'teachers':
                             headers.push('Teacher Name', 'Average %', 'Students', 'Subjects');
@@ -5002,8 +5212,14 @@ Alliance Girls High School
                     
                     if (currentFilters.grade) doc.text(`Grade: ${currentFilters.grade}`, 25, yPosition);
                     if (currentFilters.stream) doc.text(`Stream: ${currentFilters.stream}`, 25, yPosition);
-                    if (currentFilters.examType) doc.text(`Exam Type: ${currentFilters.examType}`, 25, yPosition);
-                    if (currentFilters.term) doc.text(`Term: ${currentFilters.term}`, 25, yPosition);
+                    if (currentFilters.examTypes && currentFilters.examTypes.length > 0) {
+                        doc.text(`Exam Types: ${currentFilters.examTypes.join(', ')}`, 25, yPosition);
+                        yPosition += 8;
+                    }
+                    if (currentFilters.terms && currentFilters.terms.length > 0) {
+                        doc.text(`Terms: ${currentFilters.terms.join(', ')}`, 25, yPosition);
+                        yPosition += 8;
+                    }
                     if (currentFilters.year) doc.text(`Year: ${currentFilters.year}`, 25, yPosition);
                     if (currentFilters.recordedBy) doc.text(`Recorded By: ${currentFilters.recordedBy}`, 25, yPosition);
                     
@@ -5333,14 +5549,14 @@ Alliance Girls High School
                             
                             if (column.key === 'achievement_level') {
                                 const level = row.achievement_level;
-                                if (level === 'Excellent') {
+                                if (level === 'Exceeding Expectations') {
                                     td.style.color = '#075824';
                                     td.style.fontWeight = 'bold';
-                                } else if (level === 'Good') {
+                                } else if (level === 'Meeting Expectations') {
                                     td.style.color = '#333687';
-                                } else if (level === 'Satisfactory') {
+                                } else if (level === 'Approaching Expectations') {
                                     td.style.color = '#ff9800';
-                                } else if (level === 'Needs Improvement' || level === 'Not Achieved') {
+                                } else if (level === 'Developing' || level === 'Beginning') {
                                     td.style.color = '#C62828';
                                 }
                             }
@@ -5481,7 +5697,7 @@ Alliance Girls High School
                 });
             }
 
-            // Function to export results to Excel - UPDATED with new fields
+            // Function to export results to Excel
             function exportResultsToExcel() {
                 if (!compiledResults || compiledResults.length === 0) {
                     alert('No data to export. Please access cloud data first.');
@@ -5489,7 +5705,7 @@ Alliance Girls High School
                 }
 
                 try {
-                    // Prepare data for Excel export - UPDATED with new fields
+                    // Prepare data for Excel export
                     const exportData = compiledResults.map(result => ({
                         'Student ID': result.student_id,
                         'Admission Number': result.admission_no,
@@ -5505,7 +5721,6 @@ Alliance Girls High School
                         'Percentage': result.percentage,
                         'Grade Letter': result.grade_letter,
                         'Achievement Level': result.achievement_level,
-                        'Achievement Description': result.achievement_description,
                         'Exam Type': result.exam_type,
                         'Term': result.term,
                         'Academic Year': result.academic_year,
@@ -5517,7 +5732,7 @@ Alliance Girls High School
                     // Create worksheet
                     const ws = XLSX.utils.json_to_sheet(exportData);
 
-                    // Auto-size columns - UPDATED with new column widths
+                    // Auto-size columns
                     const colWidths = [
                         { wch: 12 }, // Student ID
                         { wch: 18 }, // Admission Number
@@ -5533,7 +5748,6 @@ Alliance Girls High School
                         { wch: 12 }, // Percentage
                         { wch: 12 }, // Grade Letter
                         { wch: 18 }, // Achievement Level
-                        { wch: 25 }, // Achievement Description
                         { wch: 15 }, // Exam Type
                         { wch: 15 }, // Term
                         { wch: 15 }, // Academic Year
@@ -5561,7 +5775,7 @@ Alliance Girls High School
                 }
             }
 
-            // Function to export results to PDF - UPDATED with new fields
+            // Function to export results to PDF
             function exportResultsToPDF() {
                 if (!compiledResults || compiledResults.length === 0) {
                     alert('No data to export. Please access cloud data first.');
@@ -5583,7 +5797,7 @@ Alliance Girls High School
                     doc.text(`Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, 14, 40);
                     doc.text(`Total Records: ${compiledResults.length}`, 14, 45);
                     
-                    // Prepare table data (limited for PDF) - UPDATED with new fields
+                    // Prepare table data (limited for PDF)
                     const tableData = compiledResults.slice(0, 100).map(result => [
                         result.admission_no,
                         result.student_name.substring(0, 15),
@@ -5601,7 +5815,7 @@ Alliance Girls High School
                         result.academic_year
                     ]);
                     
-                    // Add table headers - UPDATED with new headers
+                    // Add table headers
                     const headers = [
                         'Admission', 'Name', 'Class', 'Subject', 
                         'Component', 'Teacher', 'Recorded By',
@@ -6235,6 +6449,12 @@ Alliance Girls High School
             window.showRankingTable = showRankingTable;
             window.exportRankingToExcel = exportRankingToExcel;
             window.exportRankingToPDF = exportRankingToPDF;
+            window.applyFilters = applyFilters;
+            window.clearFilters = clearFilters;
+            window.formatYearInput = formatYearInput;
+            window.getFullAcademicYear = getFullAcademicYear;
+            window.useCurrentYear = useCurrentYear;
+            window.useCurrentYearReport = useCurrentYearReport;
 
             // Start initialization when DOM is ready
             if (document.readyState === 'loading') {

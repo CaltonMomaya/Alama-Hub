@@ -1848,11 +1848,7 @@
                         </div>
                         <div style="flex: 1; min-width: 150px;">
                             <label style="display: block; margin-bottom: 5px; color: var(--primary-green); font-weight: 600;">Academic Year:</label>
-                            <select id="academicYear" class="editable-cell" style="width: 100%;">
-                                <option value="2025-2026">2025-2026</option>
-                                <option value="2026-2027">2026-2027</option>
-                                <option value="2027-2028">2027-2028</option>
-                            </select>
+                            <input type="text" id="academicYear" class="editable-cell" placeholder="e.g. 2025-2026" style="width: 100%;" maxlength="9">
                         </div>
                         <div style="flex: 1; min-width: 150px;">
                             <label style="display: block; margin-bottom: 5px; color: var(--primary-green); font-weight: 600;">Term:</label>
@@ -3784,8 +3780,7 @@
                 marksFormName.textContent = form;
                 marksTeacherName.textContent = userNameElement.textContent;
                 
-                // Set default academic year and term
-                if (academicYearSelect) academicYearSelect.value = '2025-2026';
+                // Set default term only (academic year is manually typed by user)
                 if (termSelect) termSelect.value = 'Term 1';
                 if (examDate) examDate.value = formattedDate;
                 
@@ -4415,6 +4410,18 @@
                 headerHTML += `<th style="width: 120px;">Actions</th>`;
                 
                 marksTableHeader.innerHTML = headerHTML;
+            }
+
+            // Opens a new, clean marks entry sheet when exam type changes. Previously entered marks remain untouched.
+            // Destination (stream, subject, term, academic_year) persists - no reassignment.
+            function openCleanMarksSheet() {
+                marksTableBody.innerHTML = '';
+                marksRows = [];
+                marksCounter = 1;
+                buildMarksTableHeader();
+                studentsForMarks.forEach((student, index) => {
+                    addMarksRowForStudent(student, index + 1, []);
+                });
             }
 
             // Function to load existing marks for students - FIXED VERSION
@@ -6962,11 +6969,11 @@
                 deselectAllComponents.addEventListener('click', deselectAllComponentsFunction);
             }
             
-            // When exam type changes, reload marks
+            // When exam type changes, open a new clean marks sheet (ready for entry, previously entered marks remain untouched)
             if (examType) {
-                examType.addEventListener('change', async function() {
-                    if (currentMarksStream && selectedComponents.length > 0) {
-                        await loadExistingMarksForStudents(currentMarksStream);
+                examType.addEventListener('change', function() {
+                    if (currentMarksStream && selectedComponents.length > 0 && studentsForMarks.length > 0) {
+                        openCleanMarksSheet();
                     }
                 });
             }
