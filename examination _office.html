@@ -366,10 +366,6 @@
             gap: 10px;
         }
 
-        .section-title h2 i {
-            color: var(--accent-blue);
-        }
-
         .section-info {
             color: var(--muted-green);
             font-size: 1rem;
@@ -1383,6 +1379,7 @@
                                     <option value="grade_10">grade_10</option>
                                     <option value="grade_11">grade_11</option>
                                     <option value="grade_12">grade_12</option>
+                                    <option value="Grade 12">Grade 12</option>
                                 </select>
                             </div>
                             
@@ -1589,8 +1586,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label><i class="fas fa-graduation-cap"></i> Term</label>
-                        <select id="reportTerm" class="form-control">
+                        <label><i class="fas fa-file-alt"></i> Exam Type</label>
+                        <select id="reportExamType" class="form-control" multiple="multiple">
                             <option value="Opener Term 1">Opener Term 1</option>
                             <option value="Mid Term 1">Mid Term 1</option>
                             <option value="End Term 1">End Term 1</option>
@@ -1604,12 +1601,30 @@
                     </div>
                     
                     <div class="form-group">
+                        <label><i class="fas fa-calendar"></i> Term</label>
+                        <select id="reportTerm" class="form-control" multiple="multiple">
+                            <option value="Term 1">Term 1</option>
+                            <option value="Term 2">Term 2</option>
+                            <option value="Term 3">Term 3</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
                         <label><i class="fas fa-users"></i> Grade</label>
                         <select id="reportForm" class="form-control">
                             <option value="">All Grades</option>
-                            <option value="Grade_10">Grade_10</option>
-                            <option value="Grade 11">Grade 11</option>
+                            <option value="grade_10">grade_10</option>
+                            <option value="grade_11">grade_11</option>
+                            <option value="grade_12">grade_12</option>
                             <option value="Grade 12">Grade 12</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-stream"></i> Stream</label>
+                        <select id="reportStream" class="form-control">
+                            <option value="">All Streams</option>
+                            <!-- Streams will be dynamically populated -->
                         </select>
                     </div>
                     
@@ -1620,12 +1635,6 @@
                                 <input type="radio" name="studentSelection" value="all" checked> All Students
                             </label>
                             <label style="display: flex; align-items: center; gap: 5px; margin-bottom: 10px;">
-                                <input type="radio" name="studentSelection" value="stream"> By Stream
-                                <select id="reportStream" class="form-control" style="width: 200px; margin-left: 10px;">
-                                    <!-- Streams will be dynamically populated -->
-                                </select>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 5px;">
                                 <input type="radio" name="studentSelection" value="range"> By Admission Range
                                 <input type="number" id="reportFromAdm" placeholder="From" class="form-control" style="width: 100px; margin-left: 10px;">
                                 <input type="number" id="reportToAdm" placeholder="To" class="form-control" style="width: 100px; margin-left: 5px;">
@@ -1633,13 +1642,44 @@
                         </div>
                     </div>
                     
-                    <div style="margin-top: 30px;">
-                        <button class="btn btn-primary" id="loadStudentsBtn">
+                    <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" id="loadReportStudentsBtn">
                             <i class="fas fa-search"></i> Load Students
                         </button>
                         <button class="btn btn-outline" id="continueToTemplateBtn">
                             <i class="fas fa-forward"></i> Continue to Template
                         </button>
+                    </div>
+                    
+                    <div id="reportStudentsList" style="display: none; margin-top: 20px;">
+                        <div class="excel-table-container">
+                            <div class="excel-table-wrapper">
+                                <table class="excel-table" id="reportStudentsTable">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAllStudents"></th>
+                                            <th>Admission</th>
+                                            <th>Name</th>
+                                            <th>Grade</th>
+                                            <th>Stream</th>
+                                            <th>Average Score</th>
+                                            <th>Overall Grade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reportStudentsTableBody">
+                                        <!-- Students will be dynamically added here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; display: flex; justify-content: space-between;">
+                            <div>
+                                <span id="selectedStudentsCount">0</span> students selected
+                            </div>
+                            <button class="btn btn-primary" id="selectFilteredStudents">
+                                <i class="fas fa-check-circle"></i> Select All Filtered Students
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
@@ -1699,6 +1739,9 @@
                         </button>
                         <button class="btn btn-secondary" id="downloadSampleBtn">
                             <i class="fas fa-download"></i> Download Sample
+                        </button>
+                        <button class="btn btn-success" id="generateIndividualReportsBtn">
+                            <i class="fas fa-file-pdf"></i> Generate Individual Reports
                         </button>
                         <button class="btn btn-outline" id="securityFeaturesBtn">
                             <i class="fas fa-shield-alt"></i> Security Features
@@ -2232,6 +2275,15 @@ Alliance Girls High School
             const exportComputationResultsBtn = document.getElementById('exportComputationResultsBtn');
             const backToFiltersBtn = document.getElementById('backToFiltersBtn');
 
+            // REPORT CARDS ELEMENTS
+            const loadReportStudentsBtn = document.getElementById('loadReportStudentsBtn');
+            const reportStudentsList = document.getElementById('reportStudentsList');
+            const reportStudentsTableBody = document.getElementById('reportStudentsTableBody');
+            const selectAllStudents = document.getElementById('selectAllStudents');
+            const selectedStudentsCount = document.getElementById('selectedStudentsCount');
+            const selectFilteredStudents = document.getElementById('selectFilteredStudents');
+            const generateIndividualReportsBtn = document.getElementById('generateIndividualReportsBtn');
+
             // State variables
             let allStudents = [];
             let allScores = [];
@@ -2257,7 +2309,11 @@ Alliance Girls High School
             // NEW: Filter state
             let currentFilters = {};
 
-            // Table column configuration - FIXED: Removed duplicate achievement level field
+            // Report Cards State
+            let filteredStudentsForReports = [];
+            let selectedStudentIds = new Set();
+
+            // Table column configuration
             const tableColumns = [
                 { key: 'id', header: '#', width: '50px' },
                 { key: 'admission_no', header: 'Admission', width: '100px' },
@@ -2392,6 +2448,7 @@ Alliance Girls High School
                 const streams = [...new Set(allStudents.map(student => student.stream).filter(Boolean))];
                 const reportStreamSelect = document.getElementById('reportStream');
                 const emailStreamSelect = document.getElementById('emailStream');
+                const filterStreamSelect = document.getElementById('filterStream');
                 
                 if (reportStreamSelect) {
                     reportStreamSelect.innerHTML = '';
@@ -2410,6 +2467,16 @@ Alliance Girls High School
                         option.value = stream;
                         option.textContent = stream;
                         emailStreamSelect.appendChild(option);
+                    });
+                }
+                
+                if (filterStreamSelect) {
+                    filterStreamSelect.innerHTML = '<option value="">All Streams</option>';
+                    streams.forEach(stream => {
+                        const option = document.createElement('option');
+                        option.value = stream;
+                        option.textContent = stream;
+                        filterStreamSelect.appendChild(option);
                     });
                 }
             }
@@ -3269,7 +3336,7 @@ Alliance Girls High School
                 return 'N/A';
             }
 
-            // Function to get achievement level - FIXED: Return only achievement_level, not description
+            // Function to get achievement level
             function getAchievementLevel(score) {
                 if (!gradingSystem || gradingSystem.length === 0) {
                     return 'N/A';
@@ -3510,7 +3577,7 @@ Alliance Girls High School
                 compileResultsModal.classList.add('show');
                 switchCompileView('cloud');
                 
-                // Initialize Select2 for multi-select dropdowns - FIXED: Use window.jQuery instead of $
+                // Initialize Select2 for multi-select dropdowns
                 setTimeout(() => {
                     if (window.jQuery && window.jQuery.fn.select2) {
                         window.jQuery('#filterExamType').select2({
@@ -3537,8 +3604,28 @@ Alliance Girls High School
                 reportCardsModal.classList.add('show');
                 switchReportCardsView('selection');
                 
-                // Set current year as default in the manual input
-                useCurrentYearReport();
+                // Initialize Select2 for multi-select dropdowns
+                setTimeout(() => {
+                    if (window.jQuery && window.jQuery.fn.select2) {
+                        window.jQuery('#reportExamType').select2({
+                            placeholder: "Select Exam Types",
+                            allowClear: true,
+                            width: '100%'
+                        });
+                        
+                        window.jQuery('#reportTerm').select2({
+                            placeholder: "Select Terms",
+                            allowClear: true,
+                            width: '100%'
+                        });
+                    }
+                    
+                    // Set current year as default
+                    useCurrentYearReport();
+                    
+                    // Populate streams dropdown
+                    populateStreams();
+                }, 100);
             }
 
             function openEmailParentsModal() {
@@ -3759,7 +3846,7 @@ Alliance Girls High School
                         }
                     }
                     
-                    // STEP 7: Prepare table data with achievement level - FIXED: Use getAchievementLevel instead of getAchievementLevelAndDescription
+                    // STEP 7: Prepare table data with achievement level
                     const tableData = [];
                     
                     scoresData.forEach((item, index) => {
@@ -3772,7 +3859,7 @@ Alliance Girls High School
                             percentageScore = (item.score / item.max_score) * 100;
                         }
                         
-                        // Get achievement level - FIXED: Single function call
+                        // Get achievement level
                         const achievementLevel = getAchievementLevel(percentageScore);
                         
                         // Get subject details from component
@@ -3814,7 +3901,7 @@ Alliance Girls High School
                             student_id: item.student_id,
                             admission_no: student?.admission_no || 'N/A',
                             student_name: student?.full_name || 'Unknown Student',
-                            grade: student?.form_grade || 'N/A',
+                            grade: student?.form_grade || student?.grade || 'N/A',
                             stream: student?.stream || 'N/A',
                             subject_code: subjectCode,
                             component_name: componentName,
@@ -3824,7 +3911,7 @@ Alliance Girls High School
                             max_score: item.max_score || component?.max_score || 0,
                             percentage: parseFloat(percentageScore.toFixed(2)),
                             grade_letter: calculateGradeFromScore(percentageScore),
-                            achievement_level: achievementLevel, // FIXED: Single field
+                            achievement_level: achievementLevel,
                             exam_type: examType,
                             term: term,
                             academic_year: item.academic_year || 'N/A',
@@ -3877,21 +3964,6 @@ Alliance Girls High School
                         option.value = stream;
                         option.textContent = stream;
                         filterStreamSelect.appendChild(option);
-                    });
-                }
-                
-                // Populate years from scores data
-                const years = [...new Set(allScores.map(score => score.academic_year).filter(Boolean))];
-                const filterYearSelect = document.getElementById('filterYear');
-                if (filterYearSelect) {
-                    // Note: This is now just a hidden input for compatibility
-                    // We use filterYearStart and filterYearEnd for the actual input
-                    filterYearSelect.innerHTML = '<option value="">All Years</option>';
-                    years.forEach(year => {
-                        const option = document.createElement('option');
-                        option.value = year;
-                        option.textContent = year;
-                        filterYearSelect.appendChild(option);
                     });
                 }
                 
@@ -3951,13 +4023,13 @@ Alliance Girls High School
                 }
             }
 
-            // Function to apply filters to the data - FIXED: Use window.jQuery instead of $
+            // Function to apply filters to the data
             async function applyFilters() {
                 // Get values from multi-select dropdowns
                 const filterGrade = document.getElementById('filterGrade')?.value || '';
                 const filterStream = document.getElementById('filterStream')?.value || '';
                 
-                // Get multiple exam types - FIXED: Use window.jQuery
+                // Get multiple exam types
                 let filterExamTypes = [];
                 if (window.jQuery && window.jQuery.fn.select2) {
                     const filterExamTypeSelect = window.jQuery('#filterExamType');
@@ -3970,7 +4042,7 @@ Alliance Girls High School
                     }
                 }
                 
-                // Get multiple terms - FIXED: Use window.jQuery
+                // Get multiple terms
                 let filterTerms = [];
                 if (window.jQuery && window.jQuery.fn.select2) {
                     const filterTermSelect = window.jQuery('#filterTerm');
@@ -3991,12 +4063,7 @@ Alliance Girls High School
                 // Show human-friendly Grade label in preview
                 let previewGradeLabel = 'All Grades';
                 if (filterGrade) {
-                    if (filterGrade.startsWith('grade_')) {
-                        const num = filterGrade.split('_')[1];
-                        previewGradeLabel = `Grade ${num}`;
-                    } else {
-                        previewGradeLabel = filterGrade;
-                    }
+                    previewGradeLabel = filterGrade;
                 }
                 
                 // Show selected exam types
@@ -4218,7 +4285,7 @@ Alliance Girls High School
                             percentageScore = (item.score / item.max_score) * 100;
                         }
                         
-                        // Get achievement level - FIXED: Single function call
+                        // Get achievement level
                         const achievementLevel = getAchievementLevel(percentageScore);
                         
                         // Get subject details from component
@@ -4260,7 +4327,7 @@ Alliance Girls High School
                             student_id: item.student_id,
                             admission_no: student?.admission_no || 'N/A',
                             student_name: student?.full_name || 'Unknown Student',
-                            grade: student?.form_grade || 'N/A',
+                            grade: student?.form_grade || student?.grade || 'N/A',
                             stream: student?.stream || 'N/A',
                             subject_code: subjectCode,
                             component_name: componentName,
@@ -4270,7 +4337,7 @@ Alliance Girls High School
                             max_score: item.max_score || component?.max_score || 0,
                             percentage: parseFloat(percentageScore.toFixed(2)),
                             grade_letter: calculateGradeFromScore(percentageScore),
-                            achievement_level: achievementLevel, // FIXED: Single field
+                            achievement_level: achievementLevel,
                             exam_type: examType,
                             term: term,
                             academic_year: item.academic_year || 'N/A',
@@ -4306,13 +4373,13 @@ Alliance Girls High School
                 }
             }
 
-            // Function to clear all filters - FIXED: Use window.jQuery instead of $
+            // Function to clear all filters
             function clearFilters() {
                 // Reset all filter dropdowns
                 document.getElementById('filterGrade').value = '';
                 document.getElementById('filterStream').value = '';
                 
-                // Clear Select2 multi-selects - FIXED: Use window.jQuery
+                // Clear Select2 multi-selects
                 if (window.jQuery && window.jQuery.fn.select2) {
                     window.jQuery('#filterExamType').val(null).trigger('change');
                     window.jQuery('#filterTerm').val(null).trigger('change');
@@ -5949,7 +6016,704 @@ Alliance Girls High School
                 }
             }
 
-            // Generate other content functions (truncated for brevity)
+            // NEW: REPORT CARDS FUNCTIONS
+
+            // Function to load students for report cards with filters
+            async function loadReportStudents() {
+                try {
+                    // Get filter values
+                    const academicYear = getFullAcademicYear('reportAcademicYear1', 'reportAcademicYear2') || '';
+                    
+                    // Get multiple exam types
+                    let examTypes = [];
+                    if (window.jQuery && window.jQuery.fn.select2) {
+                        const examTypeSelect = window.jQuery('#reportExamType');
+                        examTypes = examTypeSelect.val() || [];
+                    }
+                    
+                    // Get multiple terms
+                    let terms = [];
+                    if (window.jQuery && window.jQuery.fn.select2) {
+                        const termSelect = window.jQuery('#reportTerm');
+                        terms = termSelect.val() || [];
+                    }
+                    
+                    const grade = document.getElementById('reportForm')?.value || '';
+                    const stream = document.getElementById('reportStream')?.value || '';
+                    const fromAdm = document.getElementById('reportFromAdm')?.value || '';
+                    const toAdm = document.getElementById('reportToAdm')?.value || '';
+                    
+                    // Show loading
+                    reportStudentsTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px;">
+                                <div class="loading-spinner">
+                                    <div class="spinner"></div>
+                                </div>
+                                <p style="margin-top: 15px; color: #666;">Loading students with applied filters...</p>
+                            </td>
+                        </tr>
+                    `;
+                    
+                    // Clear previous selections
+                    selectedStudentIds.clear();
+                    updateSelectedStudentsCount();
+                    
+                    // STEP 1: Build the query for student_scores
+                    let query = supabase
+                        .from('student_scores')
+                        .select('*');
+                    
+                    // Apply filters
+                    if (academicYear) {
+                        query = query.eq('academic_year', academicYear);
+                    }
+                    
+                    if (examTypes.length > 0) {
+                        query = query.in('exam_type', examTypes);
+                    }
+                    
+                    if (terms.length > 0) {
+                        query = query.in('term', terms);
+                    }
+                    
+                    // Execute the query
+                    const { data: filteredScores, error: scoresError } = await query;
+                    
+                    if (scoresError) {
+                        console.error('Error fetching filtered scores:', scoresError);
+                        alert('Error loading student data: ' + scoresError.message);
+                        return;
+                    }
+                    
+                    if (!filteredScores || filteredScores.length === 0) {
+                        reportStudentsTableBody.innerHTML = `
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                                    <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                                    <h3>No student data found with selected filters</h3>
+                                    <p>Try adjusting your filter criteria.</p>
+                                </td>
+                            </tr>
+                        `;
+                        filteredStudentsForReports = [];
+                        reportStudentsList.style.display = 'block';
+                        return;
+                    }
+                    
+                    // STEP 2: Get student IDs from filtered scores
+                    const studentIds = [...new Set(filteredScores.map(score => score.student_id).filter(Boolean))];
+                    
+                    // STEP 3: Fetch student details with additional filters if needed
+                    let studentQuery = supabase
+                        .from('students')
+                        .select('*')
+                        .in('id', studentIds);
+                    
+                    if (grade) {
+                        studentQuery = studentQuery.eq('form_grade', grade);
+                    }
+                    
+                    if (stream) {
+                        studentQuery = studentQuery.eq('stream', stream);
+                    }
+                    
+                    if (fromAdm) {
+                        studentQuery = studentQuery.gte('admission_no', fromAdm);
+                    }
+                    
+                    if (toAdm) {
+                        studentQuery = studentQuery.lte('admission_no', toAdm);
+                    }
+                    
+                    const { data: filteredStudents, error: studentsError } = await studentQuery;
+                    
+                    if (studentsError) {
+                        console.error('Error fetching filtered students:', studentsError);
+                        alert('Error loading student details: ' + studentsError.message);
+                        return;
+                    }
+                    
+                    if (!filteredStudents || filteredStudents.length === 0) {
+                        reportStudentsTableBody.innerHTML = `
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                                    <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                                    <h3>No students found with selected criteria</h3>
+                                    <p>Try adjusting your filter criteria.</p>
+                                </td>
+                            </tr>
+                        `;
+                        filteredStudentsForReports = [];
+                        reportStudentsList.style.display = 'block';
+                        return;
+                    }
+                    
+                    // STEP 4: Calculate average scores for each student
+                    const studentsWithScores = filteredStudents.map(student => {
+                        const studentScores = filteredScores.filter(score => score.student_id === student.id);
+                        let totalScore = 0;
+                        let count = 0;
+                        
+                        studentScores.forEach(score => {
+                            let percentageScore = score.percentage_score || 0;
+                            if (score.score !== null && score.max_score && score.max_score > 0) {
+                                percentageScore = (score.score / score.max_score) * 100;
+                            }
+                            totalScore += percentageScore;
+                            count++;
+                        });
+                        
+                        const averageScore = count > 0 ? totalScore / count : 0;
+                        const overallGrade = calculateGradeFromScore(averageScore);
+                        
+                        return {
+                            id: student.id,
+                            admission_no: student.admission_no,
+                            name: student.full_name,
+                            grade: student.form_grade || student.grade || 'N/A',
+                            stream: student.stream || 'N/A',
+                            averageScore: averageScore.toFixed(2),
+                            overallGrade: overallGrade,
+                            examCount: count
+                        };
+                    });
+                    
+                    // Sort by average score descending
+                    studentsWithScores.sort((a, b) => b.averageScore - a.averageScore);
+                    
+                    filteredStudentsForReports = studentsWithScores;
+                    
+                    // Display students
+                    displayFilteredStudents(studentsWithScores);
+                    
+                    // Show the students list
+                    reportStudentsList.style.display = 'block';
+                    
+                    console.log(`Loaded ${studentsWithScores.length} students for report cards`);
+                    
+                } catch (error) {
+                    console.error('Error loading report students:', error);
+                    alert('Error loading students: ' + error.message);
+                }
+            }
+
+            // Function to display filtered students
+            function displayFilteredStudents(students) {
+                reportStudentsTableBody.innerHTML = '';
+                
+                if (students.length === 0) {
+                    reportStudentsTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                                No students found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                students.forEach((student, index) => {
+                    const tr = document.createElement('tr');
+                    const isSelected = selectedStudentIds.has(student.id);
+                    
+                    tr.innerHTML = `
+                        <td style="text-align: center;">
+                            <input type="checkbox" class="student-checkbox" data-student-id="${student.id}" ${isSelected ? 'checked' : ''}>
+                        </td>
+                        <td>${student.admission_no}</td>
+                        <td>${student.name}</td>
+                        <td>${student.grade}</td>
+                        <td>${student.stream}</td>
+                        <td style="text-align: center;">
+                            <span style="font-weight: bold; color: ${getScoreColor(student.averageScore)};">
+                                ${student.averageScore}%
+                            </span>
+                        </td>
+                        <td style="text-align: center;">
+                            <span style="font-weight: bold; color: ${getGradeColor(student.overallGrade)};">
+                                ${student.overallGrade}
+                            </span>
+                        </td>
+                    `;
+                    
+                    reportStudentsTableBody.appendChild(tr);
+                });
+                
+                // Add event listeners to checkboxes
+                const checkboxes = document.querySelectorAll('.student-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const studentId = this.getAttribute('data-student-id');
+                        if (this.checked) {
+                            selectedStudentIds.add(studentId);
+                        } else {
+                            selectedStudentIds.delete(studentId);
+                        }
+                        updateSelectedStudentsCount();
+                        updateSelectAllCheckbox();
+                    });
+                });
+                
+                updateSelectAllCheckbox();
+            }
+
+            // Helper function to get color based on score
+            function getScoreColor(score) {
+                const numericScore = parseFloat(score);
+                if (numericScore >= 80) return '#075824';
+                if (numericScore >= 70) return '#333687';
+                if (numericScore >= 60) return '#ff9800';
+                return '#C62828';
+            }
+
+            // Helper function to get color based on grade
+            function getGradeColor(grade) {
+                if (grade === 'A' || grade === 'A-') return '#075824';
+                if (grade === 'B+' || grade === 'B' || grade === 'B-') return '#333687';
+                if (grade === 'C+' || grade === 'C' || grade === 'C-') return '#ff9800';
+                if (grade === 'D' || grade === 'D+') return '#C62828';
+                if (grade === 'E') return '#C62828';
+                return '#666';
+            }
+
+            // Function to update selected students count
+            function updateSelectedStudentsCount() {
+                selectedStudentsCount.textContent = selectedStudentIds.size;
+            }
+
+            // Function to update select all checkbox
+            function updateSelectAllCheckbox() {
+                if (!selectAllStudents) return;
+                
+                const checkboxes = document.querySelectorAll('.student-checkbox');
+                const checkedCount = document.querySelectorAll('.student-checkbox:checked').length;
+                
+                selectAllStudents.checked = checkedCount === checkboxes.length && checkboxes.length > 0;
+                selectAllStudents.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+            }
+
+            // Function to select all filtered students
+            function selectAllFilteredStudents() {
+                const checkboxes = document.querySelectorAll('.student-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                    const studentId = checkbox.getAttribute('data-student-id');
+                    selectedStudentIds.add(studentId);
+                });
+                updateSelectedStudentsCount();
+                updateSelectAllCheckbox();
+            }
+
+            // Function to generate individual report cards
+            async function generateIndividualReportCards() {
+                if (selectedStudentIds.size === 0) {
+                    alert('Please select at least one student to generate report cards.');
+                    return;
+                }
+                
+                // Get template options
+                const templateType = document.getElementById('reportTemplate')?.value || 'standard';
+                const includeQR = document.getElementById('includeQR')?.checked;
+                const includePatterns = document.getElementById('includePatterns')?.checked;
+                const includeComments = document.getElementById('includeComments')?.checked;
+                const includeGraphs = document.getElementById('includeGraphs')?.checked;
+                const includeRank = document.getElementById('includeRank')?.checked;
+                const includeWatermark = document.getElementById('includeWatermark')?.checked;
+                
+                // Get filter values for the report header
+                const academicYear = getFullAcademicYear('reportAcademicYear1', 'reportAcademicYear2') || 'All Years';
+                
+                let examTypes = [];
+                if (window.jQuery && window.jQuery.fn.select2) {
+                    const examTypeSelect = window.jQuery('#reportExamType');
+                    examTypes = examTypeSelect.val() || [];
+                }
+                const examTypeLabel = examTypes.length > 0 ? examTypes.join(', ') : 'All';
+                
+                let terms = [];
+                if (window.jQuery && window.jQuery.fn.select2) {
+                    const termSelect = window.jQuery('#reportTerm');
+                    terms = termSelect.val() || [];
+                }
+                const termLabel = terms.length > 0 ? terms.join(', ') : 'All';
+                
+                // Show loading message
+                const originalButtonText = generateIndividualReportsBtn.innerHTML;
+                generateIndividualReportsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Reports...';
+                generateIndividualReportsBtn.disabled = true;
+                
+                try {
+                    // Get selected students data
+                    const selectedStudents = filteredStudentsForReports.filter(student => 
+                        selectedStudentIds.has(student.id)
+                    );
+                    
+                    console.log(`Generating ${selectedStudents.length} individual report cards...`);
+                    
+                    // Generate report for each selected student
+                    for (const student of selectedStudents) {
+                        await generateSingleReportCard(
+                            student, 
+                            templateType,
+                            {
+                                includeQR,
+                                includePatterns,
+                                includeComments,
+                                includeGraphs,
+                                includeRank,
+                                includeWatermark
+                            },
+                            {
+                                academicYear,
+                                examTypes: examTypeLabel,
+                                terms: termLabel
+                            }
+                        );
+                    }
+                    
+                    alert(`Successfully generated ${selectedStudents.length} individual report cards in PDF format!`);
+                    
+                } catch (error) {
+                    console.error('Error generating individual report cards:', error);
+                    alert('Error generating report cards: ' + error.message);
+                } finally {
+                    // Restore button state
+                    generateIndividualReportsBtn.innerHTML = originalButtonText;
+                    generateIndividualReportsBtn.disabled = false;
+                }
+            }
+
+            // Function to generate a single report card
+            async function generateSingleReportCard(student, templateType, options, filterInfo) {
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF('p', 'mm', 'a4');
+                    
+                    // Generate a unique serial number
+                    const serialNumber = `AGHS-RC-${new Date().getFullYear()}-${student.admission_no}-${Date.now().toString().slice(-6)}`;
+                    
+                    // Add anti-forgery patterns if enabled
+                    if (options.includePatterns) {
+                        addSecurityPatterns(doc);
+                    }
+                    
+                    // Add school watermark if enabled
+                    if (options.includeWatermark) {
+                        addWatermark(doc);
+                    }
+                    
+                    // Add header
+                    doc.setFontSize(20);
+                    doc.setTextColor(1, 39, 13); // exam-office-purple
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('ALLIANCE GIRLS HIGH SCHOOL', 105, 20, { align: 'center' });
+                    
+                    doc.setFontSize(14);
+                    doc.setTextColor(21, 101, 192); // exam-office-blue
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('OFFICIAL REPORT CARD', 105, 28, { align: 'center' });
+                    
+                    // Add serial number (security feature)
+                    doc.setFontSize(8);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text(`Serial: ${serialNumber}`, 105, 35, { align: 'center' });
+                    
+                    // Add student information section
+                    doc.setFontSize(10);
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('STUDENT INFORMATION', 20, 45);
+                    
+                    doc.setDrawColor(1, 39, 13);
+                    doc.setLineWidth(0.5);
+                    doc.line(20, 47, 190, 47);
+                    
+                    // Student details
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+                    let yPos = 55;
+                    
+                    doc.text(`Name: ${student.name}`, 25, yPos);
+                    doc.text(`Admission No: ${student.admission_no}`, 120, yPos);
+                    yPos += 8;
+                    
+                    doc.text(`Grade: ${student.grade}`, 25, yPos);
+                    doc.text(`Stream: ${student.stream}`, 120, yPos);
+                    yPos += 8;
+                    
+                    doc.text(`Academic Year: ${filterInfo.academicYear}`, 25, yPos);
+                    doc.text(`Exam Types: ${filterInfo.examTypes}`, 120, yPos);
+                    yPos += 8;
+                    
+                    doc.text(`Term: ${filterInfo.terms}`, 25, yPos);
+                    yPos += 12;
+                    
+                    // Performance summary
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('PERFORMANCE SUMMARY', 20, yPos);
+                    doc.setLineWidth(0.5);
+                    doc.line(20, yPos + 2, 190, yPos + 2);
+                    yPos += 10;
+                    
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Overall Average: ${student.averageScore}%`, 25, yPos);
+                    doc.text(`Overall Grade: ${student.overallGrade}`, 120, yPos);
+                    yPos += 8;
+                    
+                    // Get detailed subject scores for this student
+                    const subjectScores = await getStudentSubjectScores(student.id);
+                    
+                    if (subjectScores.length > 0) {
+                        // Subject performance table
+                        doc.setFont('helvetica', 'bold');
+                        doc.text('SUBJECT PERFORMANCE', 20, yPos);
+                        doc.setLineWidth(0.5);
+                        doc.line(20, yPos + 2, 190, yPos + 2);
+                        yPos += 10;
+                        
+                        // Table headers
+                        doc.setFillColor(1, 39, 13);
+                        doc.setTextColor(255, 255, 255);
+                        doc.rect(20, yPos - 5, 170, 8, 'F');
+                        
+                        doc.setFontSize(9);
+                        doc.text('Subject', 25, yPos);
+                        doc.text('Score', 120, yPos);
+                        doc.text('Grade', 150, yPos);
+                        doc.text('Achievement', 170, yPos);
+                        yPos += 10;
+                        
+                        // Table rows
+                        doc.setFontSize(9);
+                        doc.setTextColor(0, 0, 0);
+                        
+                        subjectScores.forEach((subject, index) => {
+                            if (index % 2 === 0) {
+                                doc.setFillColor(240, 240, 240);
+                                doc.rect(20, yPos - 4, 170, 6, 'F');
+                            }
+                            
+                            doc.text(subject.name.substring(0, 30), 25, yPos);
+                            doc.text(`${subject.averageScore.toFixed(1)}%`, 120, yPos);
+                            
+                            const gradeColor = getGradeColor(subject.grade);
+                            doc.setTextColor(gradeColor);
+                            doc.text(subject.grade, 150, yPos);
+                            
+                            doc.setTextColor(0, 0, 0);
+                            doc.text(subject.achievementLevel.substring(0, 15), 170, yPos);
+                            
+                            yPos += 7;
+                            
+                            // Add new page if needed
+                            if (yPos > 270) {
+                                doc.addPage();
+                                yPos = 20;
+                            }
+                        });
+                        
+                        yPos += 10;
+                    }
+                    
+                    // Comments section if enabled
+                    if (options.includeComments) {
+                        doc.setFont('helvetica', 'bold');
+                        doc.text('TEACHER COMMENTS', 20, yPos);
+                        doc.setLineWidth(0.5);
+                        doc.line(20, yPos + 2, 190, yPos + 2);
+                        yPos += 10;
+                        
+                        doc.setFont('helvetica', 'normal');
+                        doc.setFontSize(9);
+                        const comments = [
+                            "Consistent performance across all subjects.",
+                            "Shows excellent analytical skills in Mathematics and Sciences.",
+                            "Good participation in class activities.",
+                            "Has shown improvement in language subjects.",
+                            "Maintains good attendance and discipline."
+                        ];
+                        
+                        comments.forEach(comment => {
+                            doc.text(`• ${comment}`, 25, yPos);
+                            yPos += 6;
+                        });
+                        
+                        yPos += 10;
+                    }
+                    
+                    // Add QR code if enabled
+                    if (options.includeQR && typeof QRCode !== 'undefined') {
+                        try {
+                            // Create QR code data
+                            const qrData = JSON.stringify({
+                                student: student.admission_no,
+                                name: student.name,
+                                serial: serialNumber,
+                                date: new Date().toISOString(),
+                                school: "Alliance Girls High School"
+                            });
+                            
+                            // Generate QR code as data URL
+                            const qrCodeDataUrl = await new Promise((resolve, reject) => {
+                                QRCode.toDataURL(qrData, {
+                                    width: 80,
+                                    height: 80,
+                                    margin: 1,
+                                    color: {
+                                        dark: '#01270d',
+                                        light: '#FFFFFF'
+                                    }
+                                }, (err, url) => {
+                                    if (err) reject(err);
+                                    else resolve(url);
+                                });
+                            });
+                            
+                            // Add QR code to PDF
+                            doc.addImage(qrCodeDataUrl, 'PNG', 150, yPos - 40, 30, 30);
+                            doc.setFontSize(7);
+                            doc.setTextColor(100, 100, 100);
+                            doc.text('Scan to verify', 150, yPos - 45, { align: 'center' });
+                            
+                        } catch (qrError) {
+                            console.warn('QR Code generation failed:', qrError);
+                        }
+                    }
+                    
+                    // Add footer with security notice
+                    doc.setFontSize(7);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text('This document is secured with anti-forgery features.', 105, 285, { align: 'center' });
+                    doc.text('Any alteration voids this report card.', 105, 290, { align: 'center' });
+                    
+                    // Generate filename
+                    const filename = `ReportCard_${student.admission_no}_${student.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+                    
+                    // Save the PDF
+                    doc.save(filename);
+                    
+                    console.log(`Generated report card for ${student.name}`);
+                    
+                } catch (error) {
+                    console.error('Error generating single report card:', error);
+                    throw error;
+                }
+            }
+
+            // Function to get detailed subject scores for a student
+            async function getStudentSubjectScores(studentId) {
+                try {
+                    // Get all scores for this student
+                    const { data: scores, error } = await supabase
+                        .from('student_scores')
+                        .select('*')
+                        .eq('student_id', studentId);
+                    
+                    if (error) throw error;
+                    
+                    if (!scores || scores.length === 0) {
+                        return [];
+                    }
+                    
+                    // Group scores by subject
+                    const subjectGroups = {};
+                    
+                    scores.forEach(score => {
+                        const subjectCode = score.subject_code || 'Unknown';
+                        let percentageScore = score.percentage_score || 0;
+                        
+                        if (score.score !== null && score.max_score && score.max_score > 0) {
+                            percentageScore = (score.score / score.max_score) * 100;
+                        }
+                        
+                        if (!subjectGroups[subjectCode]) {
+                            subjectGroups[subjectCode] = {
+                                totalScore: 0,
+                                count: 0,
+                                scores: []
+                            };
+                        }
+                        
+                        subjectGroups[subjectCode].totalScore += percentageScore;
+                        subjectGroups[subjectCode].count += 1;
+                        subjectGroups[subjectCode].scores.push(percentageScore);
+                    });
+                    
+                    // Calculate averages and format results
+                    const subjectResults = Object.entries(subjectGroups).map(([subject, data]) => {
+                        const averageScore = data.count > 0 ? data.totalScore / data.count : 0;
+                        const grade = calculateGradeFromScore(averageScore);
+                        const achievementLevel = getAchievementLevel(averageScore);
+                        
+                        return {
+                            name: subject,
+                            averageScore: averageScore,
+                            grade: grade,
+                            achievementLevel: achievementLevel,
+                            count: data.count
+                        };
+                    });
+                    
+                    // Sort by average score descending
+                    return subjectResults.sort((a, b) => b.averageScore - a.averageScore);
+                    
+                } catch (error) {
+                    console.error('Error getting student subject scores:', error);
+                    return [];
+                }
+            }
+
+            // Function to add security patterns to PDF
+            function addSecurityPatterns(doc) {
+                // Add micro-text border
+                doc.setFontSize(4);
+                doc.setTextColor(200, 200, 200);
+                
+                // Top border
+                for (let i = 20; i < 190; i += 5) {
+                    doc.text('AGHS', i, 18);
+                }
+                
+                // Bottom border
+                for (let i = 20; i < 190; i += 5) {
+                    doc.text('AGHS', i, 287);
+                }
+                
+                // Left border
+                for (let i = 20; i < 287; i += 5) {
+                    doc.text('AGHS', 18, i);
+                }
+                
+                // Right border
+                for (let i = 20; i < 287; i += 5) {
+                    doc.text('AGHS', 192, i);
+                }
+                
+                // Reset text color
+                doc.setTextColor(0, 0, 0);
+            }
+
+            // Function to add watermark to PDF
+            function addWatermark(doc) {
+                doc.setFontSize(60);
+                doc.setTextColor(240, 240, 240);
+                doc.setFont('helvetica', 'bold');
+                
+                // Rotated watermark text
+                doc.saveGraphicsState();
+                doc.translate(105, 150);
+                doc.rotate(45 * Math.PI / 180);
+                doc.text('ALLIANCE GIRLS', 0, 0, { align: 'center' });
+                doc.text('HIGH SCHOOL', 0, 20, { align: 'center' });
+                doc.restoreGraphicsState();
+                
+                // Reset
+                doc.setTextColor(0, 0, 0);
+                doc.setFont('helvetica', 'normal');
+            }
+
+            // Generate other content functions
             function generateEmailContent() {
                 return `
                     <div class="data-section">
@@ -6086,7 +6850,7 @@ Alliance Girls High School
                 `;
             }
 
-            // Generate remaining content functions (truncated)
+            // Generate remaining content functions
             function generateTrendsContent() {
                 return `<div class="data-section"><h2>Performance Trends</h2></div>`;
             }
@@ -6331,7 +7095,7 @@ Alliance Girls High School
                     });
                 }
 
-                // NEW FILTER EVENT LISTENERS
+                // FILTER EVENT LISTENERS
                 if (filterComputeBtn) {
                     filterComputeBtn.addEventListener('click', toggleFilterForm);
                 }
@@ -6354,6 +7118,35 @@ Alliance Girls High School
 
                 if (backToFiltersBtn) {
                     backToFiltersBtn.addEventListener('click', backToFilters);
+                }
+
+                // REPORT CARDS EVENT LISTENERS
+                if (loadReportStudentsBtn) {
+                    loadReportStudentsBtn.addEventListener('click', loadReportStudents);
+                }
+
+                if (selectAllStudents) {
+                    selectAllStudents.addEventListener('change', function() {
+                        const checkboxes = document.querySelectorAll('.student-checkbox');
+                        checkboxes.forEach(checkbox => {
+                            checkbox.checked = this.checked;
+                            const studentId = checkbox.getAttribute('data-student-id');
+                            if (this.checked) {
+                                selectedStudentIds.add(studentId);
+                            } else {
+                                selectedStudentIds.delete(studentId);
+                            }
+                        });
+                        updateSelectedStudentsCount();
+                    });
+                }
+
+                if (selectFilteredStudents) {
+                    selectFilteredStudents.addEventListener('click', selectAllFilteredStudents);
+                }
+
+                if (generateIndividualReportsBtn) {
+                    generateIndividualReportsBtn.addEventListener('click', generateIndividualReportCards);
                 }
 
                 // Pagination buttons
@@ -6444,7 +7237,7 @@ Alliance Girls High School
             window.changePageSize = changePageSize;
             window.goToPage = goToPage;
 
-            // NEW: Ranking functions
+            // Ranking functions
             window.computeAggregates = computeAggregates;
             window.showRankingTable = showRankingTable;
             window.exportRankingToExcel = exportRankingToExcel;
@@ -6455,6 +7248,11 @@ Alliance Girls High School
             window.getFullAcademicYear = getFullAcademicYear;
             window.useCurrentYear = useCurrentYear;
             window.useCurrentYearReport = useCurrentYearReport;
+            
+            // Report cards functions
+            window.loadReportStudents = loadReportStudents;
+            window.selectAllFilteredStudents = selectAllFilteredStudents;
+            window.generateIndividualReportCards = generateIndividualReportCards;
 
             // Start initialization when DOM is ready
             if (document.readyState === 'loading') {
