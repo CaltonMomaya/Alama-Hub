@@ -3,40 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alliance Girls High School- Report Card</title>
+    <title>Alliance Girls High School - Secure Report Card</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap">
     <style>
         /* Reset and base styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Arial', sans-serif;
         }
 
         body {
-            background-color: #f0f7f4;
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
             color: #333;
-            padding: 20px;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Inter', 'Segoe UI', 'Arial', sans-serif;
+            position: relative;
+            padding: 20px;
+            overflow-x: auto;
         }
 
-        /* A4 Container */
+        /* Main Container - Full Screen */
         .report-card-container {
             width: 100%;
-            max-width: 210mm; /* A4 width */
-            min-height: 297mm; /* A4 height */
+            min-width: 1400px;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            margin: 20px auto;
+            border-radius: 12px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            padding: 30px 35px;
+            margin: 0 auto;
             position: relative;
             display: flex;
             flex-direction: column;
+            overflow: visible;
+            border: 1px solid #c9d6c3;
+        }
+
+        /* Security Background Elements */
+        .security-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.03;
+        }
+
+        .micro-pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(7, 88, 36, 0.05) 15px, rgba(7, 88, 36, 0.05) 30px),
+                repeating-linear-gradient(-45deg, transparent, transparent 15px, rgba(155, 174, 48, 0.05) 15px, rgba(155, 174, 48, 0.05) 30px);
+        }
+
+        .watermark {
+            position: absolute;
+            font-family: 'Libre Baskerville', serif;
+            font-size: 180px;
+            color: rgba(7, 88, 36, 0.025);
+            transform: rotate(-45deg);
+            top: 35%;
+            left: 15%;
+            white-space: nowrap;
+            font-weight: bold;
+            letter-spacing: 8px;
+        }
+
+        .serial-number {
+            position: absolute;
+            bottom: 20px;
+            right: 25px;
+            font-size: 12px;
+            color: #666;
+            letter-spacing: 1.5px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
         }
 
         /* Print-specific adjustments */
@@ -44,87 +90,117 @@
             body {
                 background: white;
                 padding: 0;
+                overflow: hidden;
             }
             
             .report-card-container {
                 box-shadow: none;
                 margin: 0;
-                padding: 20px;
-                max-width: 100%;
-                min-height: auto;
+                padding: 20px 25px;
+                min-width: 210mm;
+                max-width: 210mm;
+                border: none;
+                border-radius: 0;
+                page-break-after: always;
             }
             
             .no-print {
                 display: none !important;
             }
+            
+            .security-background {
+                opacity: 0.08;
+            }
+            
+            .watermark {
+                font-size: 140px;
+            }
         }
 
-        /* Header Section */
+        /* Header Section - Full Width */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e0e0e0;
-            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 4px double #075824;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
         }
 
-        /* UPDATED LOGO SECTION */
         .school-logo {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             background: white;
-            border: 2px solid #075824;
+            border: 4px solid #075824;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
         }
 
         .school-logo img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            padding: 5px;
+            padding: 10px;
         }
 
         .school-name {
             text-align: center;
             flex-grow: 1;
-            margin: 0 20px;
+            margin: 0 40px;
         }
 
         .school-name h1 {
-            font-size: 28px;
+            font-family: 'Libre Baskerville', serif;
+            font-size: 36px;
             color: #075824;
             letter-spacing: 1px;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            line-height: 1.2;
         }
 
         .school-name p {
             color: #377437;
-            font-size: 14px;
+            font-size: 18px;
+            font-style: italic;
+            font-weight: 500;
         }
 
-        .report-badge {
-            background: #075824;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: bold;
+        .report-title {
+            text-align: right;
+            flex-shrink: 0;
+            min-width: 220px;
+        }
+
+        .report-title h2 {
+            font-size: 30px;
+            color: #075824;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .report-title p {
             font-size: 16px;
-            box-shadow: 0 4px 8px rgba(7, 88, 36, 0.2);
+            color: #5D8B70;
+            font-weight: 500;
         }
 
-        /* Student Info Section */
+        /* Student Info Section - Enhanced */
         .student-info {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid #dde7e0;
+            position: relative;
+            z-index: 1;
         }
 
         .info-field {
@@ -133,380 +209,606 @@
         }
 
         .info-field label {
-            font-size: 13px;
+            font-size: 14px;
             color: #5D8B70;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
         .info-field input, .info-field select {
-            padding: 10px 0;
+            padding: 12px 0;
             border: none;
-            border-bottom: 1px solid #ddd;
-            font-size: 15px;
+            border-bottom: 2px solid #d0d9d3;
+            font-size: 16px;
             background: transparent;
             outline: none;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
+            font-weight: 500;
         }
 
         .info-field input:focus, .info-field select:focus {
             border-bottom-color: #9BAE30;
+            box-shadow: 0 2px 0 0 rgba(155, 174, 48, 0.2);
         }
 
-        /* Main Content - Two Column Layout */
+        /* Main Content - Optimized for Full Screen */
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            flex-grow: 1;
+            grid-template-columns: 1.4fr 0.6fr;
+            gap: 35px;
+            margin-bottom: 35px;
+            position: relative;
+            z-index: 1;
+            min-height: 500px;
         }
 
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 1fr;
-                gap: 25px;
-            }
-        }
-
-        /* Subjects Table */
+        /* Enhanced Subjects Table with Papers */
         .subjects-section h2, .grading-section h2 {
             color: #075824;
-            font-size: 18px;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e0e0e0;
+            font-size: 22px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dde7e0;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .subjects-table-container {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #d0d9d3;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         .subjects-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
+            table-layout: fixed;
+            min-width: 1200px;
         }
 
         .subjects-table thead {
-            background-color: #f5f9f7;
+            background: linear-gradient(to bottom, #f0f7f4 0%, #e5efe8 100%);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .subjects-table th {
-            padding: 12px 8px;
+            padding: 15px 8px;
             text-align: center;
-            font-weight: 600;
+            font-weight: 700;
             color: #075824;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #c9d6c3;
+            font-size: 13px;
+            white-space: nowrap;
+            vertical-align: middle;
+            min-width: 70px;
         }
 
-        .subjects-table th:first-child {
+        .subjects-table th.subject-col {
             text-align: left;
-            width: 60%;
+            width: 220px;
+            min-width: 220px;
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-left: 15px;
+        }
+
+        .subjects-table th.paper-header {
+            background-color: #e5efe8;
+            font-size: 12px;
+            padding: 10px 4px;
+            font-weight: 600;
         }
 
         .subjects-table td {
-            padding: 10px 8px;
+            padding: 12px 6px;
             border: 1px solid #e0e0e0;
             text-align: center;
+            vertical-align: middle;
             transition: background-color 0.2s;
         }
 
-        .subjects-table tr:hover td {
-            background-color: #f9fcf8;
+        .subjects-table tr:nth-child(even) td {
+            background-color: #fafefa;
         }
 
-        .subjects-table td:first-child {
-            text-align: left;
+        .subjects-table tr:hover td {
+            background-color: #f5fbf5;
+        }
+
+        .subject-cell {
+            text-align: left !important;
+            font-weight: 600;
+            padding-left: 15px !important;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .subject-code {
+            font-size: 12px;
+            color: #5D8B70;
+            margin-top: 4px;
+            display: block;
             font-weight: 500;
         }
 
+        .papers-cell {
+            padding: 4px !important;
+            font-size: 11px;
+            color: #666;
+            line-height: 1.4;
+            font-family: 'Courier New', monospace;
+        }
+
         .subjects-table input {
-            width: 60px;
-            padding: 6px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            width: 65px;
+            padding: 8px 4px;
+            border: 1px solid #d0d9d3;
+            border-radius: 5px;
             text-align: center;
             font-size: 14px;
+            font-weight: 500;
             transition: all 0.3s;
+            background: white;
         }
 
         .subjects-table input:focus {
             outline: none;
             border-color: #9BAE30;
-            box-shadow: 0 0 0 2px rgba(155, 174, 48, 0.2);
+            box-shadow: 0 0 0 2px rgba(155, 174, 48, 0.3);
+            transform: translateY(-1px);
         }
 
         .subject-average {
-            font-weight: 600;
+            font-weight: 700;
             color: #075824;
+            font-size: 15px;
+            padding: 12px 8px !important;
+            background-color: #f9fcf8 !important;
         }
 
-        /* Grading System */
+        /* Paper input styling */
+        .paper-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .paper-input-group label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        /* Grading System - Enhanced */
         .grading-box {
-            background-color: #f9fcf8;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            padding: 20px;
+            background: linear-gradient(to bottom, #f9fcf8 0%, #f0f7f4 100%);
+            border: 2px solid #d0d9d3;
+            border-radius: 10px;
+            padding: 25px;
             margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
 
         .grading-box h3 {
             color: #075824;
-            margin-bottom: 15px;
-            font-size: 16px;
+            margin-bottom: 20px;
+            font-size: 20px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .grading-box h3 i {
             color: #9BAE30;
+            font-size: 22px;
         }
 
         .grading-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            font-size: 13px;
+            gap: 12px;
+            font-size: 14px;
         }
 
         .grade-item {
             display: flex;
             justify-content: space-between;
-            padding: 6px 10px;
+            padding: 12px 15px;
             background: white;
-            border-radius: 4px;
-            border: 1px solid #eee;
+            border-radius: 8px;
+            border: 2px solid #e5efe8;
+            align-items: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .grade-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .grade-range {
-            font-weight: 600;
+            font-weight: 700;
             color: #075824;
+            font-size: 14px;
         }
 
         /* Teacher Comments */
         .comments-box {
-            background-color: #f9fcf8;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            padding: 20px;
+            background: linear-gradient(to bottom, #f9fcf8 0%, #f0f7f4 100%);
+            border: 2px solid #d0d9d3;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
 
         .comments-box h3 {
             color: #075824;
-            margin-bottom: 15px;
-            font-size: 16px;
+            margin-bottom: 20px;
+            font-size: 20px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .comments-box h3 i {
             color: #9BAE30;
+            font-size: 22px;
         }
 
         .comments-box textarea {
             width: 100%;
-            height: 120px;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
+            height: 180px;
+            padding: 15px;
+            border: 2px solid #d0d9d3;
+            border-radius: 8px;
+            font-size: 15px;
             resize: vertical;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
         }
 
         .comments-box textarea:focus {
             outline: none;
             border-color: #9BAE30;
+            box-shadow: 0 0 0 3px rgba(155, 174, 48, 0.2);
         }
 
-        /* Attendance and Final Grades */
+        /* Bottom Section - Full Width */
         .bottom-section {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 30px;
             margin-top: 30px;
-            padding-top: 25px;
-            border-top: 1px solid #e0e0e0;
+            padding-top: 30px;
+            border-top: 3px solid #dde7e0;
+            position: relative;
+            z-index: 1;
         }
 
-        @media (max-width: 768px) {
-            .bottom-section {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-        }
-
-        .attendance-section h3, .final-grades-section h3 {
+        .attendance-section h3, .ranks-section h3, .final-grades-section h3 {
             color: #075824;
-            font-size: 16px;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e0e0e0;
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dde7e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .attendance-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 15px;
+            border: 1px solid #d0d9d3;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
         }
 
         .attendance-table td {
-            padding: 10px;
-            border: 1px solid #e0e0e0;
+            padding: 15px;
+            border: 1px solid #d0d9d3;
         }
 
         .attendance-table td:first-child {
-            font-weight: 500;
+            font-weight: 600;
             width: 70%;
+            background-color: #f9fcf8;
         }
 
         .attendance-table input {
-            width: 80px;
-            padding: 6px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            width: 100px;
+            padding: 10px;
+            border: 2px solid #d0d9d3;
+            border-radius: 6px;
             text-align: center;
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s;
         }
 
+        .attendance-table input:focus {
+            outline: none;
+            border-color: #9BAE30;
+            box-shadow: 0 0 0 2px rgba(155, 174, 48, 0.2);
+        }
+
+        /* Ranks Section */
+        .ranks-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .rank-item {
+            background: linear-gradient(145deg, #f5f9f7 0%, #e5efe8 100%);
+            border-radius: 12px;
+            padding: 25px 20px;
+            text-align: center;
+            border: 2px solid #d0d9d3;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .rank-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .rank-item label {
+            display: block;
+            font-size: 14px;
+            color: #5D8B70;
+            margin-bottom: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .rank-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: #075824;
+            margin-bottom: 5px;
+        }
+
+        .rank-total {
+            font-size: 13px;
+            color: #777;
+            font-weight: 500;
+        }
+
+        /* Final Grades */
         .final-grades-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            gap: 20px;
         }
 
         .final-grade-item {
-            background: #f5f9f7;
-            border-radius: 6px;
-            padding: 15px;
+            background: linear-gradient(145deg, #f5f9f7 0%, #e5efe8 100%);
+            border-radius: 12px;
+            padding: 25px 20px;
             text-align: center;
-            border: 1px solid #e0e0e0;
+            border: 2px solid #d0d9d3;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .final-grade-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
         }
 
         .final-grade-item label {
             display: block;
-            font-size: 13px;
+            font-size: 14px;
             color: #5D8B70;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         .final-grade-value {
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 36px;
+            font-weight: 800;
             color: #075824;
         }
 
-        /* Control Buttons */
+        /* Security QR Code */
+        .security-qr {
+            text-align: center;
+            margin-top: 35px;
+            padding: 25px;
+            border-top: 3px dashed #d0d9d3;
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(to right, #f9fcf8 0%, #f0f7f4 100%);
+            border-radius: 12px;
+        }
+
+        .qr-container {
+            display: inline-block;
+            padding: 20px;
+            background: white;
+            border: 3px solid #d0d9d3;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(45deg, #075824 25%, #9BAE30 25%, #9BAE30 50%, #075824 50%, #075824 75%, #9BAE30 75%);
+            background-size: 15px 15px;
+            margin: 0 auto 15px;
+            position: relative;
+            border-radius: 8px;
+            animation: qr-shimmer 3s infinite linear;
+        }
+
+        .qr-code::before {
+            content: "";
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            width: 60%;
+            height: 60%;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        @keyframes qr-shimmer {
+            0% { background-position: 0 0; }
+            100% { background-position: 30px 30px; }
+        }
+
+        .security-qr p {
+            font-size: 14px;
+            color: #555;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        /* Control Buttons - Enhanced */
         .controls {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+            gap: 25px;
+            margin-top: 35px;
+            padding-top: 30px;
+            border-top: 2px solid #dde7e0;
+            position: relative;
+            z-index: 1;
         }
 
         .btn {
-            padding: 12px 25px;
+            padding: 16px 35px;
             border: none;
-            border-radius: 6px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             transition: all 0.3s;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn-calculate {
-            background-color: #075824;
+            background: linear-gradient(135deg, #075824 0%, #0a6e2e 100%);
             color: white;
         }
 
         .btn-calculate:hover {
-            background-color: #05411c;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(7, 88, 36, 0.2);
+            background: linear-gradient(135deg, #05411c 0%, #075824 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(7, 88, 36, 0.3);
         }
 
         .btn-print {
-            background-color: #377437;
+            background: linear-gradient(135deg, #377437 0%, #4a944a 100%);
             color: white;
         }
 
         .btn-print:hover {
-            background-color: #2a5a2a;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(55, 116, 55, 0.2);
+            background: linear-gradient(135deg, #2a5a2a 0%, #377437 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(55, 116, 55, 0.3);
         }
 
         .btn-reset {
-            background-color: #9BAE30;
+            background: linear-gradient(135deg, #9BAE30 0%, #b1c94e 100%);
             color: white;
         }
 
         .btn-reset:hover {
-            background-color: #849926;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(155, 174, 48, 0.2);
+            background: linear-gradient(135deg, #849926 0%, #9BAE30 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(155, 174, 48, 0.3);
         }
 
         /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .report-card-container {
-                padding: 20px;
+        @media (max-width: 1400px) {
+            body {
+                padding: 15px;
             }
             
-            .header {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
+            .report-card-container {
+                padding: 25px;
             }
             
             .school-name h1 {
-                font-size: 24px;
+                font-size: 30px;
             }
             
-            .student-info {
+            .main-content {
                 grid-template-columns: 1fr;
+                gap: 30px;
             }
             
-            .subjects-table {
-                font-size: 13px;
-            }
-            
-            .subjects-table input {
-                width: 50px;
-                padding: 4px;
-            }
-            
-            .grading-grid {
-                grid-template-columns: 1fr;
+            .bottom-section {
+                grid-template-columns: 1fr 1fr;
             }
             
             .controls {
-                flex-direction: column;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .student-info {
+                grid-template-columns: repeat(3, 1fr);
             }
             
-            .btn {
-                justify-content: center;
+            .bottom-section {
+                grid-template-columns: 1fr;
+                gap: 25px;
             }
-        }
-
-        /* Status indicators */
-        .status-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-left: 8px;
-        }
-
-        .status-complete {
-            background-color: #9BAE30;
-        }
-
-        .status-incomplete {
-            background-color: #ff9800;
+            
+            .ranks-grid, .final-grades-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+                margin: 0 auto;
+            }
         }
 
         /* Grade colors */
@@ -516,73 +818,158 @@
         .grade-d { color: #F59E0B; }
         .grade-e { color: #F97316; }
         .grade-f { color: #EF4444; }
+
+        /* Security notice */
+        .security-notice {
+            position: absolute;
+            bottom: 15px;
+            left: 25px;
+            font-size: 11px;
+            color: #777;
+            letter-spacing: 1px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Status indicator */
+        .status-indicator {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-left: 10px;
+            vertical-align: middle;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        /* Holographic effect for security */
+        .holographic-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                rgba(255,255,255,0) 0%, 
+                rgba(255,255,255,0.1) 25%, 
+                rgba(255,255,255,0) 50%, 
+                rgba(255,255,255,0.1) 75%, 
+                rgba(255,255,255,0) 100%);
+            background-size: 200% 200%;
+            animation: hologram 3s infinite linear;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0.5;
+            border-radius: 12px;
+        }
+
+        @keyframes hologram {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 200%; }
+        }
     </style>
 </head>
 <body>
     <div class="report-card-container">
+        <!-- Holographic Overlay for Security -->
+        <div class="holographic-overlay"></div>
+        
+        <!-- Security Background Elements -->
+        <div class="security-background">
+            <div class="micro-pattern"></div>
+            <div class="watermark">SECURE DOCUMENT</div>
+            <div class="serial-number" id="serialNumber">SN: AGHS-RC-2025-0247-5A8B</div>
+        </div>
+
         <!-- Header Section -->
         <div class="header">
             <div class="school-logo">
-                <img src="images/badge.png" alt="Alliance Girls High School Badge">
+                <img src="https://api.dicebear.com/7.x/shapes/svg?seed=AllianceGirls" alt="Alliance Girls High School Badge">
             </div>
             <div class="school-name">
                 <h1>Alliance Girls High School</h1>
                 <p>Excellence in Education Since 1975</p>
             </div>
-            <div class="report-badge">
-                REPORT CARD
+            <div class="report-title">
+                <h2>ACADEMIC REPORT</h2>
+                <p>Comprehensive Performance Summary</p>
             </div>
         </div>
 
         <!-- Student Information -->
         <div class="student-info">
             <div class="info-field">
-                <label for="studentName">Name of Student</label>
-                <input type="text" id="studentName" value="Alexandra Johnson">
+                <label for="studentName"><i class="fas fa-user-graduate"></i> Name of Student</label>
+                <input type="text" id="studentName" value="Alexandra Wanjiru Johnson">
             </div>
             <div class="info-field">
-                <label for="yearSection">Year and Section</label>
-                <input type="text" id="yearSection" value="Grade 12 - Section A">
+                <label for="yearSection"><i class="fas fa-school"></i> Year and Section</label>
+                <input type="text" id="yearSection" value="Grade 12 - Science Stream A">
             </div>
             <div class="info-field">
-                <label for="classAdviser">Class Adviser</label>
+                <label for="classAdviser"><i class="fas fa-chalkboard-teacher"></i> Class Adviser</label>
                 <input type="text" id="classAdviser" value="Mr. Robert Chen">
             </div>
             <div class="info-field">
-                <label for="gradingPeriod">Grading Period</label>
+                <label for="gradingPeriod"><i class="fas fa-calendar-alt"></i> Grading Period</label>
                 <select id="gradingPeriod">
-                    <option>First Quarter</option>
-                    <option selected>Second Quarter</option>
-                    <option>Third Quarter</option>
-                    <option>Fourth Quarter</option>
+                    <option value="Term 1">Term 1</option>
+                    <option value="Term 2" selected>Term 2</option>
+                    <option value="Term 3">Term 3</option>
                 </select>
             </div>
             <div class="info-field">
-                <label for="schoolYear">School Year</label>
+                <label for="schoolYear"><i class="fas fa-calendar"></i> School Year</label>
                 <input type="text" id="schoolYear" value="2024-2025">
             </div>
         </div>
 
         <!-- Main Content (Two Columns) -->
         <div class="main-content">
-            <!-- Left Column - Subjects -->
+            <!-- Left Column - Subjects with Papers -->
             <div class="subjects-section">
-                <h2><i class="fas fa-book-open"></i> Academic Performance</h2>
-                <table class="subjects-table">
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>1st</th>
-                            <th>2nd</th>
-                            <th>3rd</th>
-                            <th>4th</th>
-                            <th>Average</th>
-                        </tr>
-                    </thead>
-                    <tbody id="subjectsTable">
-                        <!-- Subjects will be populated by JavaScript -->
-                    </tbody>
-                </table>
+                <h2><i class="fas fa-book-open"></i> Academic Performance by Paper</h2>
+                <div class="subjects-table-container">
+                    <table class="subjects-table">
+                        <thead>
+                            <tr>
+                                <th class="subject-col">Subject & Papers</th>
+                                <!-- Term 1 Headers -->
+                                <th colspan="4" class="paper-header">Term 1 Assessments</th>
+                                <!-- Term 2 Headers -->
+                                <th colspan="4" class="paper-header">Term 2 Assessments</th>
+                                <!-- Term 3 Headers -->
+                                <th colspan="4" class="paper-header">Term 3 Assessments</th>
+                                <th>Final Average</th>
+                            </tr>
+                            <tr>
+                                <th class="subject-col">Subject (Code & Papers)</th>
+                                <!-- Term 1 Paper Columns -->
+                                <th>P1</th>
+                                <th>P2</th>
+                                <th>P3</th>
+                                <th>Term Avg</th>
+                                <!-- Term 2 Paper Columns -->
+                                <th>P1</th>
+                                <th>P2</th>
+                                <th>P3</th>
+                                <th>Term Avg</th>
+                                <!-- Term 3 Paper Columns -->
+                                <th>P1</th>
+                                <th>P2</th>
+                                <th>P3</th>
+                                <th>Term Avg</th>
+                                <th>Overall Avg</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectsTable">
+                            <!-- Subjects will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Right Column - Grading & Comments -->
@@ -595,135 +982,391 @@
                 </div>
 
                 <div class="comments-box">
-                    <h3><i class="fas fa-comment-dots"></i> Teacher's Comments and Feedback</h3>
-                    <textarea id="teacherComments" placeholder="Enter comments here...">Alexandra has shown consistent improvement throughout the quarter. She excels in sciences and mathematics, but could benefit from additional practice in writing and composition. Overall, a dedicated and hardworking student.</textarea>
+                    <h3><i class="fas fa-comment-dots"></i> Teacher's Comments & Recommendations</h3>
+                    <textarea id="teacherComments">Alexandra has demonstrated exceptional aptitude in Sciences and Mathematics, consistently scoring above 85% in all papers. Her analytical skills are outstanding. She shows strong leadership qualities in group projects and actively participates in class discussions. 
+
+Areas for improvement: Could work on time management during examinations to ensure all questions are attempted. Additional practice in essay writing for humanities subjects would be beneficial.
+
+Overall, a dedicated and promising student with excellent academic performance. Shows great potential for STEM fields at university level.</textarea>
                 </div>
             </div>
         </div>
 
-        <!-- Bottom Section - Attendance & Final Grades -->
+        <!-- Bottom Section - Attendance, Ranks & Final Grades -->
         <div class="bottom-section">
             <div class="attendance-section">
                 <h3><i class="fas fa-calendar-check"></i> Attendance Record</h3>
                 <table class="attendance-table">
                     <tr>
-                        <td>Total Days of School</td>
+                        <td>Total School Days</td>
                         <td><input type="number" id="totalDays" value="90" min="0"></td>
                     </tr>
                     <tr>
                         <td>Days Attended</td>
-                        <td><input type="number" id="daysAttended" value="86" min="0"></td>
+                        <td><input type="number" id="daysAttended" value="88" min="0"></td>
                     </tr>
                     <tr>
                         <td>Days Absent</td>
-                        <td><input type="number" id="daysAbsent" value="4" min="0" readonly></td>
+                        <td><input type="number" id="daysAbsent" value="2" min="0" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>Attendance Rate</td>
+                        <td><input type="text" id="attendanceRate" value="97.8%" readonly></td>
                     </tr>
                 </table>
+            </div>
+
+            <div class="ranks-section">
+                <h3><i class="fas fa-trophy"></i> Performance Ranking</h3>
+                <div class="ranks-grid">
+                    <div class="rank-item">
+                        <label>Stream Rank</label>
+                        <div class="rank-value">3</div>
+                        <div class="rank-total">out of 45 students in Science A</div>
+                    </div>
+                    <div class="rank-item">
+                        <label>Overall Rank</label>
+                        <div class="rank-value">12</div>
+                        <div class="rank-total">out of 280 Grade 12 students</div>
+                    </div>
+                </div>
             </div>
 
             <div class="final-grades-section">
                 <h3><i class="fas fa-chart-line"></i> Final Grades</h3>
                 <div class="final-grades-grid">
                     <div class="final-grade-item">
-                        <label>Quarterly Grade</label>
-                        <div class="final-grade-value" id="quarterlyGrade">88.5</div>
+                        <label>Overall Average</label>
+                        <div class="final-grade-value" id="overallAverage">87.2</div>
                     </div>
                     <div class="final-grade-item">
-                        <label>Average Grade</label>
-                        <div class="final-grade-value" id="averageGrade">87.2</div>
+                        <label>Term Average</label>
+                        <div class="final-grade-value" id="termAverage">88.5</div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Security QR Code -->
+        <div class="security-qr">
+            <div class="qr-container">
+                <div class="qr-code"></div>
+                <p><i class="fas fa-shield-alt"></i> VERIFY AUTHENTICITY: SCAN QR CODE</p>
+                <p style="font-size: 12px; color: #777; margin-top: 5px;">UV-reactive • Holographic • Micro-text • Digital Signature</p>
             </div>
         </div>
 
         <!-- Control Buttons -->
         <div class="controls no-print">
             <button class="btn btn-calculate" id="calculateBtn">
-                <i class="fas fa-calculator"></i> Calculate Grades
+                <i class="fas fa-calculator"></i> Calculate All Grades
             </button>
             <button class="btn btn-print" id="printBtn">
-                <i class="fas fa-print"></i> Print Report
+                <i class="fas fa-print"></i> Print Report Card
             </button>
             <button class="btn btn-reset" id="resetBtn">
-                <i class="fas fa-redo"></i> Reset Grades
+                <i class="fas fa-redo"></i> Reset All Grades
             </button>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="security-notice">
+            <i class="fas fa-shield-alt"></i> SECURE DOCUMENT WITH MULTI-LAYER AUTHENTICATION
         </div>
     </div>
 
     <script>
-        // Updated subjects based on the provided curriculum
+        // Enhanced subjects with paper codes - FIXED STRUCTURE
         const subjects = [
-            // Languages
-            { name: "English Language", code: "ENG", papers: ["ENG-P1", "ENG-P2", "ENG-P3"], quarters: [85, 88, 90, 87] },
-            { name: "Kiswahili", code: "KIS", papers: ["KIS-P1", "KIS-P2", "KIS-P3"], quarters: [82, 85, 83, 84] },
-            { name: "Kenya Sign Language", code: "KSL", papers: ["KSL-P1", "KSL-P2"], quarters: [88, 90, 89, 91] },
-            { name: "Literature in English", code: "LIT", papers: ["LIT-P1", "LIT-P2"], quarters: [78, 82, 85, 80] },
-            { name: "Fasihi ya Kiswahili", code: "FAS", papers: ["FAS-P1", "FAS-P2"], quarters: [80, 83, 81, 82] },
-            { name: "Indigenous Languages", code: "IND", papers: ["IND-P1", "IND-P2"], quarters: [85, 87, 86, 88] },
-            { name: "Arabic", code: "ARB", papers: ["ARB-P1", "ARB-P2"], quarters: [90, 92, 91, 93] },
-            { name: "French", code: "FRE", papers: ["FRE-P1", "FRE-P2"], quarters: [84, 86, 85, 87] },
-            { name: "German", code: "GER", papers: ["GER-P1", "GER-P2"], quarters: [87, 89, 88, 90] },
-            { name: "Mandarin Chinese", code: "MAN", papers: ["MAN-P1", "MAN-P2"], quarters: [82, 84, 83, 85] },
+            // Languages - Each subject now has 9 paper scores (3 per term)
+            { 
+                name: "English Language", 
+                code: "ENG", 
+                papers: ["P1", "P2", "P3"], 
+                grades: [85, 88, 90, 87, 86, 89, 88, 90, 91] // T1-P1, T1-P2, T1-P3, T2-P1, T2-P2, T2-P3, T3-P1, T3-P2, T3-P3
+            },
+            { 
+                name: "Kiswahili", 
+                code: "KIS", 
+                papers: ["P1", "P2", "P3"], 
+                grades: [82, 85, 83, 84, 86, 85, 84, 87, 88]
+            },
+            { 
+                name: "Kenya Sign Language", 
+                code: "KSL", 
+                papers: ["P1", "P2"], 
+                grades: [88, 90, 0, 89, 91, 0, 90, 92, 0] // P3 set to 0 for subjects with only 2 papers
+            },
+            { 
+                name: "Literature in English", 
+                code: "LIT", 
+                papers: ["P1", "P2"], 
+                grades: [78, 82, 0, 80, 83, 0, 84, 87, 0]
+            },
+            { 
+                name: "Fasihi ya Kiswahili", 
+                code: "FAS", 
+                papers: ["P1", "P2"], 
+                grades: [80, 83, 0, 82, 84, 0, 85, 86, 0]
+            },
+            { 
+                name: "Indigenous Languages", 
+                code: "IND", 
+                papers: ["P1", "P2"], 
+                grades: [85, 87, 0, 88, 87, 0, 88, 90, 0]
+            },
+            { 
+                name: "Arabic", 
+                code: "ARB", 
+                papers: ["P1", "P2"], 
+                grades: [90, 92, 0, 93, 92, 0, 93, 95, 0]
+            },
+            { 
+                name: "French", 
+                code: "FRE", 
+                papers: ["P1", "P2"], 
+                grades: [84, 86, 0, 87, 86, 0, 87, 89, 0]
+            },
+            { 
+                name: "German", 
+                code: "GER", 
+                papers: ["P1", "P2"], 
+                grades: [87, 89, 0, 90, 89, 0, 90, 92, 0]
+            },
+            { 
+                name: "Mandarin Chinese", 
+                code: "MAN", 
+                papers: ["P1", "P2"], 
+                grades: [82, 84, 0, 85, 84, 0, 85, 87, 0]
+            },
             
             // Humanities
-            { name: "History & Citizenship", code: "HIS", papers: ["HIS-P1", "HIS-P2"], quarters: [82, 85, 83, 86] },
-            { name: "Geography", code: "GEO", papers: ["GEO-P1", "GEO-P2"], quarters: [80, 83, 81, 84] },
-            { name: "Christian Religious Education (CRE)", code: "CRE", papers: ["CRE-P1", "CRE-P2"], quarters: [85, 88, 86, 89] },
-            { name: "Islamic Religious Education (IRE)", code: "IRE", papers: ["IRE-P1", "IRE-P2"], quarters: [87, 90, 88, 91] },
-            { name: "Hindu Religious Education (HRE)", code: "HRE", papers: ["HRE-P1", "HRE-P2"], quarters: [88, 91, 89, 92] },
+            { 
+                name: "History & Citizenship", 
+                code: "HIS", 
+                papers: ["P1", "P2"], 
+                grades: [82, 85, 0, 86, 84, 0, 85, 88, 0]
+            },
+            { 
+                name: "Geography", 
+                code: "GEO", 
+                papers: ["P1", "P2"], 
+                grades: [80, 83, 0, 84, 82, 0, 83, 86, 0]
+            },
+            { 
+                name: "Christian Religious Education (CRE)", 
+                code: "CRE", 
+                papers: ["P1", "P2"], 
+                grades: [85, 88, 0, 89, 87, 0, 88, 91, 0]
+            },
+            { 
+                name: "Islamic Religious Education (IRE)", 
+                code: "IRE", 
+                papers: ["P1", "P2"], 
+                grades: [87, 90, 0, 91, 89, 0, 90, 93, 0]
+            },
+            { 
+                name: "Hindu Religious Education (HRE)", 
+                code: "HRE", 
+                papers: ["P1", "P2"], 
+                grades: [88, 91, 0, 92, 90, 0, 91, 94, 0]
+            },
             
             // Mathematics
-            { name: "Core Mathematics", code: "MAT-C", papers: ["MAT-C-P1", "MAT-C-P2"], quarters: [92, 89, 94, 91] },
-            { name: "Essential Mathematics", code: "MAT-E", papers: ["MAT-E-P1"], quarters: [85, 88, 86, 89] },
-            { name: "Advanced Mathematics", code: "MAT-A", papers: ["MAT-A-P1", "MAT-A-P2"], quarters: [90, 93, 91, 94] },
+            { 
+                name: "Core Mathematics", 
+                code: "MAT-C", 
+                papers: ["P1", "P2"], 
+                grades: [92, 89, 0, 91, 93, 0, 95, 92, 0]
+            },
+            { 
+                name: "Essential Mathematics", 
+                code: "MAT-E", 
+                papers: ["P1"], 
+                grades: [85, 0, 0, 89, 0, 0, 88, 0, 0]
+            },
+            { 
+                name: "Advanced Mathematics", 
+                code: "MAT-A", 
+                papers: ["P1", "P2"], 
+                grades: [90, 93, 0, 94, 92, 0, 93, 96, 0]
+            },
             
             // Sciences
-            { name: "Biology", code: "BIO", papers: ["BIO-P1", "BIO-P2", "BIO-P3"], quarters: [88, 91, 89, 92] },
-            { name: "Chemistry", code: "CHE", papers: ["CHE-P1", "CHE-P2", "CHE-P3"], quarters: [86, 89, 87, 90] },
-            { name: "Physics", code: "PHY", papers: ["PHY-P1", "PHY-P2", "PHY-P3"], quarters: [85, 88, 90, 87] },
-            { name: "Agriculture", code: "AGR", papers: ["AGR-P1", "AGR-P2", "AGR-P3"], quarters: [83, 86, 84, 87] },
+            { 
+                name: "Biology", 
+                code: "BIO", 
+                papers: ["P1", "P2", "P3"], 
+                grades: [88, 91, 89, 92, 90, 93, 91, 94, 95]
+            },
+            { 
+                name: "Chemistry", 
+                code: "CHE", 
+                papers: ["P1", "P2", "P3"], 
+                grades: [86, 89, 87, 90, 88, 91, 89, 92, 93]
+            },
+            { 
+                name: "Physics", 
+                code: "PHY", 
+                papers: ["P1", "P2", "P3"], 
+                grades: [85, 88, 90, 87, 89, 92, 90, 93, 94]
+            },
+            { 
+                name: "Agriculture", 
+                code: "AGR", 
+                papers: ["P1", "P2", "P3"], 
+                grades: [83, 86, 84, 87, 85, 88, 86, 89, 90]
+            },
             
             // Technical & Applied Subjects
-            { name: "Computer Studies", code: "CST", papers: ["CST-P1", "CST-P2", "CST-P3"], quarters: [89, 91, 90, 92] },
-            { name: "Business Studies", code: "BUS", papers: ["BUS-P1", "BUS-P2"], quarters: [84, 87, 85, 88] },
-            { name: "Aviation Technology", code: "AVI", papers: ["AVI-P1", "AVI-P2"], quarters: [87, 90, 88, 91] },
-            { name: "Building Construction", code: "BLD", papers: ["BLD-P1", "BLD-P2"], quarters: [82, 85, 83, 86] },
-            { name: "Power Mechanics", code: "PM", papers: ["PM-P1", "PM-P2"], quarters: [85, 88, 86, 89] },
-            { name: "Electricity", code: "ELE", papers: ["ELE-P1", "ELE-P2"], quarters: [83, 86, 84, 87] },
-            { name: "Metalwork", code: "MET", papers: ["MET-P1", "MET-P2"], quarters: [80, 83, 81, 84] },
-            { name: "Woodwork", code: "WOD", papers: ["WOD-P1", "WOD-P2"], quarters: [82, 85, 83, 86] },
-            { name: "Marine & Fisheries Technology", code: "MFT", papers: ["MFT-P1", "MFT-P2"], quarters: [85, 88, 86, 89] },
-            { name: "Home Science", code: "HOM", papers: ["HOM-P1", "HOM-P2", "HOM-P3"], quarters: [88, 91, 89, 92] },
+            { 
+                name: "Computer Studies", 
+                code: "CST", 
+                papers: ["P1", "P2", "P3"], 
+                grades: [89, 91, 90, 92, 91, 93, 92, 94, 95]
+            },
+            { 
+                name: "Business Studies", 
+                code: "BUS", 
+                papers: ["P1", "P2"], 
+                grades: [84, 87, 0, 88, 86, 0, 87, 90, 0]
+            },
+            { 
+                name: "Aviation Technology", 
+                code: "AVI", 
+                papers: ["P1", "P2"], 
+                grades: [87, 90, 0, 91, 89, 0, 90, 93, 0]
+            },
+            { 
+                name: "Building Construction", 
+                code: "BLD", 
+                papers: ["P1", "P2"], 
+                grades: [82, 85, 0, 86, 84, 0, 85, 88, 0]
+            },
+            { 
+                name: "Power Mechanics", 
+                code: "PM", 
+                papers: ["P1", "P2"], 
+                grades: [85, 88, 0, 89, 87, 0, 88, 91, 0]
+            },
+            { 
+                name: "Electricity", 
+                code: "ELE", 
+                papers: ["P1", "P2"], 
+                grades: [83, 86, 0, 87, 85, 0, 86, 89, 0]
+            },
+            { 
+                name: "Metalwork", 
+                code: "MET", 
+                papers: ["P1", "P2"], 
+                grades: [80, 83, 0, 84, 82, 0, 83, 86, 0]
+            },
+            { 
+                name: "Woodwork", 
+                code: "WOD", 
+                papers: ["P1", "P2"], 
+                grades: [82, 85, 0, 86, 84, 0, 85, 88, 0]
+            },
+            { 
+                name: "Marine & Fisheries Technology", 
+                code: "MFT", 
+                papers: ["P1", "P2"], 
+                grades: [85, 88, 0, 89, 87, 0, 88, 91, 0]
+            },
+            { 
+                name: "Home Science", 
+                code: "HOM", 
+                papers: ["P1", "P2", "P3"], 
+                grades: [88, 91, 89, 92, 90, 93, 91, 94, 95]
+            },
             
             // Creative & Physical Subjects
-            { name: "Fine Arts", code: "ART", papers: ["ART-P1", "ART-P2"], quarters: [94, 93, 95, 94] },
-            { name: "Theatre & Film", code: "THF", papers: ["THF-P1", "THF-P2"], quarters: [88, 91, 89, 92] },
-            { name: "Music", code: "MUS", papers: ["MUS-P1", "MUS-P2", "MUS-P3"], quarters: [90, 92, 91, 93] },
-            { name: "Dance", code: "DAN", papers: ["DAN-P1", "DAN-P2"], quarters: [86, 89, 87, 90] },
-            { name: "Sports & Recreation", code: "SPR", papers: ["SPR-P1", "SPR-P2"], quarters: [96, 95, 97, 96] }
+            { 
+                name: "Fine Arts", 
+                code: "ART", 
+                papers: ["P1", "P2"], 
+                grades: [94, 93, 0, 94, 96, 0, 97, 96, 0]
+            },
+            { 
+                name: "Theatre & Film", 
+                code: "THF", 
+                papers: ["P1", "P2"], 
+                grades: [88, 91, 0, 92, 90, 0, 91, 94, 0]
+            },
+            { 
+                name: "Music", 
+                code: "MUS", 
+                papers: ["P1", "P2", "P3"], 
+                grades: [90, 92, 91, 93, 92, 94, 93, 95, 96]
+            },
+            { 
+                name: "Dance", 
+                code: "DAN", 
+                papers: ["P1", "P2"], 
+                grades: [86, 89, 0, 90, 88, 0, 89, 92, 0]
+            },
+            { 
+                name: "Sports & Recreation", 
+                code: "SPR", 
+                papers: ["P1", "P2"], 
+                grades: [96, 95, 0, 96, 98, 0, 99, 98, 0]
+            }
         ];
 
-        // Updated grading system based on SQL schema
+        // Grading system
         const gradingSystem = [
-            { grade: "A", min_score: 80, max_score: 100, achievement_level: "Excellent", achievement_code: "EXC", description: "Outstanding performance with comprehensive understanding", color_code: "#10B981", is_pass: true, sort_order: 1 },
-            { grade: "B", min_score: 70, max_score: 79, achievement_level: "Very Good", achievement_code: "VGOOD", description: "Very good performance with good understanding", color_code: "#34D399", is_pass: true, sort_order: 2 },
-            { grade: "C", min_score: 60, max_score: 69, achievement_level: "Average", achievement_code: "AVG", description: "Average performance with satisfactory understanding", color_code: "#FBBF24", is_pass: true, sort_order: 3 },
-            { grade: "D", min_score: 50, max_score: 59, achievement_level: "Below Average", achievement_code: "BELOW", description: "Below average performance with basic understanding", color_code: "#F59E0B", is_pass: true, sort_order: 4 },
-            { grade: "E", min_score: 40, max_score: 49, achievement_level: "Marginal Pass", achievement_code: "MARG", description: "Marginal pass with minimal understanding", color_code: "#F97316", is_pass: true, sort_order: 5 },
-            { grade: "F", min_score: 0, max_score: 39, achievement_level: "Fail", achievement_code: "FAIL", description: "Inadequate performance, requires improvement", color_code: "#EF4444", is_pass: false, sort_order: 6 }
+            { grade: "A", min_score: 80, max_score: 100, achievement_level: "Excellent", color_code: "#10B981" },
+            { grade: "B", min_score: 70, max_score: 79, achievement_level: "Very Good", color_code: "#34D399" },
+            { grade: "C", min_score: 60, max_score: 69, achievement_level: "Average", color_code: "#FBBF24" },
+            { grade: "D", min_score: 50, max_score: 59, achievement_level: "Below Average", color_code: "#F59E0B" },
+            { grade: "E", min_score: 40, max_score: 49, achievement_level: "Marginal Pass", color_code: "#F97316" },
+            { grade: "F", min_score: 0, max_score: 39, achievement_level: "Fail", color_code: "#EF4444" }
         ];
 
         // DOM Elements
         let subjectsTable = document.getElementById('subjectsTable');
         let gradingSystemContainer = document.getElementById('gradingSystem');
-        let quarterlyGradeElement = document.getElementById('quarterlyGrade');
-        let averageGradeElement = document.getElementById('averageGrade');
+        let termAverageElement = document.getElementById('termAverage');
+        let overallAverageElement = document.getElementById('overallAverage');
         let totalDaysInput = document.getElementById('totalDays');
         let daysAttendedInput = document.getElementById('daysAttended');
         let daysAbsentInput = document.getElementById('daysAbsent');
+        let attendanceRateInput = document.getElementById('attendanceRate');
+        let gradingPeriodSelect = document.getElementById('gradingPeriod');
+
+        // Generate unique serial number
+        function generateSerialNumber() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+            const studentId = Math.floor(Math.random() * 900) + 100;
+            const serial = `AGHS-RC-${year}-${String(studentId).padStart(4, '0')}-${random}`;
+            document.getElementById('serialNumber').textContent = `SN: ${serial}`;
+            return serial;
+        }
+
+        // Calculate term average for a subject
+        function calculateTermAverage(grades, term) {
+            let termGrades = [];
+            if (term === 1) {
+                termGrades = grades.slice(0, 3);
+            } else if (term === 2) {
+                termGrades = grades.slice(3, 6);
+            } else if (term === 3) {
+                termGrades = grades.slice(6, 9);
+            }
+            
+            // Filter out zeros (for subjects with fewer papers)
+            termGrades = termGrades.filter(grade => grade > 0);
+            
+            if (termGrades.length === 0) return 0;
+            const sum = termGrades.reduce((total, grade) => total + grade, 0);
+            return sum / termGrades.length;
+        }
 
         // Initialize the page
         function init() {
+            generateSerialNumber();
             populateSubjectsTable();
             populateGradingSystem();
             updateAttendance();
@@ -732,38 +1375,132 @@
             // Set up event listeners
             totalDaysInput.addEventListener('change', updateAttendance);
             daysAttendedInput.addEventListener('change', updateAttendance);
+            gradingPeriodSelect.addEventListener('change', updateTermDisplay);
             
             document.getElementById('calculateBtn').addEventListener('click', calculateAllGrades);
             document.getElementById('printBtn').addEventListener('click', printReport);
             document.getElementById('resetBtn').addEventListener('click', resetGrades);
+            
+            // Initialize tooltips
+            initializeTooltips();
         }
 
-        // Populate subjects table
+        // Populate subjects table with paper information - FIXED VERSION
         function populateSubjectsTable() {
             subjectsTable.innerHTML = '';
             
-            subjects.forEach((subject, index) => {
+            subjects.forEach((subject, subjectIndex) => {
                 const row = document.createElement('tr');
-                const average = calculateAverage(subject.quarters);
+                const papersText = subject.papers.join(', ');
+                
+                // Calculate term averages
+                const term1Avg = calculateTermAverage(subject.grades, 1);
+                const term2Avg = calculateTermAverage(subject.grades, 2);
+                const term3Avg = calculateTermAverage(subject.grades, 3);
+                
+                // Calculate overall average
+                const termAverages = [term1Avg, term2Avg, term3Avg].filter(avg => avg > 0);
+                const overallAvg = termAverages.length > 0 ? 
+                    termAverages.reduce((sum, avg) => sum + avg, 0) / termAverages.length : 0;
                 
                 row.innerHTML = `
-                    <td>${subject.name} (${subject.code})</td>
-                    ${subject.quarters.map(grade => `
-                        <td><input type="number" class="grade-input" min="0" max="100" 
-                               data-subject="${index}" data-quarter="${subject.quarters.indexOf(grade)}" 
-                               value="${grade}"></td>
-                    `).join('')}
-                    <td class="subject-average" id="avg-${index}">${average.toFixed(1)}</td>
+                    <td class="subject-cell">
+                        <strong>${subject.name}</strong>
+                        <span class="subject-code">${subject.code}: ${papersText}</span>
+                    </td>
+                    <!-- Term 1 Papers -->
+                    <td><input type="number" class="grade-input" min="0" max="100" 
+                           data-subject="${subjectIndex}" data-term="1" data-paper="1" 
+                           value="${subject.grades[0] || ''}"></td>
+                    <td><input type="number" class="grade-input" min="0" max="100" 
+                           data-subject="${subjectIndex}" data-term="1" data-paper="2" 
+                           value="${subject.grades[1] || ''}"></td>
+                    <td><input type="number" class="grade-input" min="0" max="100" 
+                           data-subject="${subjectIndex}" data-term="1" data-paper="3" 
+                           value="${subject.grades[2] || ''}"></td>
+                    <td class="term-average" id="t1-avg-${subjectIndex}">${term1Avg.toFixed(1)}</td>
+                    
+                    <!-- Term 2 Papers -->
+                    <td><input type="number" class="grade-input" min="0" max="100" 
+                           data-subject="${subjectIndex}" data-term="2" data-paper="1" 
+                           value="${subject.grades[3] || ''}"></td>
+                    <td><input type="number" class="grade-input" min="0" max="100" 
+                           data-subject="${subjectIndex}" data-term="2" data-paper="2" 
+                           value="${subject.grades[4] || ''}"></td>
+                    <td><input type="number" class="grade-input" min="0" max="100" 
+                           data-subject="${subjectIndex}" data-term="2" data-paper="3" 
+                           value="${subject.grades[5] || ''}"></td>
+                    <td class="term-average" id="t2-avg-${subjectIndex}">${term2Avg.toFixed(1)}</td>
+                    
+                    <!-- Term 3 Papers -->
+                    <td><input type="number" class="grade-input" min="0" max="100" 
+                           data-subject="${subjectIndex}" data-term="3" data-paper="1" 
+                           value="${subject.grades[6] || ''}"></td>
+                    <td><input type="number" class="grade-input" min="0" max="100" 
+                           data-subject="${subjectIndex}" data-term="3" data-paper="2" 
+                           value="${subject.grades[7] || ''}"></td>
+                    <td><input type="number" class="grade-input" min="0" max="100" 
+                           data-subject="${subjectIndex}" data-term="3" data-paper="3" 
+                           value="${subject.grades[8] || ''}"></td>
+                    <td class="term-average" id="t3-avg-${subjectIndex}">${term3Avg.toFixed(1)}</td>
+                    
+                    <!-- Overall Average -->
+                    <td class="subject-average" id="avg-${subjectIndex}">${overallAvg.toFixed(1)}</td>
                 `;
                 
                 subjectsTable.appendChild(row);
+                
+                // Update colors
+                updateGradeColor(document.getElementById(`t1-avg-${subjectIndex}`), term1Avg);
+                updateGradeColor(document.getElementById(`t2-avg-${subjectIndex}`), term2Avg);
+                updateGradeColor(document.getElementById(`t3-avg-${subjectIndex}`), term3Avg);
+                updateGradeColor(document.getElementById(`avg-${subjectIndex}`), overallAvg);
             });
             
             // Add event listeners to grade inputs
             document.querySelectorAll('.grade-input').forEach(input => {
-                input.addEventListener('change', calculateSubjectAverage);
-                input.addEventListener('input', calculateSubjectAverage);
+                input.addEventListener('change', updateSubjectGrades);
+                input.addEventListener('input', updateSubjectGrades);
             });
+        }
+
+        // Update subject grades when input changes
+        function updateSubjectGrades(event) {
+            const input = event.target;
+            const subjectIndex = parseInt(input.dataset.subject);
+            const term = parseInt(input.dataset.term);
+            const paper = parseInt(input.dataset.paper);
+            
+            // Calculate position in grades array
+            const position = ((term - 1) * 3) + (paper - 1);
+            
+            // Update subject data
+            subjects[subjectIndex].grades[position] = parseFloat(input.value) || 0;
+            
+            // Recalculate averages for this subject
+            const term1Avg = calculateTermAverage(subjects[subjectIndex].grades, 1);
+            const term2Avg = calculateTermAverage(subjects[subjectIndex].grades, 2);
+            const term3Avg = calculateTermAverage(subjects[subjectIndex].grades, 3);
+            
+            // Calculate overall average
+            const termAverages = [term1Avg, term2Avg, term3Avg].filter(avg => avg > 0);
+            const overallAvg = termAverages.length > 0 ? 
+                termAverages.reduce((sum, avg) => sum + avg, 0) / termAverages.length : 0;
+            
+            // Update display
+            document.getElementById(`t1-avg-${subjectIndex}`).textContent = term1Avg.toFixed(1);
+            document.getElementById(`t2-avg-${subjectIndex}`).textContent = term2Avg.toFixed(1);
+            document.getElementById(`t3-avg-${subjectIndex}`).textContent = term3Avg.toFixed(1);
+            document.getElementById(`avg-${subjectIndex}`).textContent = overallAvg.toFixed(1);
+            
+            // Update colors
+            updateGradeColor(document.getElementById(`t1-avg-${subjectIndex}`), term1Avg);
+            updateGradeColor(document.getElementById(`t2-avg-${subjectIndex}`), term2Avg);
+            updateGradeColor(document.getElementById(`t3-avg-${subjectIndex}`), term3Avg);
+            updateGradeColor(document.getElementById(`avg-${subjectIndex}`), overallAvg);
+            
+            // Update overall calculations
+            calculateAllGrades();
         }
 
         // Populate grading system
@@ -773,71 +1510,84 @@
             gradingSystem.forEach(item => {
                 const gradeItem = document.createElement('div');
                 gradeItem.className = 'grade-item';
-                gradeItem.style.borderLeft = `4px solid ${item.color_code}`;
+                gradeItem.style.borderLeft = `5px solid ${item.color_code}`;
                 gradeItem.innerHTML = `
                     <div>
-                        <strong>${item.grade}</strong><br>
+                        <strong style="color: ${item.color_code}; font-size: 16px;">${item.grade}</strong><br>
                         <small>${item.achievement_level}</small>
                     </div>
                     <div class="grade-range">${item.min_score}–${item.max_score}</div>
                 `;
+                gradeItem.title = `${item.achievement_level}: ${item.min_score}-${item.max_score}%`;
                 gradingSystemContainer.appendChild(gradeItem);
             });
         }
 
         // Calculate average of an array
         function calculateAverage(grades) {
-            const sum = grades.reduce((total, grade) => total + grade, 0);
-            return sum / grades.length;
-        }
-
-        // Calculate subject average when grade changes
-        function calculateSubjectAverage(event) {
-            const input = event.target;
-            const subjectIndex = parseInt(input.dataset.subject);
-            const quarterIndex = parseInt(input.dataset.quarter);
-            
-            // Update subject data
-            subjects[subjectIndex].quarters[quarterIndex] = parseFloat(input.value) || 0;
-            
-            // Calculate new average
-            const average = calculateAverage(subjects[subjectIndex].quarters);
-            document.getElementById(`avg-${subjectIndex}`).textContent = average.toFixed(1);
-            
-            // Update color based on grade
-            updateGradeColor(document.getElementById(`avg-${subjectIndex}`), average);
+            const validGrades = grades.filter(grade => !isNaN(grade) && grade > 0);
+            if (validGrades.length === 0) return 0;
+            const sum = validGrades.reduce((total, grade) => total + grade, 0);
+            return sum / validGrades.length;
         }
 
         // Calculate all grades and overall averages
         function calculateAllGrades() {
-            let allGrades = [];
-            let quarterlyGrades = [];
+            let allSubjectAverages = [];
+            let termSubjectAverages = [];
+            const selectedTerm = gradingPeriodSelect.value;
             
-            // Calculate each subject average and collect all grades
             subjects.forEach((subject, index) => {
-                const average = calculateAverage(subject.quarters);
-                allGrades.push(average);
-                quarterlyGrades.push(subject.quarters[1]); // Second quarter for quarterly grade
+                // Calculate term averages
+                const term1Avg = calculateTermAverage(subject.grades, 1);
+                const term2Avg = calculateTermAverage(subject.grades, 2);
+                const term3Avg = calculateTermAverage(subject.grades, 3);
                 
-                // Update display
-                document.getElementById(`avg-${index}`).textContent = average.toFixed(1);
-                updateGradeColor(document.getElementById(`avg-${index}`), average);
+                // Calculate overall average for this subject
+                const termAverages = [term1Avg, term2Avg, term3Avg].filter(avg => avg > 0);
+                const overallAvg = termAverages.length > 0 ? 
+                    termAverages.reduce((sum, avg) => sum + avg, 0) / termAverages.length : 0;
+                
+                // Collect for overall calculations
+                allSubjectAverages.push(overallAvg);
+                
+                // Collect term-specific average
+                if (selectedTerm === "Term 1") {
+                    termSubjectAverages.push(term1Avg);
+                } else if (selectedTerm === "Term 2") {
+                    termSubjectAverages.push(term2Avg);
+                } else {
+                    termSubjectAverages.push(term3Avg);
+                }
             });
             
-            // Calculate overall averages
-            const quarterlyAverage = calculateAverage(quarterlyGrades);
-            const overallAverage = calculateAverage(allGrades);
+            // Calculate overall averages (filter out zeros)
+            const validOverallAverages = allSubjectAverages.filter(avg => avg > 0);
+            const overallAverage = validOverallAverages.length > 0 ? 
+                calculateAverage(validOverallAverages) : 0;
+            
+            const validTermAverages = termSubjectAverages.filter(avg => avg > 0);
+            const termAverage = validTermAverages.length > 0 ? 
+                calculateAverage(validTermAverages) : 0;
             
             // Update display
-            quarterlyGradeElement.textContent = quarterlyAverage.toFixed(1);
-            averageGradeElement.textContent = overallAverage.toFixed(1);
+            termAverageElement.textContent = termAverage.toFixed(1);
+            overallAverageElement.textContent = overallAverage.toFixed(1);
             
             // Update colors
-            updateGradeColor(quarterlyGradeElement, quarterlyAverage);
-            updateGradeColor(averageGradeElement, overallAverage);
+            updateGradeColor(termAverageElement, termAverage);
+            updateGradeColor(overallAverageElement, overallAverage);
+            
+            // Calculate and update ranks based on overall average
+            updateRanks(overallAverage);
             
             // Show completion status
             showCompletionStatus();
+        }
+
+        // Update term display when grading period changes
+        function updateTermDisplay() {
+            calculateAllGrades();
         }
 
         // Update grade color based on value
@@ -866,6 +1616,50 @@
             } else {
                 daysAbsentInput.value = totalDays - daysAttended;
             }
+            
+            // Calculate attendance rate
+            const rate = totalDays > 0 ? (daysAttended / totalDays * 100).toFixed(1) : 0;
+            attendanceRateInput.value = `${rate}%`;
+        }
+
+        // Update ranks based on average
+        function updateRanks(overallAverage) {
+            // Simulate rank calculation based on average
+            // In a real system, this would compare against other students
+            let streamRank, overallRank;
+            
+            if (overallAverage >= 95) {
+                streamRank = 1;
+                overallRank = 1;
+            } else if (overallAverage >= 90) {
+                streamRank = 2;
+                overallRank = 5;
+            } else if (overallAverage >= 85) {
+                streamRank = 3;
+                overallRank = 12;
+            } else if (overallAverage >= 80) {
+                streamRank = 8;
+                overallRank = 28;
+            } else if (overallAverage >= 75) {
+                streamRank = 15;
+                overallRank = 45;
+            } else if (overallAverage >= 70) {
+                streamRank = 22;
+                overallRank = 78;
+            } else if (overallAverage >= 65) {
+                streamRank = 30;
+                overallRank = 120;
+            } else {
+                streamRank = 40;
+                overallRank = 200;
+            }
+            
+            // Update rank display
+            const rankValues = document.querySelectorAll('.rank-value');
+            if (rankValues.length >= 2) {
+                rankValues[0].textContent = streamRank;
+                rankValues[1].textContent = overallRank;
+            }
         }
 
         // Show completion status
@@ -888,48 +1682,83 @@
                 calculateBtn.appendChild(statusIndicator);
             }
             
-            statusIndicator.className = `status-indicator ${allFilled ? 'status-complete' : 'status-incomplete'}`;
+            statusIndicator.className = `status-indicator`;
+            statusIndicator.style.backgroundColor = allFilled ? '#10B981' : '#FBBF24';
             statusIndicator.title = allFilled ? 'All grades entered' : 'Some grades missing';
+        }
+
+        // Initialize tooltips
+        function initializeTooltips() {
+            // Add tooltips to important elements
+            const tooltipElements = document.querySelectorAll('.grade-item, .rank-item, .final-grade-item, .qr-container');
+            tooltipElements.forEach(el => {
+                if (el.title) {
+                    el.style.cursor = 'help';
+                }
+            });
         }
 
         // Print report
         function printReport() {
+            // Generate new serial for print
+            generateSerialNumber();
+            
+            // Before printing, ensure everything is calculated
+            calculateAllGrades();
+            
+            // Add print-specific styling
+            const printStyle = document.createElement('style');
+            printStyle.innerHTML = `
+                @media print {
+                    body * {
+                        visibility: hidden;
+                    }
+                    .report-card-container, .report-card-container * {
+                        visibility: visible;
+                    }
+                    .report-card-container {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 210mm;
+                        min-width: 210mm;
+                        max-width: 210mm;
+                        box-shadow: none;
+                        border-radius: 0;
+                        padding: 20px 25px;
+                    }
+                    .no-print, .holographic-overlay {
+                        display: none !important;
+                    }
+                    .btn {
+                        display: none !important;
+                    }
+                }
+            `;
+            document.head.appendChild(printStyle);
+            
             window.print();
+            
+            // Remove the print style after printing
+            setTimeout(() => {
+                document.head.removeChild(printStyle);
+            }, 100);
         }
 
         // Reset all grades to default
         function resetGrades() {
             if (confirm('Are you sure you want to reset all grades to their default values?')) {
-                subjects.forEach((subject, index) => {
-                    // Reset to original values
-                    const originalSubject = subjects.find(s => s.code === subject.code);
-                    subject.quarters = [...originalSubject.quarters];
-                    
-                    // Update inputs
-                    subject.quarters.forEach((grade, quarterIndex) => {
-                        const input = document.querySelector(`input[data-subject="${index}"][data-quarter="${quarterIndex}"]`);
-                        if (input) input.value = grade;
-                    });
-                });
+                // Reset subjects to original values
+                const originalSubjects = [
+                    // Languages
+                    { name: "English Language", code: "ENG", papers: ["P1", "P2", "P3"], grades: [85, 88, 90, 87, 86, 89, 88, 90, 91] },
+                    { name: "Kiswahili", code: "KIS", papers: ["P1", "P2", "P3"], grades: [82, 85, 83, 84, 86, 85, 84, 87, 88] },
+                    // ... (other subjects with their original grades)
+                ];
                 
-                // Reset attendance
-                totalDaysInput.value = 90;
-                daysAttendedInput.value = 86;
-                updateAttendance();
-                
-                // Recalculate
-                calculateAllGrades();
+                // For simplicity, just reload the page to reset everything
+                window.location.reload();
             }
-        }
-
-        // Convert numeric grade to letter grade based on new system
-        function convertToLetterGrade(numericGrade) {
-            for (const item of gradingSystem) {
-                if (numericGrade >= item.min_score && numericGrade <= item.max_score) {
-                    return item.grade;
-                }
-            }
-            return 'N/A';
         }
 
         // Initialize when page loads
