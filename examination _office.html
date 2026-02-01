@@ -4412,6 +4412,7 @@ Alliance Girls High School
                 const subjectGroups = {};
                 const streamGroups = {};
                 const gradeGroups = {};
+                const allSubjectsSet = new Set(); // For horizontal subject columns
                 
                 // Process all data records
                 data.forEach(item => {
@@ -4421,6 +4422,8 @@ Alliance Girls High School
                     const stream = item.stream || 'Unknown';
                     const grade = item.grade || 'Unknown';
                     const percentage = parseFloat(item.percentage) || 0;
+                    
+                    allSubjectsSet.add(subject);
                     
                     // Group by student
                     if (!studentGroups[studentId]) {
@@ -4432,7 +4435,8 @@ Alliance Girls High School
                             stream: stream,
                             grade: grade,
                             scores: [],
-                            teacherCount: new Set() // Count unique teachers
+                            teacherCount: new Set(), // Count unique teachers
+                            subjectScores: {} // subject_code -> { sum, count } for horizontal display
                         };
                     }
                     studentGroups[studentId].totalScore += percentage;
@@ -4440,6 +4444,13 @@ Alliance Girls High School
                     studentGroups[studentId].scores.push(percentage);
                     studentGroups[studentId].subjects.add(subject);
                     studentGroups[studentId].teacherCount.add(teacherId);
+                    
+                    // Per-subject scores (average if multiple components per subject)
+                    if (!studentGroups[studentId].subjectScores[subject]) {
+                        studentGroups[studentId].subjectScores[subject] = { sum: 0, count: 0 };
+                    }
+                    studentGroups[studentId].subjectScores[subject].sum += percentage;
+                    studentGroups[studentId].subjectScores[subject].count += 1;
                     
                     // Group by teacher (using recorded_by)
                     if (!teacherGroups[teacherId]) {
@@ -4501,10 +4512,20 @@ Alliance Girls High School
                 
                 // Calculate averages and prepare rankings
                 
+                // Sorted list of all subjects for horizontal columns
+                const allSubjects = [...allSubjectsSet].sort();
+                
                 // 1. Student ranking
                 const studentRanking = Object.entries(studentGroups).map(([studentId, data]) => {
                     const average = data.count > 0 ? data.totalScore / data.count : 0;
                     const achievementLevel = getAchievementLevel(average);
+                    
+                    // Build subjectScores: subject -> percentage (or null if not sat)
+                    const subjectScores = {};
+                    allSubjects.forEach(subj => {
+                        const sc = data.subjectScores[subj];
+                        subjectScores[subj] = (sc && sc.count > 0) ? parseFloat((sc.sum / sc.count).toFixed(2)) : null;
+                    });
                     
                     return {
                         id: studentId,
@@ -4517,7 +4538,8 @@ Alliance Girls High School
                         achievement_level: achievementLevel,
                         subjectCount: data.subjects.size,
                         teacherCount: data.teacherCount.size,
-                        scores: data.scores
+                        scores: data.scores,
+                        subjectScores: subjectScores
                     };
                 }).sort((a, b) => b.average - a.average);
                 
@@ -4609,6 +4631,7 @@ Alliance Girls High School
                     subjectRanking: subjectRanking,
                     streamRanking: streamRanking,
                     gradeRanking: gradeRanking,
+                    allSubjects: allSubjects,
                     
                     // Top performers
                     topStudents: studentRanking.slice(0, 10),
@@ -4823,16 +4846,28 @@ Alliance Girls High School
                 switch(type) {
                     case 'students':
                         rankingData = window.currentAggregates.studentRanking;
-                        columns = [
-                            { key: 'rank', label: 'Rank', width: '80px' },
-                            { key: 'name', label: 'Student Name', width: '200px' },
-                            { key: 'id', label: 'Admission', width: '120px' },
-                            { key: 'average', label: 'Average %', width: '100px', format: 'percent' },
-                            { key: 'achievement_level', label: 'Achievement Level', width: '150px' },
-                            { key: 'grade', label: 'Grade', width: '80px' },
-                            { key: 'stream', label: 'Stream', width: '100px' },
-                            { key: 'subjectCount', label: 'Subjects', width: '80px' }
-                        ];
+                        const allSubjects = window.currentAggregates.allSubjects || [];
+                        if (allSubjects.length > 0 && rankingData.length > 0 && rankingData[0].subjectScores) {
+                            columns = [
+                                { key: 'rank', label: 'Rank', width: '60px' },
+                                { key: 'name', label: 'Student Name', width: '180px' }
+                            ];
+                            allSubjects.forEach(subj => {
+                                columns.push({ key: 'subject_' + subj, label: subj, width: '80px', format: 'subject' });
+                            });
+                            columns.push({ key: 'total_avg', label: 'Total / Average', width: '120px', format: 'totalAvg' });
+                        } else {
+                            columns = [
+                                { key: 'rank', label: 'Rank', width: '80px' },
+                                { key: 'name', label: 'Student Name', width: '200px' },
+                                { key: 'id', label: 'Admission', width: '120px' },
+                                { key: 'average', label: 'Average %', width: '100px', format: 'percent' },
+                                { key: 'achievement_level', label: 'Achievement Level', width: '150px' },
+                                { key: 'grade', label: 'Grade', width: '80px' },
+                                { key: 'stream', label: 'Stream', width: '100px' },
+                                { key: 'subjectCount', label: 'Subjects', width: '80px' }
+                            ];
+                        }
                         break;
                         
                     case 'teachers':
@@ -4887,11 +4922,11 @@ Alliance Girls High School
                 if (rankingData.length === 0) {
                     tableHTML = `<p style="text-align: center; color: #666; padding: 40px;">No ${type} data available</p>`;
                 } else {
-                    // Limit to top 20 for display
-                    const displayData = rankingData.slice(0, 20);
+                    const useHorizontalLayout = (type === 'students' && columns.some(c => c.format === 'subject'));
+                    const displayData = useHorizontalLayout ? rankingData : rankingData.slice(0, 20);
                     
                     tableHTML = `
-                        <div style="overflow-x: auto; max-height: 400px; border: 1px solid #ddd; border-radius: 8px;">
+                        <div style="overflow-x: auto; max-height: ${useHorizontalLayout ? '500px' : '400px'}; border: 1px solid #ddd; border-radius: 8px;">
                             <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                                 <thead style="background-color: var(--exam-office-purple); color: white; position: sticky; top: 0;">
                                     <tr>
@@ -4909,17 +4944,25 @@ Alliance Girls High School
                                         return `
                                             <tr style="background-color: ${rowColor};">
                                                 ${columns.map(col => {
-                                                    let cellValue = item[col.key] || '';
+                                                    let cellValue;
+                                                    if (col.format === 'subject') {
+                                                        const subj = col.label;
+                                                        cellValue = (item.subjectScores && item.subjectScores[subj] !== null) 
+                                                            ? item.subjectScores[subj].toFixed(2) : 'N/A';
+                                                    } else if (col.format === 'totalAvg') {
+                                                        cellValue = (item.totalScore !== undefined && item.average !== undefined) 
+                                                            ? `${item.totalScore.toFixed(2)} / ${item.average.toFixed(2)}` : '';
+                                                    } else {
+                                                        cellValue = item[col.key] ?? '';
+                                                    }
                                                     if (col.format === 'percent' && typeof cellValue === 'number') {
                                                         cellValue = cellValue.toFixed(2) + '%';
                                                     }
                                                     if (col.key === 'rank') {
-                                                        // Add medal emojis for top 3
                                                         if (item.rank === 1) cellValue = '🥇 ' + cellValue;
                                                         else if (item.rank === 2) cellValue = '🥈 ' + cellValue;
                                                         else if (item.rank === 3) cellValue = '🥉 ' + cellValue;
                                                     }
-                                                    // Color code achievement levels
                                                     if (col.key === 'achievement_level') {
                                                         if (cellValue === 'Exceeding Expectations') cellValue = `<span style="color: #075824; font-weight: bold;">${cellValue}</span>`;
                                                         else if (cellValue === 'Meeting Expectations') cellValue = `<span style="color: #333687; font-weight: bold;">${cellValue}</span>`;
@@ -4927,7 +4970,9 @@ Alliance Girls High School
                                                         else if (cellValue === 'Developing') cellValue = `<span style="color: #C62828; font-weight: bold;">${cellValue}</span>`;
                                                         else if (cellValue === 'Beginning') cellValue = `<span style="color: #C62828; font-weight: bold;">${cellValue}</span>`;
                                                     }
-                                                    return `<td style="padding: 8px 10px; border-bottom: 1px solid #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cellValue}">${cellValue}</td>`;
+                                                    const displayVal = (typeof cellValue === 'string' && cellValue.startsWith('<')) ? cellValue : String(cellValue);
+                                                    const titleAttr = (typeof cellValue === 'string' && !cellValue.startsWith('<')) ? ` title="${cellValue.replace(/"/g, '&quot;')}"` : '';
+                                                    return `<td style="padding: 8px 10px; border-bottom: 1px solid #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"${titleAttr}>${displayVal}</td>`;
                                                 }).join('')}
                                             </tr>
                                         `;
@@ -4935,7 +4980,8 @@ Alliance Girls High School
                                 </tbody>
                             </table>
                         </div>
-                        ${rankingData.length > 20 ? `<p style="text-align: center; color: #666; margin-top: 10px;">Showing top 20 of ${rankingData.length} ${type}</p>` : ''}
+                        ${(!useHorizontalLayout && rankingData.length > 20) ? `<p style="text-align: center; color: #666; margin-top: 10px;">Showing top 20 of ${rankingData.length} ${type}</p>` : ''}
+                        ${(useHorizontalLayout && rankingData.length > 0) ? `<p style="text-align: center; color: #666; margin-top: 10px;">Showing all ${rankingData.length} students</p>` : ''}
                     `;
                 }
                 
@@ -5230,113 +5276,104 @@ Alliance Girls High School
                 try {
                     const aggregates = calculateAggregates(compiledResults);
                     const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF();
                     
-                    // Add title
+                    const studentRanking = aggregates.studentRanking || [];
+                    const allSubjects = aggregates.allSubjects || [];
+                    const hasHorizontalData = allSubjects.length > 0 && studentRanking.length > 0 && studentRanking[0].subjectScores;
+                    
+                    const colCount = 3 + (hasHorizontalData ? allSubjects.length : 0);
+                    const useLandscape = hasHorizontalData && allSubjects.length > 5;
+                    const doc = new jsPDF(useLandscape ? 'l' : 'p', 'mm', 'a4');
+                    
+                    let yPosition = 20;
+                    
                     doc.setFontSize(16);
-                    doc.text('ALLIANCE GIRLS HIGH SCHOOL', 20, 20);
-                    doc.setFontSize(14);
-                    doc.text('Computation Results Report', 20, 30);
-                    
-                    // Add filter information
-                    doc.setFontSize(10);
-                    let yPosition = 45;
-                    
-                    doc.text('Filter Criteria:', 20, yPosition);
+                    doc.text('ALLIANCE GIRLS HIGH SCHOOL', 14, yPosition);
                     yPosition += 8;
+                    doc.setFontSize(14);
+                    doc.text('Computation Results Report - Students Ranking', 14, yPosition);
+                    yPosition += 10;
                     
-                    if (currentFilters.grade) doc.text(`Grade: ${currentFilters.grade}`, 25, yPosition);
-                    if (currentFilters.stream) doc.text(`Stream: ${currentFilters.stream}`, 25, yPosition);
+                    doc.setFontSize(10);
+                    if (currentFilters.grade) { doc.text(`Grade: ${currentFilters.grade}`, 14, yPosition); yPosition += 6; }
+                    if (currentFilters.stream) { doc.text(`Stream: ${currentFilters.stream}`, 14, yPosition); yPosition += 6; }
                     if (currentFilters.examTypes && currentFilters.examTypes.length > 0) {
-                        doc.text(`Exam Types: ${currentFilters.examTypes.join(', ')}`, 25, yPosition);
-                        yPosition += 8;
+                        doc.text(`Exam Types: ${currentFilters.examTypes.join(', ')}`, 14, yPosition); yPosition += 6;
                     }
                     if (currentFilters.terms && currentFilters.terms.length > 0) {
-                        doc.text(`Terms: ${currentFilters.terms.join(', ')}`, 25, yPosition);
-                        yPosition += 8;
+                        doc.text(`Terms: ${currentFilters.terms.join(', ')}`, 14, yPosition); yPosition += 6;
                     }
-                    if (currentFilters.year) doc.text(`Year: ${currentFilters.year}`, 25, yPosition);
-                    if (currentFilters.recordedBy) doc.text(`Recorded By: ${currentFilters.recordedBy}`, 25, yPosition);
+                    if (currentFilters.year) { doc.text(`Year: ${currentFilters.year}`, 14, yPosition); yPosition += 6; }
+                    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, yPosition);
+                    yPosition += 12;
                     
-                    yPosition += 15;
-                    
-                    // Add summary statistics
-                    doc.setFontSize(12);
-                    doc.text('Summary Statistics:', 20, yPosition);
-                    yPosition += 10;
-                    
-                    const stats = [
-                        ['Total Records:', aggregates.totalRecords.toString()],
-                        ['Unique Students:', aggregates.uniqueStudents.toString()],
-                        ['Unique Subjects:', aggregates.uniqueSubjects.toString()],
-                        ['Overall Mean:', aggregates.overallMean ? aggregates.overallMean.toFixed(2) + '%' : 'N/A'],
-                        ['Standard Deviation:', aggregates.standardDeviation ? aggregates.standardDeviation.toFixed(2) : 'N/A'],
-                        ['Highest Score:', aggregates.highestScore ? aggregates.highestScore.toFixed(2) + '%' : 'N/A'],
-                        ['Lowest Score:', aggregates.lowestScore ? aggregates.lowestScore.toFixed(2) + '%' : 'N/A'],
-                        ['Median:', aggregates.median ? aggregates.median.toFixed(2) + '%' : 'N/A']
-                    ];
-                    
-                    doc.setFontSize(10);
-                    stats.forEach(stat => {
-                        doc.text(stat[0], 25, yPosition);
-                        doc.text(stat[1], 120, yPosition);
-                        yPosition += 8;
-                    });
-                    
-                    yPosition += 10;
-                    
-                    // Add grade distribution
-                    if (aggregates.gradeDistribution && Object.keys(aggregates.gradeDistribution).length > 0) {
-                        doc.setFontSize(12);
-                        doc.text('Grade Distribution:', 20, yPosition);
-                        yPosition += 10;
+                    if (hasHorizontalData) {
+                        const pageWidth = doc.internal.pageSize.getWidth();
+                        const headers = ['Rank', 'Student Name', ...allSubjects, 'Total / Average'];
+                        const headStyles = { fillColor: [1, 39, 13], textColor: [255, 255, 255], fontSize: 8, halign: 'center' };
+                        const bodyStyles = { fontSize: 7, halign: 'center' };
                         
-                        doc.setFontSize(10);
-                        Object.entries(aggregates.gradeDistribution)
-                            .sort((a, b) => b[1] - a[1])
-                            .forEach(([grade, count], index) => {
-                                if (index % 2 === 0) {
-                                    doc.text(`${grade}: ${count}`, 25, yPosition);
-                                } else {
-                                    doc.text(`${grade}: ${count}`, 100, yPosition);
-                                    yPosition += 8;
-                                }
+                        const tableData = studentRanking.map((student) => {
+                            const row = [
+                                student.rank,
+                                (student.name || 'Unknown').substring(0, 25)
+                            ];
+                            allSubjects.forEach(subj => {
+                                const val = student.subjectScores && student.subjectScores[subj] !== null
+                                    ? student.subjectScores[subj].toFixed(2) : 'N/A';
+                                row.push(val);
                             });
+                            row.push(`${(student.totalScore || 0).toFixed(2)} / ${(student.average || 0).toFixed(2)}`);
+                            return row;
+                        });
                         
-                        if (Object.keys(aggregates.gradeDistribution).length % 2 !== 0) {
-                            yPosition += 8;
+                        doc.autoTable({
+                            head: [headers],
+                            body: tableData,
+                            startY: yPosition,
+                            theme: 'grid',
+                            headStyles: headStyles,
+                            bodyStyles: bodyStyles,
+                            alternateRowStyles: { fillColor: [248, 248, 248] },
+                            margin: { left: 14, right: 14 },
+                            styles: { overflow: 'linebreak', cellWidth: 'wrap' },
+                            showHead: 'everyPage',
+                            didDrawPage: (data) => {
+                                doc.setFontSize(8);
+                                doc.text(`Page ${doc.internal.getNumberOfPages()}`, pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+                            },
+                            tableLineColor: [200, 200, 200],
+                            tableLineWidth: 0.1
+                        });
+                    } else {
+                        doc.setFontSize(10);
+                        doc.text('Summary:', 14, yPosition);
+                        yPosition += 8;
+                        doc.text(`Total Records: ${aggregates.totalRecords} | Students: ${aggregates.uniqueStudents} | Overall Mean: ${aggregates.overallMean ? aggregates.overallMean.toFixed(2) + '%' : 'N/A'}`, 14, yPosition);
+                        yPosition += 10;
+                        const headers = ['Rank', 'Student Name', 'Admission', 'Average %', 'Achievement'];
+                        const tableData = studentRanking.slice(0, 100).map(s => [
+                            s.rank,
+                            (s.name || '').substring(0, 30),
+                            s.id || '',
+                            (s.average || 0).toFixed(2) + '%',
+                            s.achievement_level || ''
+                        ]);
+                        if (tableData.length > 0) {
+                            doc.autoTable({
+                                head: [headers],
+                                body: tableData,
+                                startY: yPosition,
+                                theme: 'grid',
+                                headStyles: { fillColor: [1, 39, 13], textColor: [255, 255, 255], fontSize: 9 },
+                                bodyStyles: { fontSize: 8 },
+                                margin: { left: 14 }
+                            });
                         }
                     }
                     
-                    yPosition += 10;
-                    
-                    // Add top performing subjects
-                    const subjectAverages = Object.entries(aggregates.subjectPerformance || {})
-                        .map(([subject, data]) => ({
-                            subject,
-                            average: data.count > 0 ? data.total / data.count : 0
-                        }))
-                        .sort((a, b) => b.average - a.average)
-                        .slice(0, 5);
-                    
-                    if (subjectAverages.length > 0) {
-                        doc.setFontSize(12);
-                        doc.text('Top Performing Subjects:', 20, yPosition);
-                        yPosition += 10;
-                        
-                        doc.setFontSize(10);
-                        subjectAverages.forEach((item, index) => {
-                            doc.text(`${index + 1}. ${item.subject}: ${item.average.toFixed(2)}%`, 25, yPosition);
-                            yPosition += 8;
-                        });
-                    }
-                    
-                    // Generate filename
                     const filename = `Computation_Results_${new Date().toISOString().split('T')[0]}.pdf`;
-                    
-                    // Save file
                     doc.save(filename);
-                    
                     console.log(`Computation results exported: ${filename}`);
                     
                 } catch (error) {
