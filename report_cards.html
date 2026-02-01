@@ -6,6 +6,7 @@
     <title>Alliance Girls High School - Secure Report Card</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* Reset and base styles */
         * {
@@ -24,6 +25,35 @@
             overflow-x: auto;
         }
 
+        /* Security Background Patterns */
+        .security-bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.15;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(7, 88, 36, 0.08) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(155, 174, 48, 0.08) 0%, transparent 20%),
+                repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(7, 88, 36, 0.03) 2px, rgba(7, 88, 36, 0.03) 4px),
+                repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(155, 174, 48, 0.03) 2px, rgba(155, 174, 48, 0.03) 4px);
+        }
+
+        .fingerprint-pattern {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 800px;
+            height: 800px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M20,50 Q50,20 80,50 Q50,80 20,50" fill="none" stroke="rgba(7, 88, 36, 0.03)" stroke-width="0.5"/><path d="M30,40 Q50,25 70,40 Q50,55 30,40" fill="none" stroke="rgba(155, 174, 48, 0.03)" stroke-width="0.5"/><circle cx="50" cy="50" r="15" fill="none" stroke="rgba(7, 88, 36, 0.03)" stroke-width="0.5"/></svg>');
+            background-repeat: repeat;
+            transform: translate(-50%, -50%) rotate(15deg);
+            opacity: 0.4;
+        }
+
         /* Main Container - Full Screen */
         .report-card-container {
             width: 100%;
@@ -38,6 +68,9 @@
             flex-direction: column;
             overflow: visible;
             border: 1px solid #c9d6c3;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><path d="M20,20 L180,180 M180,20 L20,180" stroke="rgba(7, 88, 36, 0.02)" stroke-width="1"/><circle cx="100" cy="100" r="80" fill="none" stroke="rgba(155, 174, 48, 0.02)" stroke-width="1"/></svg>');
         }
 
         /* Security Background Elements */
@@ -115,6 +148,10 @@
             .watermark {
                 font-size: 140px;
             }
+            
+            .security-bg-pattern {
+                opacity: 0.1;
+            }
         }
 
         /* Header Section - Full Width */
@@ -130,8 +167,8 @@
         }
 
         .school-logo {
-            width: 100px;
-            height: 100px;
+            width: 110px;
+            height: 110px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -146,8 +183,8 @@
         .school-logo img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            padding: 10px;
+            object-fit: cover;
+            padding: 8px;
         }
 
         .school-name {
@@ -194,8 +231,8 @@
         /* Student Info Section - Enhanced */
         .student-info {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 15px;
             margin-bottom: 30px;
             padding-bottom: 25px;
             border-bottom: 2px solid #dde7e0;
@@ -208,19 +245,23 @@
             flex-direction: column;
         }
 
+        .info-field.full-width {
+            grid-column: span 2;
+        }
+
         .info-field label {
-            font-size: 14px;
+            font-size: 13px;
             color: #5D8B70;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 600;
             letter-spacing: 0.5px;
         }
 
         .info-field input, .info-field select {
-            padding: 12px 0;
+            padding: 10px 0;
             border: none;
             border-bottom: 2px solid #d0d9d3;
-            font-size: 16px;
+            font-size: 15px;
             background: transparent;
             outline: none;
             transition: all 0.3s;
@@ -267,9 +308,9 @@
         .subjects-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 13px;
             table-layout: fixed;
-            min-width: 1200px;
+            min-width: 1400px;
         }
 
         .subjects-table thead {
@@ -280,36 +321,44 @@
         }
 
         .subjects-table th {
-            padding: 15px 8px;
+            padding: 12px 6px;
             text-align: center;
             font-weight: 700;
             color: #075824;
             border: 1px solid #c9d6c3;
-            font-size: 13px;
+            font-size: 12px;
             white-space: nowrap;
             vertical-align: middle;
-            min-width: 70px;
         }
 
         .subjects-table th.subject-col {
             text-align: left;
-            width: 220px;
-            min-width: 220px;
-            max-width: 220px;
+            width: 180px;
+            min-width: 180px;
+            max-width: 180px;
             overflow: hidden;
             text-overflow: ellipsis;
-            padding-left: 15px;
+            padding-left: 12px;
         }
 
-        .subjects-table th.paper-header {
-            background-color: #e5efe8;
-            font-size: 12px;
-            padding: 10px 4px;
+        .subjects-table th.exam-type {
+            background-color: #e8f0eb;
+            font-size: 11px;
             font-weight: 600;
+            color: #377437;
+            padding: 8px 4px;
+        }
+
+        .subjects-table th.term-header {
+            background-color: #e5efe8;
+            font-size: 14px;
+            padding: 12px 4px;
+            font-weight: 700;
+            color: #075824;
         }
 
         .subjects-table td {
-            padding: 12px 6px;
+            padding: 10px 5px;
             border: 1px solid #e0e0e0;
             text-align: center;
             vertical-align: middle;
@@ -327,35 +376,27 @@
         .subject-cell {
             text-align: left !important;
             font-weight: 600;
-            padding-left: 15px !important;
+            padding-left: 12px !important;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
         .subject-code {
-            font-size: 12px;
+            font-size: 11px;
             color: #5D8B70;
             margin-top: 4px;
             display: block;
             font-weight: 500;
         }
 
-        .papers-cell {
-            padding: 4px !important;
-            font-size: 11px;
-            color: #666;
-            line-height: 1.4;
-            font-family: 'Courier New', monospace;
-        }
-
         .subjects-table input {
-            width: 65px;
-            padding: 8px 4px;
+            width: 60px;
+            padding: 6px 4px;
             border: 1px solid #d0d9d3;
-            border-radius: 5px;
+            border-radius: 4px;
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             transition: all 0.3s;
             background: white;
@@ -365,29 +406,49 @@
             outline: none;
             border-color: #9BAE30;
             box-shadow: 0 0 0 2px rgba(155, 174, 48, 0.3);
-            transform: translateY(-1px);
         }
 
         .subject-average {
             font-weight: 700;
             color: #075824;
-            font-size: 15px;
-            padding: 12px 8px !important;
+            font-size: 14px;
+            padding: 10px 6px !important;
             background-color: #f9fcf8 !important;
         }
 
-        /* Paper input styling */
-        .paper-input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            align-items: center;
+        .paper-average {
+            font-weight: 600;
+            color: #377437;
+            background-color: #f0f7f4 !important;
         }
 
-        .paper-input-group label {
-            font-size: 11px;
-            color: #666;
-            margin-bottom: 2px;
+        /* Exam Type Labels */
+        .exam-type-label {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 3px;
+            text-transform: uppercase;
+        }
+
+        .opener-exam {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #90caf9;
+        }
+
+        .mid-exam {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+            border: 1px solid #ce93d8;
+        }
+
+        .end-exam {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
         }
 
         /* Grading System - Enhanced */
@@ -443,7 +504,14 @@
             font-size: 14px;
         }
 
-        /* Teacher Comments */
+        /* Comments Section - Enhanced */
+        .comments-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
         .comments-box {
             background: linear-gradient(to bottom, #f9fcf8 0%, #f0f7f4 100%);
             border: 2px solid #d0d9d3;
@@ -468,13 +536,12 @@
 
         .comments-box textarea {
             width: 100%;
-            height: 180px;
+            height: 120px;
             padding: 15px;
             border: 2px solid #d0d9d3;
             border-radius: 8px;
-            font-size: 15px;
-            resize: vertical;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            font-size: 14px;
+            resize: none;
             line-height: 1.6;
             font-family: 'Inter', sans-serif;
             font-weight: 400;
@@ -484,6 +551,36 @@
             outline: none;
             border-color: #9BAE30;
             box-shadow: 0 0 0 3px rgba(155, 174, 48, 0.2);
+        }
+
+        /* Performance Graph */
+        .performance-graph {
+            background: linear-gradient(to bottom, #f9fcf8 0%, #f0f7f4 100%);
+            border: 2px solid #d0d9d3;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .performance-graph h3 {
+            color: #075824;
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .performance-graph h3 i {
+            color: #9BAE30;
+            font-size: 22px;
+        }
+
+        .graph-container {
+            width: 100%;
+            height: 200px;
+            position: relative;
         }
 
         /* Bottom Section - Full Width */
@@ -796,7 +893,7 @@
 
         @media (max-width: 1200px) {
             .student-info {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(4, 1fr);
             }
             
             .bottom-section {
@@ -808,6 +905,10 @@
                 grid-template-columns: 1fr;
                 max-width: 400px;
                 margin: 0 auto;
+            }
+            
+            .comments-section {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -870,12 +971,78 @@
             0% { background-position: 0% 0%; }
             100% { background-position: 200% 200%; }
         }
+
+        /* Complex background patterns */
+        .complex-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(7, 88, 36, 0.02)"/><circle cx="50" cy="50" r="2" fill="rgba(7, 88, 36, 0.02)"/><circle cx="80" cy="80" r="2" fill="rgba(7, 88, 36, 0.02)"/><path d="M10,90 L90,10" stroke="rgba(155, 174, 48, 0.02)" stroke-width="0.5"/></svg>'),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><path d="M50,50 Q100,0 150,50 Q100,100 50,50" fill="none" stroke="rgba(7, 88, 36, 0.01)" stroke-width="0.5"/><path d="M100,100 L150,150" stroke="rgba(155, 174, 48, 0.01)" stroke-width="0.5"/></svg>');
+            background-repeat: repeat;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Signature Section */
+        .signature-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px dashed #d0d9d3;
+        }
+
+        .signature-box {
+            text-align: center;
+            padding: 20px;
+            background: #f9fcf8;
+            border-radius: 10px;
+            border: 2px solid #e5efe8;
+        }
+
+        .signature-box h4 {
+            color: #075824;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .signature-line {
+            width: 80%;
+            height: 1px;
+            background: #333;
+            margin: 40px auto 10px;
+        }
+
+        .signature-name {
+            font-weight: 600;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        .signature-title {
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
+    <!-- Background Security Patterns -->
+    <div class="security-bg-pattern"></div>
+    <div class="fingerprint-pattern"></div>
+    
     <div class="report-card-container">
         <!-- Holographic Overlay for Security -->
         <div class="holographic-overlay"></div>
+        
+        <!-- Complex Background Pattern -->
+        <div class="complex-pattern"></div>
         
         <!-- Security Background Elements -->
         <div class="security-background">
@@ -887,7 +1054,7 @@
         <!-- Header Section -->
         <div class="header">
             <div class="school-logo">
-                <img src="https://api.dicebear.com/7.x/shapes/svg?seed=AllianceGirls" alt="Alliance Girls High School Badge">
+                <img src="badge.png" alt="Alliance Girls High School Badge" onerror="this.onerror=null; this.src='https://api.dicebear.com/7.x/shapes/svg?seed=AllianceGirls'">
             </div>
             <div class="school-name">
                 <h1>Alliance Girls High School</h1>
@@ -901,17 +1068,32 @@
 
         <!-- Student Information -->
         <div class="student-info">
-            <div class="info-field">
+            <div class="info-field full-width">
                 <label for="studentName"><i class="fas fa-user-graduate"></i> Name of Student</label>
                 <input type="text" id="studentName" value="Alexandra Wanjiru Johnson">
             </div>
             <div class="info-field">
-                <label for="yearSection"><i class="fas fa-school"></i> Year and Section</label>
+                <label for="gender"><i class="fas fa-venus-mars"></i> Gender</label>
+                <select id="gender">
+                    <option value="Female" selected>Female</option>
+                    <option value="Male">Male</option>
+                </select>
+            </div>
+            <div class="info-field">
+                <label for="yearSection"><i class="fas fa-school"></i> Year & Section</label>
                 <input type="text" id="yearSection" value="Grade 12 - Science Stream A">
             </div>
             <div class="info-field">
                 <label for="classAdviser"><i class="fas fa-chalkboard-teacher"></i> Class Adviser</label>
                 <input type="text" id="classAdviser" value="Mr. Robert Chen">
+            </div>
+            <div class="info-field full-width">
+                <label for="parentGuardian"><i class="fas fa-users"></i> Parent/Guardian Name</label>
+                <input type="text" id="parentGuardian" value="Mr. James Johnson">
+            </div>
+            <div class="info-field">
+                <label for="parentPhone"><i class="fas fa-phone"></i> Parent Phone</label>
+                <input type="text" id="parentPhone" value="+254 712 345 678">
             </div>
             <div class="info-field">
                 <label for="gradingPeriod"><i class="fas fa-calendar-alt"></i> Grading Period</label>
@@ -931,37 +1113,44 @@
         <div class="main-content">
             <!-- Left Column - Subjects with Papers -->
             <div class="subjects-section">
-                <h2><i class="fas fa-book-open"></i> Academic Performance by Paper</h2>
+                <h2><i class="fas fa-book-open"></i> Academic Performance by Paper & Exam Type</h2>
                 <div class="subjects-table-container">
                     <table class="subjects-table">
                         <thead>
                             <tr>
                                 <th class="subject-col">Subject & Papers</th>
                                 <!-- Term 1 Headers -->
-                                <th colspan="4" class="paper-header">Term 1 Assessments</th>
+                                <th colspan="5" class="term-header">TERM 1 ASSESSMENTS</th>
                                 <!-- Term 2 Headers -->
-                                <th colspan="4" class="paper-header">Term 2 Assessments</th>
+                                <th colspan="5" class="term-header">TERM 2 ASSESSMENTS</th>
                                 <!-- Term 3 Headers -->
-                                <th colspan="4" class="paper-header">Term 3 Assessments</th>
+                                <th colspan="5" class="term-header">TERM 3 ASSESSMENTS</th>
                                 <th>Final Average</th>
                             </tr>
                             <tr>
                                 <th class="subject-col">Subject (Code & Papers)</th>
-                                <!-- Term 1 Paper Columns -->
-                                <th>P1</th>
-                                <th>P2</th>
-                                <th>P3</th>
-                                <th>Term Avg</th>
-                                <!-- Term 2 Paper Columns -->
-                                <th>P1</th>
-                                <th>P2</th>
-                                <th>P3</th>
-                                <th>Term Avg</th>
-                                <!-- Term 3 Paper Columns -->
-                                <th>P1</th>
-                                <th>P2</th>
-                                <th>P3</th>
-                                <th>Term Avg</th>
+                                <!-- Term 1 Columns -->
+                                <th class="exam-type opener-exam">Opener</th>
+                                <th class="exam-type mid-exam">Mid Term</th>
+                                <th class="exam-type end-exam">End Term</th>
+                                <th>Term 1 Avg</th>
+                                <th>Grade</th>
+                                
+                                <!-- Term 2 Columns -->
+                                <th class="exam-type opener-exam">Opener</th>
+                                <th class="exam-type mid-exam">Mid Term</th>
+                                <th class="exam-type end-exam">End Term</th>
+                                <th>Term 2 Avg</th>
+                                <th>Grade</th>
+                                
+                                <!-- Term 3 Columns -->
+                                <th class="exam-type opener-exam">Opener</th>
+                                <th class="exam-type mid-exam">Mid Term</th>
+                                <th class="exam-type end-exam">End Term</th>
+                                <th>Term 3 Avg</th>
+                                <th>Grade</th>
+                                
+                                <!-- Overall -->
                                 <th>Overall Avg</th>
                             </tr>
                         </thead>
@@ -981,13 +1170,24 @@
                     </div>
                 </div>
 
-                <div class="comments-box">
-                    <h3><i class="fas fa-comment-dots"></i> Teacher's Comments & Recommendations</h3>
-                    <textarea id="teacherComments">Alexandra has demonstrated exceptional aptitude in Sciences and Mathematics, consistently scoring above 85% in all papers. Her analytical skills are outstanding. She shows strong leadership qualities in group projects and actively participates in class discussions. 
+                <!-- Performance Graph -->
+                <div class="performance-graph">
+                    <h3><i class="fas fa-chart-line"></i> Performance Trend</h3>
+                    <div class="graph-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
 
-Areas for improvement: Could work on time management during examinations to ensure all questions are attempted. Additional practice in essay writing for humanities subjects would be beneficial.
-
-Overall, a dedicated and promising student with excellent academic performance. Shows great potential for STEM fields at university level.</textarea>
+                <!-- Comments Section -->
+                <div class="comments-section">
+                    <div class="comments-box">
+                        <h3><i class="fas fa-chalkboard-teacher"></i> Class Teacher's Comments</h3>
+                        <textarea id="teacherComments">Alexandra demonstrates exceptional aptitude in Sciences and Mathematics. Shows strong leadership in group projects. Time management during exams needs improvement. Overall excellent performance.</textarea>
+                    </div>
+                    <div class="comments-box">
+                        <h3><i class="fas fa-user-tie"></i> Principal's Comments</h3>
+                        <textarea id="principalComments">Outstanding academic performance. Shows great potential for STEM fields. A model student with exemplary conduct. Recommended for university scholarship consideration.</textarea>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1047,6 +1247,24 @@ Overall, a dedicated and promising student with excellent academic performance. 
             </div>
         </div>
 
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <div class="signature-box">
+                <h4>Class Teacher's Signature</h4>
+                <p>I certify that the above information is accurate</p>
+                <div class="signature-line"></div>
+                <div class="signature-name">Mr. Robert Chen</div>
+                <div class="signature-title">Class Teacher, Science Stream A</div>
+            </div>
+            <div class="signature-box">
+                <h4>Principal's Signature</h4>
+                <p>Approved and verified by school administration</p>
+                <div class="signature-line"></div>
+                <div class="signature-name">Dr. Elizabeth Muthoni</div>
+                <div class="signature-title">Principal, Alliance Girls High School</div>
+            </div>
+        </div>
+
         <!-- Security QR Code -->
         <div class="security-qr">
             <div class="qr-container">
@@ -1076,100 +1294,36 @@ Overall, a dedicated and promising student with excellent academic performance. 
     </div>
 
     <script>
-        // Enhanced subjects with paper codes - FIXED STRUCTURE
+        // Enhanced subjects with exam types
         const subjects = [
-            // Languages - Each subject now has 9 paper scores (3 per term)
+            // Languages
             { 
                 name: "English Language", 
                 code: "ENG", 
                 papers: ["P1", "P2", "P3"], 
-                grades: [85, 88, 90, 87, 86, 89, 88, 90, 91] // T1-P1, T1-P2, T1-P3, T2-P1, T2-P2, T2-P3, T3-P1, T3-P2, T3-P3
+                grades: [85, 88, 90, 87, 86, 89, 88, 90, 91],
+                examTypes: ["opener", "mid", "end", "opener", "mid", "end", "opener", "mid", "end"]
             },
             { 
                 name: "Kiswahili", 
                 code: "KIS", 
                 papers: ["P1", "P2", "P3"], 
-                grades: [82, 85, 83, 84, 86, 85, 84, 87, 88]
+                grades: [82, 85, 83, 84, 86, 85, 84, 87, 88],
+                examTypes: ["opener", "mid", "end", "opener", "mid", "end", "opener", "mid", "end"]
             },
             { 
                 name: "Kenya Sign Language", 
                 code: "KSL", 
                 papers: ["P1", "P2"], 
-                grades: [88, 90, 0, 89, 91, 0, 90, 92, 0] // P3 set to 0 for subjects with only 2 papers
+                grades: [88, 90, 0, 89, 91, 0, 90, 92, 0],
+                examTypes: ["opener", "mid", "none", "opener", "mid", "none", "opener", "mid", "none"]
             },
             { 
                 name: "Literature in English", 
                 code: "LIT", 
                 papers: ["P1", "P2"], 
-                grades: [78, 82, 0, 80, 83, 0, 84, 87, 0]
-            },
-            { 
-                name: "Fasihi ya Kiswahili", 
-                code: "FAS", 
-                papers: ["P1", "P2"], 
-                grades: [80, 83, 0, 82, 84, 0, 85, 86, 0]
-            },
-            { 
-                name: "Indigenous Languages", 
-                code: "IND", 
-                papers: ["P1", "P2"], 
-                grades: [85, 87, 0, 88, 87, 0, 88, 90, 0]
-            },
-            { 
-                name: "Arabic", 
-                code: "ARB", 
-                papers: ["P1", "P2"], 
-                grades: [90, 92, 0, 93, 92, 0, 93, 95, 0]
-            },
-            { 
-                name: "French", 
-                code: "FRE", 
-                papers: ["P1", "P2"], 
-                grades: [84, 86, 0, 87, 86, 0, 87, 89, 0]
-            },
-            { 
-                name: "German", 
-                code: "GER", 
-                papers: ["P1", "P2"], 
-                grades: [87, 89, 0, 90, 89, 0, 90, 92, 0]
-            },
-            { 
-                name: "Mandarin Chinese", 
-                code: "MAN", 
-                papers: ["P1", "P2"], 
-                grades: [82, 84, 0, 85, 84, 0, 85, 87, 0]
-            },
-            
-            // Humanities
-            { 
-                name: "History & Citizenship", 
-                code: "HIS", 
-                papers: ["P1", "P2"], 
-                grades: [82, 85, 0, 86, 84, 0, 85, 88, 0]
-            },
-            { 
-                name: "Geography", 
-                code: "GEO", 
-                papers: ["P1", "P2"], 
-                grades: [80, 83, 0, 84, 82, 0, 83, 86, 0]
-            },
-            { 
-                name: "Christian Religious Education (CRE)", 
-                code: "CRE", 
-                papers: ["P1", "P2"], 
-                grades: [85, 88, 0, 89, 87, 0, 88, 91, 0]
-            },
-            { 
-                name: "Islamic Religious Education (IRE)", 
-                code: "IRE", 
-                papers: ["P1", "P2"], 
-                grades: [87, 90, 0, 91, 89, 0, 90, 93, 0]
-            },
-            { 
-                name: "Hindu Religious Education (HRE)", 
-                code: "HRE", 
-                papers: ["P1", "P2"], 
-                grades: [88, 91, 0, 92, 90, 0, 91, 94, 0]
+                grades: [78, 82, 0, 80, 83, 0, 84, 87, 0],
+                examTypes: ["opener", "mid", "none", "opener", "mid", "none", "opener", "mid", "none"]
             },
             
             // Mathematics
@@ -1177,19 +1331,15 @@ Overall, a dedicated and promising student with excellent academic performance. 
                 name: "Core Mathematics", 
                 code: "MAT-C", 
                 papers: ["P1", "P2"], 
-                grades: [92, 89, 0, 91, 93, 0, 95, 92, 0]
-            },
-            { 
-                name: "Essential Mathematics", 
-                code: "MAT-E", 
-                papers: ["P1"], 
-                grades: [85, 0, 0, 89, 0, 0, 88, 0, 0]
+                grades: [92, 89, 0, 91, 93, 0, 95, 92, 0],
+                examTypes: ["opener", "mid", "none", "opener", "mid", "none", "opener", "mid", "none"]
             },
             { 
                 name: "Advanced Mathematics", 
                 code: "MAT-A", 
                 papers: ["P1", "P2"], 
-                grades: [90, 93, 0, 94, 92, 0, 93, 96, 0]
+                grades: [90, 93, 0, 94, 92, 0, 93, 96, 0],
+                examTypes: ["opener", "mid", "none", "opener", "mid", "none", "opener", "mid", "none"]
             },
             
             // Sciences
@@ -1197,119 +1347,84 @@ Overall, a dedicated and promising student with excellent academic performance. 
                 name: "Biology", 
                 code: "BIO", 
                 papers: ["P1", "P2", "P3"], 
-                grades: [88, 91, 89, 92, 90, 93, 91, 94, 95]
+                grades: [88, 91, 89, 92, 90, 93, 91, 94, 95],
+                examTypes: ["opener", "mid", "end", "opener", "mid", "end", "opener", "mid", "end"]
             },
             { 
                 name: "Chemistry", 
                 code: "CHE", 
                 papers: ["P1", "P2", "P3"], 
-                grades: [86, 89, 87, 90, 88, 91, 89, 92, 93]
+                grades: [86, 89, 87, 90, 88, 91, 89, 92, 93],
+                examTypes: ["opener", "mid", "end", "opener", "mid", "end", "opener", "mid", "end"]
             },
             { 
                 name: "Physics", 
                 code: "PHY", 
                 papers: ["P1", "P2", "P3"], 
-                grades: [85, 88, 90, 87, 89, 92, 90, 93, 94]
-            },
-            { 
-                name: "Agriculture", 
-                code: "AGR", 
-                papers: ["P1", "P2", "P3"], 
-                grades: [83, 86, 84, 87, 85, 88, 86, 89, 90]
+                grades: [85, 88, 90, 87, 89, 92, 90, 93, 94],
+                examTypes: ["opener", "mid", "end", "opener", "mid", "end", "opener", "mid", "end"]
             },
             
-            // Technical & Applied Subjects
+            // Humanities
+            { 
+                name: "History & Citizenship", 
+                code: "HIS", 
+                papers: ["P1", "P2"], 
+                grades: [82, 85, 0, 86, 84, 0, 85, 88, 0],
+                examTypes: ["opener", "mid", "none", "opener", "mid", "none", "opener", "mid", "none"]
+            },
+            { 
+                name: "Geography", 
+                code: "GEO", 
+                papers: ["P1", "P2"], 
+                grades: [80, 83, 0, 84, 82, 0, 83, 86, 0],
+                examTypes: ["opener", "mid", "none", "opener", "mid", "none", "opener", "mid", "none"]
+            },
+            { 
+                name: "Christian Religious Education", 
+                code: "CRE", 
+                papers: ["P1", "P2"], 
+                grades: [85, 88, 0, 89, 87, 0, 88, 91, 0],
+                examTypes: ["opener", "mid", "none", "opener", "mid", "none", "opener", "mid", "none"]
+            },
+            
+            // Technical & Applied
             { 
                 name: "Computer Studies", 
                 code: "CST", 
                 papers: ["P1", "P2", "P3"], 
-                grades: [89, 91, 90, 92, 91, 93, 92, 94, 95]
+                grades: [89, 91, 90, 92, 91, 93, 92, 94, 95],
+                examTypes: ["opener", "mid", "end", "opener", "mid", "end", "opener", "mid", "end"]
             },
             { 
                 name: "Business Studies", 
                 code: "BUS", 
                 papers: ["P1", "P2"], 
-                grades: [84, 87, 0, 88, 86, 0, 87, 90, 0]
-            },
-            { 
-                name: "Aviation Technology", 
-                code: "AVI", 
-                papers: ["P1", "P2"], 
-                grades: [87, 90, 0, 91, 89, 0, 90, 93, 0]
-            },
-            { 
-                name: "Building Construction", 
-                code: "BLD", 
-                papers: ["P1", "P2"], 
-                grades: [82, 85, 0, 86, 84, 0, 85, 88, 0]
-            },
-            { 
-                name: "Power Mechanics", 
-                code: "PM", 
-                papers: ["P1", "P2"], 
-                grades: [85, 88, 0, 89, 87, 0, 88, 91, 0]
-            },
-            { 
-                name: "Electricity", 
-                code: "ELE", 
-                papers: ["P1", "P2"], 
-                grades: [83, 86, 0, 87, 85, 0, 86, 89, 0]
-            },
-            { 
-                name: "Metalwork", 
-                code: "MET", 
-                papers: ["P1", "P2"], 
-                grades: [80, 83, 0, 84, 82, 0, 83, 86, 0]
-            },
-            { 
-                name: "Woodwork", 
-                code: "WOD", 
-                papers: ["P1", "P2"], 
-                grades: [82, 85, 0, 86, 84, 0, 85, 88, 0]
-            },
-            { 
-                name: "Marine & Fisheries Technology", 
-                code: "MFT", 
-                papers: ["P1", "P2"], 
-                grades: [85, 88, 0, 89, 87, 0, 88, 91, 0]
+                grades: [84, 87, 0, 88, 86, 0, 87, 90, 0],
+                examTypes: ["opener", "mid", "none", "opener", "mid", "none", "opener", "mid", "none"]
             },
             { 
                 name: "Home Science", 
                 code: "HOM", 
                 papers: ["P1", "P2", "P3"], 
-                grades: [88, 91, 89, 92, 90, 93, 91, 94, 95]
+                grades: [88, 91, 89, 92, 90, 93, 91, 94, 95],
+                examTypes: ["opener", "mid", "end", "opener", "mid", "end", "opener", "mid", "end"]
             },
             
-            // Creative & Physical Subjects
+            // Creative
             { 
                 name: "Fine Arts", 
                 code: "ART", 
                 papers: ["P1", "P2"], 
-                grades: [94, 93, 0, 94, 96, 0, 97, 96, 0]
-            },
-            { 
-                name: "Theatre & Film", 
-                code: "THF", 
-                papers: ["P1", "P2"], 
-                grades: [88, 91, 0, 92, 90, 0, 91, 94, 0]
+                grades: [94, 93, 0, 94, 96, 0, 97, 96, 0],
+                examTypes: ["opener", "mid", "none", "opener", "mid", "none", "opener", "mid", "none"]
             },
             { 
                 name: "Music", 
                 code: "MUS", 
                 papers: ["P1", "P2", "P3"], 
-                grades: [90, 92, 91, 93, 92, 94, 93, 95, 96]
-            },
-            { 
-                name: "Dance", 
-                code: "DAN", 
-                papers: ["P1", "P2"], 
-                grades: [86, 89, 0, 90, 88, 0, 89, 92, 0]
-            },
-            { 
-                name: "Sports & Recreation", 
-                code: "SPR", 
-                papers: ["P1", "P2"], 
-                grades: [96, 95, 0, 96, 98, 0, 99, 98, 0]
+                grades: [90, 92, 91, 93, 92, 94, 93, 95, 96],
+                examTypes: ["opener", "mid", "end", "opener", "mid", "end", "opener", "mid", "end"]
             }
         ];
 
@@ -1323,6 +1438,13 @@ Overall, a dedicated and promising student with excellent academic performance. 
             { grade: "F", min_score: 0, max_score: 39, achievement_level: "Fail", color_code: "#EF4444" }
         ];
 
+        // Performance data for chart
+        const performanceData = {
+            terms: ['Term 1', 'Term 2', 'Term 3'],
+            averages: [84.5, 87.2, 88.5],
+            subjects: ['Math', 'Science', 'English', 'Humanities']
+        };
+
         // DOM Elements
         let subjectsTable = document.getElementById('subjectsTable');
         let gradingSystemContainer = document.getElementById('gradingSystem');
@@ -1333,6 +1455,102 @@ Overall, a dedicated and promising student with excellent academic performance. 
         let daysAbsentInput = document.getElementById('daysAbsent');
         let attendanceRateInput = document.getElementById('attendanceRate');
         let gradingPeriodSelect = document.getElementById('gradingPeriod');
+        let performanceChart = null;
+
+        // Get grade letter based on score
+        function getGradeLetter(score) {
+            if (score >= 80) return "A";
+            else if (score >= 70) return "B";
+            else if (score >= 60) return "C";
+            else if (score >= 50) return "D";
+            else if (score >= 40) return "E";
+            else return "F";
+        }
+
+        // Get grade color based on score
+        function getGradeColor(score) {
+            if (score >= 80) return "#10B981";
+            else if (score >= 70) return "#34D399";
+            else if (score >= 60) return "#FBBF24";
+            else if (score >= 50) return "#F59E0B";
+            else if (score >= 40) return "#F97316";
+            else return "#EF4444";
+        }
+
+        // Initialize Chart.js
+        function initPerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            // Destroy previous chart if exists
+            if (performanceChart) {
+                performanceChart.destroy();
+            }
+            
+            performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: performanceData.terms,
+                    datasets: [
+                        {
+                            label: 'Overall Average',
+                            data: performanceData.averages,
+                            borderColor: '#075824',
+                            backgroundColor: 'rgba(7, 88, 36, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Class Average',
+                            data: [82.3, 83.7, 84.2],
+                            borderColor: '#9BAE30',
+                            backgroundColor: 'rgba(155, 174, 48, 0.1)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 70,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
         // Generate unique serial number
         function generateSerialNumber() {
@@ -1371,6 +1589,7 @@ Overall, a dedicated and promising student with excellent academic performance. 
             populateGradingSystem();
             updateAttendance();
             calculateAllGrades();
+            initPerformanceChart();
             
             // Set up event listeners
             totalDaysInput.addEventListener('change', updateAttendance);
@@ -1381,11 +1600,13 @@ Overall, a dedicated and promising student with excellent academic performance. 
             document.getElementById('printBtn').addEventListener('click', printReport);
             document.getElementById('resetBtn').addEventListener('click', resetGrades);
             
-            // Initialize tooltips
-            initializeTooltips();
+            // Update chart when grades change
+            document.querySelectorAll('.grade-input').forEach(input => {
+                input.addEventListener('change', updatePerformanceChart);
+            });
         }
 
-        // Populate subjects table with paper information - FIXED VERSION
+        // Populate subjects table with exam types
         function populateSubjectsTable() {
             subjectsTable.innerHTML = '';
             
@@ -1403,46 +1624,82 @@ Overall, a dedicated and promising student with excellent academic performance. 
                 const overallAvg = termAverages.length > 0 ? 
                     termAverages.reduce((sum, avg) => sum + avg, 0) / termAverages.length : 0;
                 
+                // Get grade letters
+                const term1Grade = getGradeLetter(term1Avg);
+                const term2Grade = getGradeLetter(term2Avg);
+                const term3Grade = getGradeLetter(term3Avg);
+                const overallGrade = getGradeLetter(overallAvg);
+                
                 row.innerHTML = `
                     <td class="subject-cell">
                         <strong>${subject.name}</strong>
                         <span class="subject-code">${subject.code}: ${papersText}</span>
                     </td>
-                    <!-- Term 1 Papers -->
-                    <td><input type="number" class="grade-input" min="0" max="100" 
-                           data-subject="${subjectIndex}" data-term="1" data-paper="1" 
-                           value="${subject.grades[0] || ''}"></td>
-                    <td><input type="number" class="grade-input" min="0" max="100" 
-                           data-subject="${subjectIndex}" data-term="1" data-paper="2" 
-                           value="${subject.grades[1] || ''}"></td>
-                    <td><input type="number" class="grade-input" min="0" max="100" 
-                           data-subject="${subjectIndex}" data-term="1" data-paper="3" 
-                           value="${subject.grades[2] || ''}"></td>
-                    <td class="term-average" id="t1-avg-${subjectIndex}">${term1Avg.toFixed(1)}</td>
+                    <!-- Term 1 Exams -->
+                    <td>
+                        <input type="number" class="grade-input" min="0" max="100" 
+                               data-subject="${subjectIndex}" data-term="1" data-paper="1" 
+                               value="${subject.grades[0] || ''}">
+                        <div class="exam-type-label ${subject.examTypes[0]}-exam">${subject.examTypes[0]}</div>
+                    </td>
+                    <td>
+                        <input type="number" class="grade-input" min="0" max="100" 
+                               data-subject="${subjectIndex}" data-term="1" data-paper="2" 
+                               value="${subject.grades[1] || ''}">
+                        <div class="exam-type-label ${subject.examTypes[1]}-exam">${subject.examTypes[1]}</div>
+                    </td>
+                    <td>
+                        <input type="number" class="grade-input" min="0" max="100" 
+                               data-subject="${subjectIndex}" data-term="1" data-paper="3" 
+                               value="${subject.grades[2] || ''}">
+                        <div class="exam-type-label ${subject.examTypes[2]}-exam">${subject.examTypes[2] === "none" ? "" : subject.examTypes[2]}</div>
+                    </td>
+                    <td class="paper-average term-average" id="t1-avg-${subjectIndex}">${term1Avg.toFixed(1)}</td>
+                    <td class="grade-letter" id="t1-grade-${subjectIndex}" style="color: ${getGradeColor(term1Avg)}; font-weight: bold;">${term1Grade}</td>
                     
-                    <!-- Term 2 Papers -->
-                    <td><input type="number" class="grade-input" min="0" max="100" 
-                           data-subject="${subjectIndex}" data-term="2" data-paper="1" 
-                           value="${subject.grades[3] || ''}"></td>
-                    <td><input type="number" class="grade-input" min="0" max="100" 
-                           data-subject="${subjectIndex}" data-term="2" data-paper="2" 
-                           value="${subject.grades[4] || ''}"></td>
-                    <td><input type="number" class="grade-input" min="0" max="100" 
-                           data-subject="${subjectIndex}" data-term="2" data-paper="3" 
-                           value="${subject.grades[5] || ''}"></td>
-                    <td class="term-average" id="t2-avg-${subjectIndex}">${term2Avg.toFixed(1)}</td>
+                    <!-- Term 2 Exams -->
+                    <td>
+                        <input type="number" class="grade-input" min="0" max="100" 
+                               data-subject="${subjectIndex}" data-term="2" data-paper="1" 
+                               value="${subject.grades[3] || ''}">
+                        <div class="exam-type-label ${subject.examTypes[3]}-exam">${subject.examTypes[3]}</div>
+                    </td>
+                    <td>
+                        <input type="number" class="grade-input" min="0" max="100" 
+                               data-subject="${subjectIndex}" data-term="2" data-paper="2" 
+                               value="${subject.grades[4] || ''}">
+                        <div class="exam-type-label ${subject.examTypes[4]}-exam">${subject.examTypes[4]}</div>
+                    </td>
+                    <td>
+                        <input type="number" class="grade-input" min="0" max="100" 
+                               data-subject="${subjectIndex}" data-term="2" data-paper="3" 
+                               value="${subject.grades[5] || ''}">
+                        <div class="exam-type-label ${subject.examTypes[5]}-exam">${subject.examTypes[5] === "none" ? "" : subject.examTypes[5]}</div>
+                    </td>
+                    <td class="paper-average term-average" id="t2-avg-${subjectIndex}">${term2Avg.toFixed(1)}</td>
+                    <td class="grade-letter" id="t2-grade-${subjectIndex}" style="color: ${getGradeColor(term2Avg)}; font-weight: bold;">${term2Grade}</td>
                     
-                    <!-- Term 3 Papers -->
-                    <td><input type="number" class="grade-input" min="0" max="100" 
-                           data-subject="${subjectIndex}" data-term="3" data-paper="1" 
-                           value="${subject.grades[6] || ''}"></td>
-                    <td><input type="number" class="grade-input" min="0" max="100" 
-                           data-subject="${subjectIndex}" data-term="3" data-paper="2" 
-                           value="${subject.grades[7] || ''}"></td>
-                    <td><input type="number" class="grade-input" min="0" max="100" 
-                           data-subject="${subjectIndex}" data-term="3" data-paper="3" 
-                           value="${subject.grades[8] || ''}"></td>
-                    <td class="term-average" id="t3-avg-${subjectIndex}">${term3Avg.toFixed(1)}</td>
+                    <!-- Term 3 Exams -->
+                    <td>
+                        <input type="number" class="grade-input" min="0" max="100" 
+                               data-subject="${subjectIndex}" data-term="3" data-paper="1" 
+                               value="${subject.grades[6] || ''}">
+                        <div class="exam-type-label ${subject.examTypes[6]}-exam">${subject.examTypes[6]}</div>
+                    </td>
+                    <td>
+                        <input type="number" class="grade-input" min="0" max="100" 
+                               data-subject="${subjectIndex}" data-term="3" data-paper="2" 
+                               value="${subject.grades[7] || ''}">
+                        <div class="exam-type-label ${subject.examTypes[7]}-exam">${subject.examTypes[7]}</div>
+                    </td>
+                    <td>
+                        <input type="number" class="grade-input" min="0" max="100" 
+                               data-subject="${subjectIndex}" data-term="3" data-paper="3" 
+                               value="${subject.grades[8] || ''}">
+                        <div class="exam-type-label ${subject.examTypes[8]}-exam">${subject.examTypes[8] === "none" ? "" : subject.examTypes[8]}</div>
+                    </td>
+                    <td class="paper-average term-average" id="t3-avg-${subjectIndex}">${term3Avg.toFixed(1)}</td>
+                    <td class="grade-letter" id="t3-grade-${subjectIndex}" style="color: ${getGradeColor(term3Avg)}; font-weight: bold;">${term3Grade}</td>
                     
                     <!-- Overall Average -->
                     <td class="subject-average" id="avg-${subjectIndex}">${overallAvg.toFixed(1)}</td>
@@ -1493,14 +1750,40 @@ Overall, a dedicated and promising student with excellent academic performance. 
             document.getElementById(`t3-avg-${subjectIndex}`).textContent = term3Avg.toFixed(1);
             document.getElementById(`avg-${subjectIndex}`).textContent = overallAvg.toFixed(1);
             
+            // Update grade letters
+            document.getElementById(`t1-grade-${subjectIndex}`).textContent = getGradeLetter(term1Avg);
+            document.getElementById(`t2-grade-${subjectIndex}`).textContent = getGradeLetter(term2Avg);
+            document.getElementById(`t3-grade-${subjectIndex}`).textContent = getGradeLetter(term3Avg);
+            
             // Update colors
             updateGradeColor(document.getElementById(`t1-avg-${subjectIndex}`), term1Avg);
             updateGradeColor(document.getElementById(`t2-avg-${subjectIndex}`), term2Avg);
             updateGradeColor(document.getElementById(`t3-avg-${subjectIndex}`), term3Avg);
             updateGradeColor(document.getElementById(`avg-${subjectIndex}`), overallAvg);
             
+            // Update grade letter colors
+            document.getElementById(`t1-grade-${subjectIndex}`).style.color = getGradeColor(term1Avg);
+            document.getElementById(`t2-grade-${subjectIndex}`).style.color = getGradeColor(term2Avg);
+            document.getElementById(`t3-grade-${subjectIndex}`).style.color = getGradeColor(term3Avg);
+            
             // Update overall calculations
             calculateAllGrades();
+        }
+
+        // Update performance chart
+        function updatePerformanceChart() {
+            // Recalculate term averages for chart
+            const term1Averages = subjects.map(subject => calculateTermAverage(subject.grades, 1));
+            const term2Averages = subjects.map(subject => calculateTermAverage(subject.grades, 2));
+            const term3Averages = subjects.map(subject => calculateTermAverage(subject.grades, 3));
+            
+            const term1Avg = term1Averages.filter(avg => avg > 0).reduce((a, b) => a + b, 0) / term1Averages.filter(avg => avg > 0).length;
+            const term2Avg = term2Averages.filter(avg => avg > 0).reduce((a, b) => a + b, 0) / term2Averages.filter(avg => avg > 0).length;
+            const term3Avg = term3Averages.filter(avg => avg > 0).reduce((a, b) => a + b, 0) / term3Averages.filter(avg => avg > 0).length;
+            
+            // Update chart data
+            performanceChart.data.datasets[0].data = [term1Avg, term2Avg, term3Avg];
+            performanceChart.update();
         }
 
         // Populate grading system
@@ -1578,6 +1861,9 @@ Overall, a dedicated and promising student with excellent academic performance. 
             updateGradeColor(termAverageElement, termAverage);
             updateGradeColor(overallAverageElement, overallAverage);
             
+            // Update performance chart
+            updatePerformanceChart();
+            
             // Calculate and update ranks based on overall average
             updateRanks(overallAverage);
             
@@ -1625,7 +1911,6 @@ Overall, a dedicated and promising student with excellent academic performance. 
         // Update ranks based on average
         function updateRanks(overallAverage) {
             // Simulate rank calculation based on average
-            // In a real system, this would compare against other students
             let streamRank, overallRank;
             
             if (overallAverage >= 95) {
@@ -1687,17 +1972,6 @@ Overall, a dedicated and promising student with excellent academic performance. 
             statusIndicator.title = allFilled ? 'All grades entered' : 'Some grades missing';
         }
 
-        // Initialize tooltips
-        function initializeTooltips() {
-            // Add tooltips to important elements
-            const tooltipElements = document.querySelectorAll('.grade-item, .rank-item, .final-grade-item, .qr-container');
-            tooltipElements.forEach(el => {
-                if (el.title) {
-                    el.style.cursor = 'help';
-                }
-            });
-        }
-
         // Print report
         function printReport() {
             // Generate new serial for print
@@ -1727,11 +2001,19 @@ Overall, a dedicated and promising student with excellent academic performance. 
                         border-radius: 0;
                         padding: 20px 25px;
                     }
-                    .no-print, .holographic-overlay {
+                    .no-print, .holographic-overlay, .btn, .security-bg-pattern, .fingerprint-pattern {
                         display: none !important;
                     }
-                    .btn {
-                        display: none !important;
+                    .complex-pattern {
+                        opacity: 0.05;
+                    }
+                    .subjects-table {
+                        font-size: 11px;
+                    }
+                    .subjects-table input {
+                        width: 50px;
+                        padding: 4px 2px;
+                        font-size: 11px;
                     }
                 }
             `;
@@ -1748,15 +2030,7 @@ Overall, a dedicated and promising student with excellent academic performance. 
         // Reset all grades to default
         function resetGrades() {
             if (confirm('Are you sure you want to reset all grades to their default values?')) {
-                // Reset subjects to original values
-                const originalSubjects = [
-                    // Languages
-                    { name: "English Language", code: "ENG", papers: ["P1", "P2", "P3"], grades: [85, 88, 90, 87, 86, 89, 88, 90, 91] },
-                    { name: "Kiswahili", code: "KIS", papers: ["P1", "P2", "P3"], grades: [82, 85, 83, 84, 86, 85, 84, 87, 88] },
-                    // ... (other subjects with their original grades)
-                ];
-                
-                // For simplicity, just reload the page to reset everything
+                // Reload the page to reset everything
                 window.location.reload();
             }
         }
