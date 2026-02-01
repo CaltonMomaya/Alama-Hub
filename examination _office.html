@@ -533,6 +533,20 @@
             box-shadow: 0 5px 15px rgba(7, 88, 36, 0.2);
         }
 
+        /* Report Card Button */
+        .btn-report-card {
+            background-color: #9BAE30;
+            color: white;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+        }
+
+        .btn-report-card:hover {
+            background-color: #8a9c29;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(155, 174, 48, 0.3);
+        }
+
         /* Modal Styles */
         .exam-modal {
             display: none;
@@ -3564,9 +3578,7 @@ Alliance Girls High School
                                     display: true,
                                     text: 'Grade Distribution Across All Students',
                                     color: '#333',
-                                    font: {
-                                        size: 14
-                                    }
+                                    font: { size: 14 }
                                 }
                             },
                             scales: {
@@ -4850,12 +4862,25 @@ Alliance Girls High School
                         if (allSubjects.length > 0 && rankingData.length > 0 && rankingData[0].subjectScores) {
                             columns = [
                                 { key: 'rank', label: 'Rank', width: '60px' },
-                                { key: 'name', label: 'Student Name', width: '180px' }
+                                { key: 'name', label: 'Student Name', width: '180px' },
+                                { key: 'grade', label: 'Grade', width: '80px' },
+                                { key: 'stream', label: 'Stream', width: '100px' },
+                                { key: 'average', label: 'Avg %', width: '80px', format: 'percent' },
+                                { key: 'achievement_level', label: 'Achievement', width: '120px' },
+                                { key: 'action', label: 'Action', width: '120px', format: 'action' }
                             ];
-                            allSubjects.forEach(subj => {
-                                columns.push({ key: 'subject_' + subj, label: subj, width: '80px', format: 'subject' });
-                            });
-                            columns.push({ key: 'total_avg', label: 'Total / Average', width: '120px', format: 'totalAvg' });
+                            
+                            // Add subject columns if there are subjects
+                            if (allSubjects.length <= 5) {
+                                allSubjects.forEach(subj => {
+                                    columns.splice(4, 0, { 
+                                        key: 'subject_' + subj, 
+                                        label: subj, 
+                                        width: '80px', 
+                                        format: 'subject' 
+                                    });
+                                });
+                            }
                         } else {
                             columns = [
                                 { key: 'rank', label: 'Rank', width: '80px' },
@@ -4865,7 +4890,8 @@ Alliance Girls High School
                                 { key: 'achievement_level', label: 'Achievement Level', width: '150px' },
                                 { key: 'grade', label: 'Grade', width: '80px' },
                                 { key: 'stream', label: 'Stream', width: '100px' },
-                                { key: 'subjectCount', label: 'Subjects', width: '80px' }
+                                { key: 'subjectCount', label: 'Subjects', width: '80px' },
+                                { key: 'action', label: 'Action', width: '120px', format: 'action' }
                             ];
                         }
                         break;
@@ -4952,6 +4978,11 @@ Alliance Girls High School
                                                     } else if (col.format === 'totalAvg') {
                                                         cellValue = (item.totalScore !== undefined && item.average !== undefined) 
                                                             ? `${item.totalScore.toFixed(2)} / ${item.average.toFixed(2)}` : '';
+                                                    } else if (col.format === 'action' && col.key === 'action') {
+                                                        // Generate Report Card button
+                                                        cellValue = `<button class="btn btn-report-card" onclick="generateStudentReportCard('${item.id}', '${item.name}', ${item.average}, '${item.grade}', '${item.stream}')">
+                                                            <i class="fas fa-file-certificate"></i> Generate Report
+                                                        </button>`;
                                                     } else {
                                                         cellValue = item[col.key] ?? '';
                                                     }
@@ -4999,6 +5030,74 @@ Alliance Girls High School
                         </button>
                     </div>
                 `;
+            }
+
+            // Function to generate individual report card for a student from ranking
+            async function generateStudentReportCard(studentId, studentName, averageScore, grade, stream) {
+                console.log(`Generating report card for: ${studentName} (${studentId})`);
+                
+                // Show loading message
+                const originalText = event?.target?.innerHTML || '';
+                if (event?.target) {
+                    event.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+                    event.target.disabled = true;
+                }
+                
+                try {
+                    // Create student object for the report card function
+                    const student = {
+                        id: studentId,
+                        admission_no: studentId,
+                        name: studentName,
+                        grade: grade,
+                        stream: stream,
+                        averageScore: averageScore.toFixed(2),
+                        overallGrade: calculateGradeFromScore(averageScore)
+                    };
+                    
+                    // Get current filter info for report header
+                    const academicYear = currentFilters.year || getCurrentAcademicYear();
+                    const examTypes = currentFilters.examTypes?.join(', ') || 'All';
+                    const terms = currentFilters.terms?.join(', ') || 'All';
+                    
+                    // Generate the report card
+                    await generateSingleReportCard(
+                        student, 
+                        'standard', // template type
+                        {
+                            includeQR: true,
+                            includePatterns: true,
+                            includeComments: true,
+                            includeGraphs: true,
+                            includeRank: true,
+                            includeWatermark: true
+                        },
+                        {
+                            academicYear: academicYear,
+                            examTypes: examTypes,
+                            terms: terms
+                        }
+                    );
+                    
+                    console.log(`Report card generated for ${studentName}`);
+                    
+                } catch (error) {
+                    console.error('Error generating student report card:', error);
+                    alert(`Error generating report card for ${studentName}: ${error.message}`);
+                } finally {
+                    // Restore button state
+                    if (event?.target) {
+                        event.target.innerHTML = originalText;
+                        event.target.disabled = false;
+                    }
+                }
+            }
+
+            // Function to get current academic year
+            function getCurrentAcademicYear() {
+                const currentYear = new Date().getFullYear();
+                const nextYear = currentYear + 1;
+                return `${currentYear}-${nextYear}`;
             }
 
             // Function to export ranking to Excel
@@ -7254,6 +7353,9 @@ Alliance Girls High School
             window.loadReportStudents = loadReportStudents;
             window.selectAllFilteredStudents = selectAllFilteredStudents;
             window.generateIndividualReportCards = generateIndividualReportCards;
+            
+            // NEW: Student report card generation from ranking
+            window.generateStudentReportCard = generateStudentReportCard;
 
             // Start initialization when DOM is ready
             if (document.readyState === 'loading') {
