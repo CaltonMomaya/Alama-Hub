@@ -1103,7 +1103,25 @@
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
 
-        /* Select2 Customization */
+        /* Exam Type (multi-select) and Term (single-select) dropdowns */
+        #filterExamType, #reportExamType {
+            min-height: 120px;
+            padding: 6px;
+        }
+        #filterExamType option, #reportExamType option {
+            padding: 6px 10px;
+        }
+        #filterTerm, #reportTerm {
+            padding: 8px 12px;
+        }
+        .form-text.text-muted {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        /* Select2 Customization (used elsewhere) */
         .select2-container {
             width: 100% !important;
         }
@@ -1379,7 +1397,6 @@
                                     <option value="grade_10">grade_10</option>
                                     <option value="grade_11">grade_11</option>
                                     <option value="grade_12">grade_12</option>
-                                    <option value="Grade 12">Grade 12</option>
                                 </select>
                             </div>
                             
@@ -1393,7 +1410,7 @@
                             
                             <div class="form-group">
                                 <label><i class="fas fa-file-alt"></i> Exam Type</label>
-                                <select id="filterExamType" class="form-control" multiple="multiple">
+                                <select id="filterExamType" class="form-control" multiple size="5">
                                     <option value="Opener Term 1">Opener Term 1</option>
                                     <option value="Mid Term 1">Mid Term 1</option>
                                     <option value="End Term 1">End Term 1</option>
@@ -1404,11 +1421,13 @@
                                     <option value="Mid Term 3">Mid Term 3</option>
                                     <option value="End Term 3">End Term 3</option>
                                 </select>
+                                <small class="form-text text-muted">Hold Ctrl (or Cmd) to select multiple</small>
                             </div>
                             
                             <div class="form-group">
                                 <label><i class="fas fa-calendar"></i> Term</label>
-                                <select id="filterTerm" class="form-control" multiple="multiple">
+                                <select id="filterTerm" class="form-control">
+                                    <option value="">All Terms</option>
                                     <option value="Term 1">Term 1</option>
                                     <option value="Term 2">Term 2</option>
                                     <option value="Term 3">Term 3</option>
@@ -1587,7 +1606,7 @@
                     
                     <div class="form-group">
                         <label><i class="fas fa-file-alt"></i> Exam Type</label>
-                        <select id="reportExamType" class="form-control" multiple="multiple">
+                        <select id="reportExamType" class="form-control" multiple size="5">
                             <option value="Opener Term 1">Opener Term 1</option>
                             <option value="Mid Term 1">Mid Term 1</option>
                             <option value="End Term 1">End Term 1</option>
@@ -1598,11 +1617,13 @@
                             <option value="Mid Term 3">Mid Term 3</option>
                             <option value="End Term 3">End Term 3</option>
                         </select>
+                        <small class="form-text text-muted">Hold Ctrl (or Cmd) to select multiple</small>
                     </div>
                     
                     <div class="form-group">
                         <label><i class="fas fa-calendar"></i> Term</label>
-                        <select id="reportTerm" class="form-control" multiple="multiple">
+                        <select id="reportTerm" class="form-control">
+                            <option value="">All Terms</option>
                             <option value="Term 1">Term 1</option>
                             <option value="Term 2">Term 2</option>
                             <option value="Term 3">Term 3</option>
@@ -1616,7 +1637,6 @@
                             <option value="grade_10">grade_10</option>
                             <option value="grade_11">grade_11</option>
                             <option value="grade_12">grade_12</option>
-                            <option value="Grade 12">Grade 12</option>
                         </select>
                     </div>
                     
@@ -3577,55 +3597,19 @@ Alliance Girls High School
                 compileResultsModal.classList.add('show');
                 switchCompileView('cloud');
                 
-                // Initialize Select2 for multi-select dropdowns
-                setTimeout(() => {
-                    if (window.jQuery && window.jQuery.fn.select2) {
-                        window.jQuery('#filterExamType').select2({
-                            placeholder: "Select Exam Types",
-                            allowClear: true,
-                            width: '100%'
-                        });
-                        
-                        window.jQuery('#filterTerm').select2({
-                            placeholder: "Select Terms",
-                            allowClear: true,
-                            width: '100%'
-                        });
-                    } else {
-                        console.error('jQuery or Select2 not loaded');
-                    }
-                    
-                    // Set current year as default
-                    useCurrentYear();
-                }, 100);
+                // Set current year as default
+                useCurrentYear();
             }
 
             function openReportCardsModal() {
                 reportCardsModal.classList.add('show');
                 switchReportCardsView('selection');
                 
-                // Initialize Select2 for multi-select dropdowns
-                setTimeout(() => {
-                    if (window.jQuery && window.jQuery.fn.select2) {
-                        window.jQuery('#reportExamType').select2({
-                            placeholder: "Select Exam Types",
-                            allowClear: true,
-                            width: '100%'
-                        });
-                        
-                        window.jQuery('#reportTerm').select2({
-                            placeholder: "Select Terms",
-                            allowClear: true,
-                            width: '100%'
-                        });
-                    }
-                    
-                    // Set current year as default
-                    useCurrentYearReport();
-                    
-                    // Populate streams dropdown
-                    populateStreams();
-                }, 100);
+                // Set current year as default
+                useCurrentYearReport();
+                
+                // Populate streams dropdown
+                populateStreams();
             }
 
             function openEmailParentsModal() {
@@ -4029,30 +4013,18 @@ Alliance Girls High School
                 const filterGrade = document.getElementById('filterGrade')?.value || '';
                 const filterStream = document.getElementById('filterStream')?.value || '';
                 
-                // Get multiple exam types
+                // Get multiple exam types (native multi-select)
                 let filterExamTypes = [];
-                if (window.jQuery && window.jQuery.fn.select2) {
-                    const filterExamTypeSelect = window.jQuery('#filterExamType');
-                    filterExamTypes = filterExamTypeSelect.val() || [];
-                } else {
-                    // Fallback if Select2 not available
-                    const examTypeSelect = document.getElementById('filterExamType');
-                    if (examTypeSelect) {
-                        filterExamTypes = Array.from(examTypeSelect.selectedOptions).map(option => option.value);
-                    }
+                const examTypeSelect = document.getElementById('filterExamType');
+                if (examTypeSelect) {
+                    filterExamTypes = Array.from(examTypeSelect.selectedOptions).map(opt => opt.value);
                 }
                 
-                // Get multiple terms
+                // Get selected term (native single-select)
                 let filterTerms = [];
-                if (window.jQuery && window.jQuery.fn.select2) {
-                    const filterTermSelect = window.jQuery('#filterTerm');
-                    filterTerms = filterTermSelect.val() || [];
-                } else {
-                    // Fallback if Select2 not available
-                    const termSelect = document.getElementById('filterTerm');
-                    if (termSelect) {
-                        filterTerms = Array.from(termSelect.selectedOptions).map(option => option.value);
-                    }
+                const filterTermEl = document.getElementById('filterTerm');
+                if (filterTermEl && filterTermEl.value) {
+                    filterTerms = [filterTermEl.value];
                 }
                 
                 // Get academic year from the split inputs
@@ -4379,17 +4351,13 @@ Alliance Girls High School
                 document.getElementById('filterGrade').value = '';
                 document.getElementById('filterStream').value = '';
                 
-                // Clear Select2 multi-selects
-                if (window.jQuery && window.jQuery.fn.select2) {
-                    window.jQuery('#filterExamType').val(null).trigger('change');
-                    window.jQuery('#filterTerm').val(null).trigger('change');
-                } else {
-                    // Fallback if Select2 not available
-                    const examTypeSelect = document.getElementById('filterExamType');
-                    const termSelect = document.getElementById('filterTerm');
-                    if (examTypeSelect) examTypeSelect.selectedIndex = -1;
-                    if (termSelect) termSelect.selectedIndex = -1;
+                // Clear exam type and term dropdowns
+                const examTypeSelect = document.getElementById('filterExamType');
+                const filterTermEl = document.getElementById('filterTerm');
+                if (examTypeSelect) {
+                    Array.from(examTypeSelect.options).forEach(opt => opt.selected = false);
                 }
+                if (filterTermEl) filterTermEl.value = '';
                 
                 // Clear academic year inputs
                 document.getElementById('filterYearStart').value = '';
@@ -6024,19 +5992,17 @@ Alliance Girls High School
                     // Get filter values
                     const academicYear = getFullAcademicYear('reportAcademicYear1', 'reportAcademicYear2') || '';
                     
-                    // Get multiple exam types
+                    // Get multiple exam types (native multi-select)
                     let examTypes = [];
-                    if (window.jQuery && window.jQuery.fn.select2) {
-                        const examTypeSelect = window.jQuery('#reportExamType');
-                        examTypes = examTypeSelect.val() || [];
+                    const reportExamTypeEl = document.getElementById('reportExamType');
+                    if (reportExamTypeEl) {
+                        examTypes = Array.from(reportExamTypeEl.selectedOptions).map(opt => opt.value);
                     }
                     
-                    // Get multiple terms
+                    // Get selected term (native single-select)
                     let terms = [];
-                    if (window.jQuery && window.jQuery.fn.select2) {
-                        const termSelect = window.jQuery('#reportTerm');
-                        terms = termSelect.val() || [];
-                    }
+                    const reportTermEl = document.getElementById('reportTerm');
+                    if (reportTermEl && reportTermEl.value) terms = [reportTermEl.value];
                     
                     const grade = document.getElementById('reportForm')?.value || '';
                     const stream = document.getElementById('reportStream')?.value || '';
@@ -6325,18 +6291,16 @@ Alliance Girls High School
                 const academicYear = getFullAcademicYear('reportAcademicYear1', 'reportAcademicYear2') || 'All Years';
                 
                 let examTypes = [];
-                if (window.jQuery && window.jQuery.fn.select2) {
-                    const examTypeSelect = window.jQuery('#reportExamType');
-                    examTypes = examTypeSelect.val() || [];
+                const reportExamTypeEl = document.getElementById('reportExamType');
+                if (reportExamTypeEl) {
+                    examTypes = Array.from(reportExamTypeEl.selectedOptions).map(opt => opt.value);
                 }
                 const examTypeLabel = examTypes.length > 0 ? examTypes.join(', ') : 'All';
                 
                 let terms = [];
-                if (window.jQuery && window.jQuery.fn.select2) {
-                    const termSelect = window.jQuery('#reportTerm');
-                    terms = termSelect.val() || [];
-                }
-                const termLabel = terms.length > 0 ? terms.join(', ') : 'All';
+                const reportTermEl = document.getElementById('reportTerm');
+                if (reportTermEl && reportTermEl.value) terms = [reportTermEl.value];
+                const termLabel = terms.length > 0 ? terms[0] : 'All';
                 
                 // Show loading message
                 const originalButtonText = generateIndividualReportsBtn.innerHTML;
