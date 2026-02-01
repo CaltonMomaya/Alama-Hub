@@ -4559,7 +4559,7 @@
                 studentsTableBody.insertAdjacentHTML('beforeend', rowHTML);
             }
 
-            // Function to add a marks row for a student - FIXED VERSION
+            // Function to add a marks row for a student - FIXED VERSION (REMOVED "Max: 100" DISPLAY)
             function addMarksRowForStudent(student, rowNumber, existingMarks) {
                 const rowId = `marks-row-${marksCounter++}`;
                 
@@ -4612,9 +4612,6 @@
                                    oninput="updateComponentScore('${rowId}', '${component.id}', this.value)"
                                    onkeydown="handleMarksNavigation(event, '${rowId}', '${component.id}')"
                                    style="width: 100%; text-align: center;">
-                            <div style="font-size: 0.7rem; color: var(--muted-green); margin-top: 2px; text-align: center;">
-                                Max: ${maxScore}
-                            </div>
                         </td>
                     `;
                 });
